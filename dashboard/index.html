@@ -35,15 +35,12 @@
         <button class="tab-btn active" role="tab" onclick="switchTab('earn')">Earn Points</button>
         <button class="tab-btn" role="tab" onclick="switchTab('post')">Post a Task</button>
         <button class="tab-btn" role="tab" onclick="switchTab('my-tasks')">My Tasks</button>
-        <button class="tab-btn" role="tab" onclick="switchTab('review')">
-          Review <span id="review-badge" class="review-count" style="display:none">0</span>
-        </button>
         <button class="tab-btn" role="tab" onclick="switchTab('profile')">Profile</button>
       </div>
 
       <!-- EARN TAB -->
       <div id="tab-earn" class="tab-panel">
-        <p class="tab-hint">Click <strong>Start Task</strong> to open the link. After 30 seconds the submit button unlocks. The task owner then reviews and approves your points.</p>
+        <p class="tab-hint">Click <strong>Start Task</strong> to open the link. Stay on the page for 30 seconds, then come back and submit. Points are awarded instantly.</p>
         <div id="earn-feed" class="task-feed"></div>
       </div>
 
@@ -51,37 +48,36 @@
       <div id="tab-post" class="tab-panel" style="display:none">
         <div class="card card-pad" style="max-width:580px">
           <h2 style="font-size:1.1rem;margin-bottom:6px">Post a new task</h2>
-          <p style="color:var(--muted);font-size:0.85rem;margin-bottom:22px">Points are deducted upfront. Each time a user completes your task and you approve it, they earn their reward.</p>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="p-platform">Platform</label>
-              <select id="p-platform">
-                <option value="tiktok">TikTok</option>
-                <option value="instagram">Instagram</option>
-                <option value="youtube">YouTube</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="p-type">Task type</label>
-              <select id="p-type">
-                <option value="follow">Follow</option>
-                <option value="like">Like</option>
-                <option value="view">View</option>
-              </select>
-            </div>
+          <p style="color:var(--muted);font-size:0.85rem;margin-bottom:22px">All points are deducted upfront. Users earn points automatically after completing the 30-second timer.</p>
+          <div class="form-group">
+            <label for="p-platform">Platform</label>
+            <select id="p-platform" onchange="onPlatformChange()">
+              <option value="tiktok">TikTok</option>
+              <option value="instagram">Instagram</option>
+              <option value="youtube">YouTube</option>
+            </select>
           </div>
           <div class="form-group">
-            <label for="p-target">Your username or link</label>
-            <input type="text" id="p-target" placeholder="e.g. @yourusername or https://..."/>
+            <label for="p-type">Task type</label>
+            <select id="p-type">
+              <option value="follow">Follow</option>
+              <option value="like">Like</option>
+              <option value="view">View</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="p-url">Your profile / video URL</label>
+            <input type="url" id="p-url" placeholder="" oninput="onUrlInput()"/>
+            <div class="url-hint" id="url-hint"></div>
           </div>
           <div class="form-group">
             <label for="p-desc">Instructions <span style="color:var(--muted2);font-weight:400;text-transform:none;font-size:0.8rem">(optional)</span></label>
-            <textarea id="p-desc" placeholder="e.g. Follow my TikTok @handle — I post daily gaming content"></textarea>
+            <textarea id="p-desc" placeholder="e.g. Follow my TikTok — I post daily gaming content"></textarea>
           </div>
           <div class="form-row">
             <div class="form-group">
               <label for="p-points">Points per completion</label>
-              <select id="p-points">
+              <select id="p-points" onchange="updateCostPreview()">
                 <option value="10">10 points</option>
                 <option value="20">20 points</option>
                 <option value="30">30 points</option>
@@ -90,19 +86,13 @@
             </div>
             <div class="form-group">
               <label for="p-slots">Number of slots</label>
-              <input type="number" id="p-slots" value="5" min="1" max="500" placeholder="e.g. 10"/>
+              <input type="number" id="p-slots" value="5" min="1" max="500" oninput="updateCostPreview()"/>
             </div>
           </div>
-          <div class="cost-box" id="cost-box">
-            <div class="cost-row">
-              <span>Points per completion</span><strong id="c-reward">10</strong>
-            </div>
-            <div class="cost-row">
-              <span>Number of slots</span><strong id="c-slots">5</strong>
-            </div>
-            <div class="cost-row cost-total">
-              <span>Total cost upfront</span><strong id="c-total" style="color:var(--orange)">50 points</strong>
-            </div>
+          <div class="cost-box">
+            <div class="cost-row"><span>Points per completion</span><strong id="c-reward">10</strong></div>
+            <div class="cost-row"><span>Number of slots</span><strong id="c-slots">5</strong></div>
+            <div class="cost-row cost-total"><span>Total cost upfront</span><strong id="c-total" style="color:var(--orange)">50 points</strong></div>
             <div class="cost-row" style="border-top:none;padding-top:0;margin-top:-4px">
               <span style="color:var(--muted)">Your balance</span><span id="c-balance" style="color:var(--muted)">0 pts</span>
             </div>
@@ -114,14 +104,8 @@
 
       <!-- MY TASKS TAB -->
       <div id="tab-my-tasks" class="tab-panel" style="display:none">
-        <p class="tab-hint">Your posted tasks. You can delete a task to deactivate it (remaining unused slots are <strong>not</strong> refunded for now).</p>
+        <p class="tab-hint">Your active tasks. Close a task to stop new completions (unused slots are not refunded).</p>
         <div id="my-tasks-feed" class="task-feed"></div>
-      </div>
-
-      <!-- REVIEW TAB -->
-      <div id="tab-review" class="tab-panel" style="display:none">
-        <p class="tab-hint">Users who completed your tasks are waiting for approval. Approve to award them points, reject if they didn't actually do it.</p>
-        <div id="review-feed" class="task-feed"></div>
       </div>
 
       <!-- PROFILE TAB -->
@@ -136,7 +120,7 @@
           </div>
           <div class="stat-grid">
             <div class="stat-box"><div class="stat-val" id="s-points">0</div><div class="stat-lbl">Points</div></div>
-            <div class="stat-box"><div class="stat-val" id="s-done">0</div><div class="stat-lbl">Tasks approved</div></div>
+            <div class="stat-box"><div class="stat-val" id="s-done">0</div><div class="stat-lbl">Tasks done</div></div>
             <div class="stat-box"><div class="stat-val" id="s-posted">0</div><div class="stat-lbl">Tasks posted</div></div>
           </div>
           <div class="divider"></div>
@@ -149,7 +133,6 @@
     </div>
   </main>
 
-  <!-- Loading -->
   <div id="loading-screen" style="display:flex;align-items:center;justify-content:center;min-height:80vh">
     <div class="spinner"></div>
   </div>
@@ -157,56 +140,102 @@
   <!-- Task flow modal -->
   <div class="modal-overlay" id="task-modal">
     <div class="modal" style="max-width:480px">
-      <div id="tm-step-1">
-        <h2 id="tm-title">Complete task</h2>
-        <p class="modal-sub" id="tm-sub">Click the button below to open the link. Keep this window open.</p>
-        <div class="task-flow-box">
-          <div class="flow-step flow-step-active" id="fs-1">
-            <div class="flow-num">1</div>
-            <div>
-              <strong>Open the link</strong>
-              <p>Click below to go to the task page</p>
-            </div>
-          </div>
-          <div class="flow-step" id="fs-2">
-            <div class="flow-num">2</div>
-            <div>
-              <strong>Complete the action</strong>
-              <p>Follow / like / view as instructed</p>
-            </div>
-          </div>
-          <div class="flow-step" id="fs-3">
-            <div class="flow-num">3</div>
-            <div>
-              <strong>Submit for review</strong>
-              <p>Wait 30 seconds then submit</p>
-            </div>
-          </div>
+      <h2 id="tm-title">Complete task</h2>
+      <p class="modal-sub" id="tm-sub"></p>
+
+      <div class="task-flow-box">
+        <div class="flow-step" id="fs-1">
+          <div class="flow-num">1</div>
+          <div><strong>Open the link</strong><p>The platform page opens in a new tab</p></div>
         </div>
-        <div id="tm-timer-row" style="display:none;margin:18px 0">
-          <div class="timer-bar-wrap">
-            <div class="timer-bar" id="timer-bar"></div>
-          </div>
-          <p class="timer-label" id="timer-label">Waiting 30s… <span id="timer-count">30</span>s</p>
+        <div class="flow-step" id="fs-2">
+          <div class="flow-num">2</div>
+          <div><strong>Stay on the page for 30s</strong><p>Complete the action while the timer runs</p></div>
         </div>
-        <div class="modal-footer" style="margin-top:20px">
-          <button class="btn btn-ghost" onclick="closeTaskModal()">Cancel</button>
-          <button class="btn btn-primary" id="tm-link-btn" onclick="clickTaskLink()">Open link ↗</button>
-          <button class="btn btn-primary" id="tm-submit-btn" style="display:none" disabled onclick="submitTask()">Submit for review</button>
+        <div class="flow-step" id="fs-3">
+          <div class="flow-num">3</div>
+          <div><strong>Come back &amp; submit</strong><p>Return here and claim your points</p></div>
         </div>
-        <div class="error-msg" id="tm-err"></div>
       </div>
+
+      <!-- Warning shown if user leaves tab -->
+      <div id="tab-warning" class="alert alert-error" style="display:none;margin-top:14px;font-size:0.83rem">
+        ⚠️ You left the page before 30 seconds — the timer has been reset. Please open the link again and stay for the full 30s.
+      </div>
+
+      <div id="tm-timer-row" style="display:none;margin:18px 0 4px">
+        <div class="timer-bar-wrap"><div class="timer-bar" id="timer-bar"></div></div>
+        <p class="timer-label" id="timer-label">Stay on the task page… <span id="timer-count">30</span>s remaining</p>
+      </div>
+
+      <div class="modal-footer" style="margin-top:20px">
+        <button class="btn btn-ghost" onclick="closeTaskModal()">Cancel</button>
+        <button class="btn btn-primary" id="tm-open-btn" onclick="openTaskLink()">Open link ↗</button>
+        <button class="btn btn-primary" id="tm-submit-btn" style="display:none" disabled onclick="submitTask()">Claim points</button>
+      </div>
+      <div class="error-msg" id="tm-err"></div>
     </div>
   </div>
 
   <script type="module">
     import { supabase, go, toast, esc, PLAT_EMOJI, PLAT_CLASS, TYPE_LABEL } from '/assets/js/shared.js';
 
+    // ---- PLATFORM URL RULES ----
+    const PLATFORM_RULES = {
+      tiktok:    { hosts: ['tiktok.com','vm.tiktok.com','vt.tiktok.com'], placeholder: 'https://www.tiktok.com/@username', hint: 'Must be a tiktok.com URL' },
+      instagram: { hosts: ['instagram.com','www.instagram.com','instagr.am'], placeholder: 'https://www.instagram.com/username/', hint: 'Must be an instagram.com URL' },
+      youtube:   { hosts: ['youtube.com','www.youtube.com','youtu.be','m.youtube.com'], placeholder: 'https://www.youtube.com/@channel', hint: 'Must be a youtube.com or youtu.be URL' },
+    };
+
+    function validatePlatformUrl(url, platform) {
+      try {
+        const u = new URL(url);
+        const host = u.hostname.replace(/^www\./, '');
+        const allowed = PLATFORM_RULES[platform].hosts.map(h => h.replace(/^www\./, ''));
+        return allowed.some(h => host === h || host.endsWith('.'+h));
+      } catch { return false; }
+    }
+
+    window.onPlatformChange = () => {
+      const plat = document.getElementById('p-platform').value;
+      document.getElementById('p-url').placeholder = PLATFORM_RULES[plat].placeholder;
+      onUrlInput();
+    };
+    window.onUrlInput = () => {
+      const url = document.getElementById('p-url').value.trim();
+      const plat = document.getElementById('p-platform').value;
+      const hint = document.getElementById('url-hint');
+      if (!url) { hint.textContent = ''; hint.className = 'url-hint'; return; }
+      if (validatePlatformUrl(url, plat)) {
+        hint.textContent = '✓ Valid URL';
+        hint.className = 'url-hint url-valid';
+      } else {
+        hint.textContent = '✗ ' + PLATFORM_RULES[plat].hint;
+        hint.className = 'url-hint url-invalid';
+      }
+    };
+    window.updateCostPreview = () => {
+      const reward = parseInt(document.getElementById('p-points').value) || 0;
+      const slots = parseInt(document.getElementById('p-slots').value) || 0;
+      document.getElementById('c-reward').textContent = reward;
+      document.getElementById('c-slots').textContent = slots;
+      document.getElementById('c-total').textContent = (reward * slots) + ' points';
+    };
+
+    // Init placeholder
+    onPlatformChange();
+    updateCostPreview();
+
+    // ---- STATE ----
     let profile = null;
     let userEmail = '';
-    let activTaskId = null;
+    let activeTaskId = null;
+    let activeTaskUrl = null;
     let timerInterval = null;
-    let timerStarted = false;
+    let tabOpenedAt = null;
+    let visibilityHandler = null;
+    let taskTab = null;
+    let timerAborted = false;
 
     // ---- INIT ----
     const { data: { session } } = await supabase.auth.getSession();
@@ -226,7 +255,6 @@
         document.getElementById('loading-screen').style.display = 'none';
         document.getElementById('app').style.display = 'block';
         loadEarnFeed();
-        loadReviewCount();
       } catch(e) {
         document.getElementById('loading-screen').innerHTML = `
           <div style="text-align:center;padding:40px">
@@ -238,10 +266,10 @@
     }
 
     function renderUI() {
-      const initials = (profile.username || 'U')[0].toUpperCase();
-      ['user-avatar','profile-avatar'].forEach(id => document.getElementById(id).textContent = initials);
+      const ini = (profile.username||'U')[0].toUpperCase();
+      ['user-avatar','profile-avatar'].forEach(id => document.getElementById(id).textContent = ini);
       document.getElementById('welcome-msg').textContent = `Welcome back, ${profile.username}`;
-      document.getElementById('welcome-sub').textContent = `You have ${profile.points} points available`;
+      document.getElementById('welcome-sub').textContent = `You have ${profile.points} points`;
       document.getElementById('nav-pts').textContent = profile.points;
       document.getElementById('pts-display').textContent = profile.points;
       document.getElementById('c-balance').textContent = profile.points + ' pts';
@@ -252,24 +280,24 @@
       document.getElementById('s-posted').textContent = profile.tasks_posted;
     }
 
-    function updatePoints(newPts) {
-      profile.points = newPts;
-      document.getElementById('nav-pts').textContent = newPts;
-      document.getElementById('pts-display').textContent = newPts;
-      document.getElementById('c-balance').textContent = newPts + ' pts';
-      document.getElementById('s-points').textContent = newPts;
-      document.getElementById('welcome-sub').textContent = `You have ${newPts} points available`;
+    function updatePoints(pts) {
+      profile.points = pts;
+      document.getElementById('nav-pts').textContent = pts;
+      document.getElementById('pts-display').textContent = pts;
+      document.getElementById('c-balance').textContent = pts + ' pts';
+      document.getElementById('s-points').textContent = pts;
+      document.getElementById('welcome-sub').textContent = `You have ${pts} points`;
     }
 
     // ---- TABS ----
     window.switchTab = (tab) => {
-      const tabs = ['earn','post','my-tasks','review','profile'];
-      document.querySelectorAll('.tab-btn').forEach((btn, i) => btn.classList.toggle('active', tabs[i] === tab));
-      tabs.forEach(t => document.getElementById('tab-'+t).style.display = t === tab ? 'block' : 'none');
-      if (tab === 'earn') loadEarnFeed();
-      if (tab === 'my-tasks') loadMyTasks();
-      if (tab === 'review') loadReviewFeed();
-      if (tab === 'profile') loadLedger();
+      ['earn','post','my-tasks','profile'].forEach((t,i) => {
+        document.querySelectorAll('.tab-btn')[i].classList.toggle('active', t===tab);
+        document.getElementById('tab-'+t).style.display = t===tab ? 'block' : 'none';
+      });
+      if (tab==='earn') loadEarnFeed();
+      if (tab==='my-tasks') loadMyTasks();
+      if (tab==='profile') loadLedger();
     };
 
     // ---- EARN FEED ----
@@ -278,119 +306,97 @@
       feed.innerHTML = '<div class="spinner"></div>';
       try {
         const { data: tasks, error } = await supabase
-          .from('tasks')
-          .select('*')
+          .from('tasks').select('*')
           .eq('is_active', true)
           .neq('owner_id', profile.id)
           .order('created_at', { ascending: false });
         if (error) throw error;
 
-        // Get my completions for these tasks
         const { data: myC } = await supabase
-          .from('completions')
-          .select('task_id, status')
+          .from('completions').select('task_id,status')
           .eq('user_id', profile.id);
+        const myStatus = Object.fromEntries((myC||[]).map(c=>[c.task_id,c.status]));
 
-        const myStatus = {};
-        (myC || []).forEach(c => myStatus[c.task_id] = c.status);
-
-        if (!tasks || tasks.length === 0) {
-          feed.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>No tasks available right now. Post one and others will post back!</p></div>`;
+        if (!tasks||tasks.length===0) {
+          feed.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>No tasks available. Post one first!</p></div>`;
           return;
         }
         feed.innerHTML = '';
-        tasks.forEach(t => {
-          const status = myStatus[t.id];
-          const slotsLeft = t.max_completions - t.completions_count;
-          feed.appendChild(buildEarnCard(t, status, slotsLeft));
-        });
+        tasks.forEach(t => feed.appendChild(buildEarnCard(t, myStatus[t.id])));
       } catch(e) {
         feed.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>${esc(e.message)}</p></div>`;
       }
     }
 
-    function buildEarnCard(t, myStatus, slotsLeft) {
+    function buildEarnCard(t, status) {
+      const slotsLeft = t.max_completions - t.completions_count;
+      let action = '';
+      if (status==='approved')
+        action = `<span class="status-chip chip-approved">✓ Done</span>`;
+      else if (status==='submitted'||status==='pending')
+        action = `<button class="btn btn-primary btn-sm" onclick="window.openTaskModal('${t.id}')">Resume ↗</button>`;
+      else if (slotsLeft<=0)
+        action = `<span class="status-chip chip-full">Full</span>`;
+      else
+        action = `<button class="btn btn-primary btn-sm" onclick="window.openTaskModal('${t.id}')">Start task ↗</button>`;
+
       const card = document.createElement('div');
       card.className = 'task-card';
-
-      let actionHtml = '';
-      if (myStatus === 'approved') {
-        actionHtml = `<span class="status-chip chip-approved">✓ Approved</span>`;
-      } else if (myStatus === 'rejected') {
-        actionHtml = `<span class="status-chip chip-rejected">✗ Rejected</span>`;
-      } else if (myStatus === 'submitted') {
-        actionHtml = `<span class="status-chip chip-pending">⏳ Awaiting review</span>`;
-      } else if (myStatus === 'pending') {
-        actionHtml = `<button class="btn btn-primary btn-sm" onclick="window.openTaskModal('${t.id}','${esc(t.target)}','${esc(t.description||'')}')">Continue ↗</button>`;
-      } else {
-        actionHtml = slotsLeft > 0
-          ? `<button class="btn btn-primary btn-sm" onclick="window.openTaskModal('${t.id}','${esc(t.target)}','${esc(t.description||'')}')">Start task ↗</button>`
-          : `<span class="status-chip chip-full">Full</span>`;
-      }
-
       card.innerHTML = `
         <div class="task-plat-icon ${PLAT_CLASS[t.platform]}">${PLAT_EMOJI[t.platform]||'🌐'}</div>
         <div class="task-info">
           <h4>${esc(t.target)}</h4>
-          <p>${esc(t.description || TYPE_LABEL[t.type]+' on '+t.platform)}</p>
+          <p>${esc(t.description||TYPE_LABEL[t.type]+' on '+t.platform)}</p>
         </div>
         <div class="task-actions">
           <span class="type-badge type-${t.type}">${TYPE_LABEL[t.type]}</span>
           <span class="pts-badge">+${t.points_reward} pts</span>
           <span class="slots-badge">${slotsLeft}/${t.max_completions} slots</span>
-          ${actionHtml}
+          ${action}
         </div>`;
       return card;
     }
 
-    // ---- TASK FLOW MODAL ----
-    window.openTaskModal = async (taskId, target, desc) => {
-      activTaskId = taskId;
-      timerStarted = false;
+    // ---- TASK MODAL ----
+    window.openTaskModal = async (taskId) => {
+      activeTaskId = taskId;
+      timerAborted = false;
       clearInterval(timerInterval);
+      removeVisibilityHandler();
 
-      document.getElementById('tm-title').textContent = `Complete: ${target}`;
-      document.getElementById('tm-sub').textContent = desc || 'Click the link, complete the task, then submit for review.';
+      // Reset modal UI
+      document.getElementById('tm-err').textContent = '';
+      document.getElementById('tab-warning').style.display = 'none';
       document.getElementById('tm-timer-row').style.display = 'none';
-      document.getElementById('tm-link-btn').style.display = 'inline-flex';
+      document.getElementById('tm-open-btn').style.display = 'inline-flex';
+      document.getElementById('tm-open-btn').disabled = false;
+      document.getElementById('tm-open-btn').textContent = 'Open link ↗';
       document.getElementById('tm-submit-btn').style.display = 'none';
       document.getElementById('tm-submit-btn').disabled = true;
-      document.getElementById('tm-err').textContent = '';
       document.getElementById('timer-bar').style.width = '0%';
-      document.getElementById('timer-count').textContent = '30';
+      setFlowStep(1);
 
-      // Reset step highlights
-      ['fs-1','fs-2','fs-3'].forEach((id,i) => {
-        document.getElementById(id).className = 'flow-step' + (i===0?' flow-step-active':'');
-      });
+      // Fetch task
+      const { data: task } = await supabase.from('tasks').select('*').eq('id', taskId).single();
+      if (!task) { toast('Task not found','error'); return; }
+      activeTaskUrl = task.target;
+      document.getElementById('tm-title').textContent = `${TYPE_LABEL[task.type]} on ${task.platform}`;
+      document.getElementById('tm-sub').textContent = task.description || task.target;
 
-      // Check if already started
-      const { data: existing } = await supabase
-        .from('completions')
-        .select('status, link_clicked_at')
-        .eq('task_id', taskId)
-        .eq('user_id', profile.id)
-        .maybeSingle();
-
-      if (existing?.status === 'submitted') {
-        document.getElementById('tm-err').textContent = 'Already submitted — awaiting owner review.';
-        document.getElementById('tm-link-btn').style.display = 'none';
-        document.getElementById('task-modal').classList.add('open');
+      // Start task in DB (get/create completion row)
+      const { data, error } = await supabase.rpc('start_task', { p_task_id: taskId });
+      if (error||data?.error) {
+        toast(data?.error||error.message,'error');
         return;
       }
 
-      if (existing?.link_clicked_at) {
-        // Already clicked link — check how much time has passed
-        const elapsed = (Date.now() - new Date(existing.link_clicked_at).getTime()) / 1000;
-        document.getElementById('tm-link-btn').style.display = 'none';
-        document.getElementById('tm-submit-btn').style.display = 'inline-flex';
-        document.getElementById('tm-timer-row').style.display = 'block';
-        document.getElementById('fs-1').className = 'flow-step flow-step-done';
-        document.getElementById('fs-2').className = 'flow-step flow-step-active';
+      // If previously clicked link, resume timer
+      if (data.resumed && data.link_clicked_at) {
+        const elapsed = (Date.now() - new Date(data.link_clicked_at).getTime()) / 1000;
         if (elapsed >= 30) {
-          unlockSubmit();
+          showSubmitReady();
         } else {
-          startTimer(30 - elapsed);
+          showTimerRunning(30 - elapsed);
         }
       }
 
@@ -400,101 +406,136 @@
     window.closeTaskModal = () => {
       document.getElementById('task-modal').classList.remove('open');
       clearInterval(timerInterval);
-      activTaskId = null;
+      removeVisibilityHandler();
+      activeTaskId = null;
+      activeTaskUrl = null;
     };
 
-    window.clickTaskLink = async () => {
-      if (!activTaskId) return;
-      const btn = document.getElementById('tm-link-btn');
+    window.openTaskLink = async () => {
+      if (!activeTaskId) return;
+      const btn = document.getElementById('tm-open-btn');
       btn.disabled = true;
       btn.textContent = 'Opening…';
 
-      const { data, error } = await supabase.rpc('start_task', { p_task_id: activTaskId });
-      if (error || data?.error) {
-        document.getElementById('tm-err').textContent = data?.error || error.message;
+      // Record click server-side
+      const { data, error } = await supabase.rpc('record_link_click', { p_task_id: activeTaskId });
+      if (error||data?.error) {
+        document.getElementById('tm-err').textContent = data?.error||error.message;
         btn.disabled = false;
         btn.textContent = 'Open link ↗';
         return;
       }
 
-      // Get task link
-      const { data: task } = await supabase.from('tasks').select('target').eq('id', activTaskId).single();
-      const url = task?.target?.startsWith('http') ? task.target : 'https://'+task.target;
-      window.open(url, '_blank');
+      // Open the URL
+      const url = activeTaskUrl.startsWith('http') ? activeTaskUrl : 'https://'+activeTaskUrl;
+      taskTab = window.open(url, '_blank');
+      tabOpenedAt = Date.now();
 
       btn.style.display = 'none';
-      document.getElementById('tm-submit-btn').style.display = 'inline-flex';
-      document.getElementById('tm-timer-row').style.display = 'block';
-      document.getElementById('fs-1').className = 'flow-step flow-step-done';
-      document.getElementById('fs-2').className = 'flow-step flow-step-active';
-      startTimer(30);
+      showTimerRunning(30);
+      setupVisibilityDetection();
     };
 
-    function startTimer(seconds) {
-      let remaining = Math.max(0, seconds);
-      document.getElementById('timer-count').textContent = Math.ceil(remaining);
-      document.getElementById('timer-bar').style.width = ((30 - remaining) / 30 * 100) + '%';
+    function showTimerRunning(remaining) {
+      document.getElementById('tm-timer-row').style.display = 'block';
+      document.getElementById('tm-submit-btn').style.display = 'inline-flex';
       document.getElementById('tm-submit-btn').disabled = true;
+      document.getElementById('tab-warning').style.display = 'none';
+      setFlowStep(2);
 
-      if (remaining <= 0) { unlockSubmit(); return; }
+      let secs = Math.max(0, remaining);
+      document.getElementById('timer-count').textContent = Math.ceil(secs);
+      document.getElementById('timer-bar').style.width = ((30-secs)/30*100)+'%';
+      document.getElementById('timer-label').innerHTML = `Stay on the task page… <span id="timer-count">${Math.ceil(secs)}</span>s remaining`;
 
       clearInterval(timerInterval);
       timerInterval = setInterval(() => {
-        remaining -= 0.25;
-        const pct = Math.min(100, (30 - remaining) / 30 * 100);
-        document.getElementById('timer-bar').style.width = pct + '%';
-        document.getElementById('timer-count').textContent = Math.max(0, Math.ceil(remaining));
-        if (remaining <= 0) {
+        secs -= 0.25;
+        const pct = Math.min(100,(30-secs)/30*100);
+        document.getElementById('timer-bar').style.width = pct+'%';
+        const countEl = document.getElementById('timer-count');
+        if (countEl) countEl.textContent = Math.max(0,Math.ceil(secs));
+        if (secs <= 0) {
           clearInterval(timerInterval);
-          unlockSubmit();
+          if (!timerAborted) showSubmitReady();
         }
       }, 250);
     }
 
-    function unlockSubmit() {
+    function showSubmitReady() {
       document.getElementById('tm-submit-btn').disabled = false;
-      document.getElementById('timer-label').innerHTML = '✓ Ready to submit!';
+      document.getElementById('timer-label').innerHTML = '✓ Time complete — come back and claim your points!';
       document.getElementById('timer-bar').style.width = '100%';
-      document.getElementById('fs-2').className = 'flow-step flow-step-done';
-      document.getElementById('fs-3').className = 'flow-step flow-step-active';
+      setFlowStep(3);
+    }
+
+    // ---- VISIBILITY / TAB CLOSE DETECTION ----
+    function setupVisibilityDetection() {
+      // Detect if user switches away from this tab before timer ends
+      removeVisibilityHandler();
+      visibilityHandler = () => {
+        if (document.hidden) {
+          // User left this tab — check if enough time has passed
+          const elapsed = (Date.now() - tabOpenedAt) / 1000;
+          if (elapsed < 28) {
+            // Not enough time — abort timer
+            timerAborted = true;
+            clearInterval(timerInterval);
+            // Reset click time server-side by re-calling start_task on next open
+            document.getElementById('tab-warning').style.display = 'block';
+            document.getElementById('tm-submit-btn').disabled = true;
+            document.getElementById('tm-open-btn').style.display = 'inline-flex';
+            document.getElementById('tm-open-btn').disabled = false;
+            document.getElementById('tm-open-btn').textContent = 'Open link again ↗';
+            setFlowStep(1);
+          }
+        }
+      };
+      document.addEventListener('visibilitychange', visibilityHandler);
+    }
+
+    function removeVisibilityHandler() {
+      if (visibilityHandler) {
+        document.removeEventListener('visibilitychange', visibilityHandler);
+        visibilityHandler = null;
+      }
+    }
+
+    function setFlowStep(active) {
+      for (let i=1;i<=3;i++) {
+        const el = document.getElementById('fs-'+i);
+        el.className = 'flow-step' + (i<active?' flow-step-done':i===active?' flow-step-active':'');
+      }
     }
 
     window.submitTask = async () => {
-      if (!activTaskId) return;
+      if (!activeTaskId) return;
       const btn = document.getElementById('tm-submit-btn');
       btn.disabled = true;
-      btn.textContent = 'Submitting…';
+      btn.textContent = 'Claiming…';
 
-      const { data, error } = await supabase.rpc('submit_task', { p_task_id: activTaskId });
-      if (error || data?.error) {
-        document.getElementById('tm-err').textContent = data?.error || error.message;
+      const { data, error } = await supabase.rpc('submit_task', { p_task_id: activeTaskId });
+      if (error||data?.error) {
+        document.getElementById('tm-err').textContent = data?.error||error.message;
         btn.disabled = false;
-        btn.textContent = 'Submit for review';
+        btn.textContent = 'Claim points';
         return;
       }
 
       closeTaskModal();
-      toast('Submitted! Waiting for the task owner to approve.', 'success');
+      toast(`+${data.points_earned} points earned! 🎉`, 'success');
+
+      // Refresh balance
+      const { data: p } = await supabase.from('profiles').select('points,tasks_completed').eq('id',profile.id).single();
+      if (p) { profile.tasks_completed=p.tasks_completed; document.getElementById('s-done').textContent=p.tasks_completed; updatePoints(p.points); }
       loadEarnFeed();
     };
 
     // ---- POST TASK ----
-    function updateCostPreview() {
-      const reward = parseInt(document.getElementById('p-points').value) || 0;
-      const slots = parseInt(document.getElementById('p-slots').value) || 0;
-      const total = reward * slots;
-      document.getElementById('c-reward').textContent = reward;
-      document.getElementById('c-slots').textContent = slots;
-      document.getElementById('c-total').textContent = total + ' points';
-    }
-    document.getElementById('p-points').addEventListener('change', updateCostPreview);
-    document.getElementById('p-slots').addEventListener('input', updateCostPreview);
-    updateCostPreview();
-
     window.postTask = async () => {
       const platform = document.getElementById('p-platform').value;
       const type = document.getElementById('p-type').value;
-      const target = document.getElementById('p-target').value.trim();
+      const url = document.getElementById('p-url').value.trim();
       const desc = document.getElementById('p-desc').value.trim();
       const reward = parseInt(document.getElementById('p-points').value);
       const slots = parseInt(document.getElementById('p-slots').value);
@@ -502,36 +543,32 @@
       const btn = document.getElementById('post-btn');
       errEl.textContent = '';
 
-      if (!target) { errEl.textContent = 'Please enter your username or link.'; return; }
-      if (!slots || slots < 1) { errEl.textContent = 'Please enter at least 1 slot.'; return; }
-      const total = reward * slots;
-      if (profile.points < total) {
-        errEl.textContent = `Not enough points. This costs ${total} pts but you have ${profile.points}.`;
+      if (!url) { errEl.textContent = 'Please enter a URL.'; return; }
+      if (!validatePlatformUrl(url, platform)) {
+        errEl.textContent = PLATFORM_RULES[platform].hint + '. Example: ' + PLATFORM_RULES[platform].placeholder;
         return;
       }
+      if (!slots||slots<1) { errEl.textContent = 'Enter at least 1 slot.'; return; }
+      const total = reward * slots;
+      if (profile.points < total) { errEl.textContent = `Not enough points. This costs ${total} pts, you have ${profile.points}.`; return; }
 
-      btn.disabled = true;
-      btn.textContent = 'Posting…';
-
+      btn.disabled = true; btn.textContent = 'Posting…';
       const { data, error } = await supabase.rpc('post_task', {
-        p_platform: platform, p_type: type, p_target: target,
-        p_description: desc || null, p_points_reward: reward,
-        p_max_completions: slots
+        p_platform: platform, p_type: type, p_target: url,
+        p_description: desc||null, p_points_reward: reward, p_max_completions: slots
       });
+      btn.disabled = false; btn.textContent = 'Post task';
 
-      btn.disabled = false;
-      btn.textContent = 'Post task';
+      if (error||data?.error) { errEl.textContent = data?.error||error.message; return; }
 
-      if (error || data?.error) { errEl.textContent = data?.error || error.message; return; }
-
-      const { data: p } = await supabase.from('profiles').select('points,tasks_posted').eq('id', profile.id).single();
-      if (p) { profile.tasks_posted = p.tasks_posted; updatePoints(p.points); document.getElementById('s-posted').textContent = p.tasks_posted; }
-
-      document.getElementById('p-target').value = '';
-      document.getElementById('p-desc').value = '';
-      document.getElementById('p-slots').value = '5';
+      const { data: p } = await supabase.from('profiles').select('points,tasks_posted').eq('id',profile.id).single();
+      if (p) { profile.tasks_posted=p.tasks_posted; document.getElementById('s-posted').textContent=p.tasks_posted; updatePoints(p.points); }
+      document.getElementById('p-url').value='';
+      document.getElementById('p-desc').value='';
+      document.getElementById('p-slots').value='5';
+      document.getElementById('url-hint').textContent='';
       updateCostPreview();
-      toast(`Task posted! Deducted ${data.total_cost} points. 🎉`, 'success');
+      toast(`Task posted! ${data.total_cost} points deducted. 🎉`, 'success');
     };
 
     // ---- MY TASKS ----
@@ -540,12 +577,9 @@
       feed.innerHTML = '<div class="spinner"></div>';
       try {
         const { data: tasks, error } = await supabase
-          .from('tasks')
-          .select('*')
-          .eq('owner_id', profile.id)
-          .order('created_at', { ascending: false });
+          .from('tasks').select('*').eq('owner_id',profile.id).order('created_at',{ascending:false});
         if (error) throw error;
-        if (!tasks || tasks.length === 0) {
+        if (!tasks||tasks.length===0) {
           feed.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>No tasks posted yet.</p></div>`;
           return;
         }
@@ -557,14 +591,14 @@
           card.innerHTML = `
             <div class="task-plat-icon ${PLAT_CLASS[t.platform]}">${PLAT_EMOJI[t.platform]||'🌐'}</div>
             <div class="task-info">
-              <h4>${esc(t.target)}</h4>
+              <h4 style="font-size:0.82rem;color:var(--muted);word-break:break-all">${esc(t.target)}</h4>
               <p>${t.completions_count}/${t.max_completions} completions · ${t.points_reward} pts each</p>
             </div>
             <div class="task-actions">
               <span class="type-badge type-${t.type}">${TYPE_LABEL[t.type]}</span>
-              ${t.is_active ? `<span class="status-chip chip-active">Active</span>` : `<span class="status-chip chip-full">Closed</span>`}
-              <span class="slots-badge">${slotsLeft} slots left</span>
-              ${t.is_active ? `<button class="btn btn-danger btn-sm" onclick="window.deactivateTask('${t.id}')">Close</button>` : ''}
+              ${t.is_active?`<span class="status-chip chip-active">Active</span>`:`<span class="status-chip chip-full">Closed</span>`}
+              <span class="slots-badge">${slotsLeft} left</span>
+              ${t.is_active?`<button class="btn btn-danger btn-sm" onclick="window.closeTask('${t.id}')">Close</button>`:''}
             </div>`;
           feed.appendChild(card);
         });
@@ -573,133 +607,31 @@
       }
     }
 
-    window.deactivateTask = async (taskId) => {
-      const { error } = await supabase.from('tasks').update({ is_active: false }).eq('id', taskId).eq('owner_id', profile.id);
-      if (error) { toast(error.message, 'error'); return; }
-      toast('Task closed.', '');
+    window.closeTask = async (taskId) => {
+      const { error } = await supabase.from('tasks').update({is_active:false}).eq('id',taskId).eq('owner_id',profile.id);
+      if (error) { toast(error.message,'error'); return; }
+      toast('Task closed.','');
       loadMyTasks();
-    };
-
-    // ---- REVIEW FEED ----
-    async function loadReviewCount() {
-      const { data: tasks } = await supabase.from('tasks').select('id').eq('owner_id', profile.id);
-      if (!tasks || tasks.length === 0) return;
-      const taskIds = tasks.map(t => t.id);
-      const { count } = await supabase
-        .from('completions')
-        .select('id', { count: 'exact', head: true })
-        .in('task_id', taskIds)
-        .eq('status', 'submitted');
-      const badge = document.getElementById('review-badge');
-      if (count && count > 0) {
-        badge.textContent = count;
-        badge.style.display = 'inline-flex';
-      } else {
-        badge.style.display = 'none';
-      }
-    }
-
-    async function loadReviewFeed() {
-      const feed = document.getElementById('review-feed');
-      feed.innerHTML = '<div class="spinner"></div>';
-      try {
-        const { data: tasks } = await supabase.from('tasks').select('id, target, platform, type, points_reward').eq('owner_id', profile.id);
-        if (!tasks || tasks.length === 0) {
-          feed.innerHTML = `<div class="empty-state"><div class="empty-icon">📬</div><p>Post a task first to start reviewing completions.</p></div>`;
-          return;
-        }
-        const taskIds = tasks.map(t => t.id);
-        const taskMap = Object.fromEntries(tasks.map(t => [t.id, t]));
-
-        const { data: completions, error } = await supabase
-          .from('completions')
-          .select('id, task_id, user_id, status, submitted_at, link_clicked_at')
-          .in('task_id', taskIds)
-          .eq('status', 'submitted')
-          .order('submitted_at', { ascending: true });
-        if (error) throw error;
-
-        if (!completions || completions.length === 0) {
-          feed.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><p>Nothing to review right now. Check back later.</p></div>`;
-          loadReviewCount();
-          return;
-        }
-
-        // Fetch usernames for completers
-        const userIds = [...new Set(completions.map(c => c.user_id))];
-        const { data: profiles } = await supabase.from('profiles').select('id, username').in('id', userIds);
-        const profileMap = Object.fromEntries((profiles||[]).map(p => [p.id, p.username]));
-
-        feed.innerHTML = '';
-        completions.forEach(c => {
-          const task = taskMap[c.task_id];
-          const username = profileMap[c.user_id] || 'Unknown';
-          const submittedAgo = c.submitted_at ? timeAgo(new Date(c.submitted_at)) : '—';
-          const card = document.createElement('div');
-          card.className = 'task-card review-card';
-          card.innerHTML = `
-            <div class="task-plat-icon ${PLAT_CLASS[task.platform]}">${PLAT_EMOJI[task.platform]||'🌐'}</div>
-            <div class="task-info">
-              <h4><strong>@${esc(username)}</strong> completed <em>${esc(task.target)}</em></h4>
-              <p>${TYPE_LABEL[task.type]} · Submitted ${submittedAgo}</p>
-            </div>
-            <div class="task-actions">
-              <span class="pts-badge">${task.points_reward} pts</span>
-              <button class="btn btn-sm" style="background:rgba(61,186,111,0.15);color:var(--green);border:1px solid rgba(61,186,111,0.3)" onclick="window.reviewCompletion('${c.id}','approve', this)">✓ Approve</button>
-              <button class="btn btn-sm btn-danger" onclick="window.reviewCompletion('${c.id}','reject', this)">✗ Reject</button>
-            </div>`;
-          feed.appendChild(card);
-        });
-        loadReviewCount();
-      } catch(e) {
-        feed.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>${esc(e.message)}</p></div>`;
-      }
-    }
-
-    window.reviewCompletion = async (completionId, action, btn) => {
-      btn.disabled = true;
-      btn.textContent = '…';
-      const { data, error } = await supabase.rpc('review_completion', { p_completion_id: completionId, p_action: action });
-      if (error || data?.error) {
-        toast(data?.error || error.message, 'error');
-        btn.disabled = false;
-        btn.textContent = action === 'approve' ? '✓ Approve' : '✗ Reject';
-        return;
-      }
-      toast(action === 'approve' ? 'Approved! Points sent to user.' : 'Rejected.', action === 'approve' ? 'success' : '');
-      btn.closest('.task-card').remove();
-      loadReviewCount();
     };
 
     // ---- LEDGER ----
     async function loadLedger() {
       const feed = document.getElementById('ledger-feed');
       feed.innerHTML = '<div class="spinner" style="margin:20px auto"></div>';
-      const { data } = await supabase
-        .from('point_ledger').select('*')
-        .eq('user_id', profile.id)
-        .order('created_at', { ascending: false }).limit(30);
-      if (!data || data.length === 0) { feed.innerHTML = '<p style="color:var(--muted);font-size:0.85rem">No history yet.</p>'; return; }
-      const labels = { task_completion: 'Completed a task', task_approved: 'Task approved ✓', task_posted: 'Posted a task', signup_bonus: '🎉 Signup bonus' };
-      feed.innerHTML = data.map(e => `
+      const { data } = await supabase.from('point_ledger').select('*')
+        .eq('user_id',profile.id).order('created_at',{ascending:false}).limit(30);
+      if (!data||data.length===0) { feed.innerHTML='<p style="color:var(--muted);font-size:0.85rem">No history yet.</p>'; return; }
+      const labels = { task_approved:'Task completed ✓', task_posted:'Posted a task', signup_bonus:'🎉 Signup bonus' };
+      feed.innerHTML = data.map(e=>`
         <div class="ledger-row">
-          <span class="ledger-reason">${labels[e.reason] || e.reason}</span>
-          <span class="ledger-delta ${e.delta > 0 ? 'delta-pos' : 'delta-neg'}">${e.delta > 0 ? '+' : ''}${e.delta}</span>
+          <span class="ledger-reason">${labels[e.reason]||e.reason}</span>
+          <span class="ledger-delta ${e.delta>0?'delta-pos':'delta-neg'}">${e.delta>0?'+':''}${e.delta}</span>
         </div>`).join('');
     }
 
     // ---- SIGN OUT ----
     window.doSignOut = async () => { await supabase.auth.signOut(); go('/'); };
     document.getElementById('signout-btn').addEventListener('click', window.doSignOut);
-
-    // ---- UTILS ----
-    function timeAgo(date) {
-      const s = Math.floor((Date.now() - date) / 1000);
-      if (s < 60) return s + 's ago';
-      if (s < 3600) return Math.floor(s/60) + 'm ago';
-      if (s < 86400) return Math.floor(s/3600) + 'h ago';
-      return Math.floor(s/86400) + 'd ago';
-    }
   </script>
 </body>
 </html>

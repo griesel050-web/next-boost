@@ -190,3 +190,8 @@
   .task-actions { width: 100%; justify-content: flex-end; flex-wrap: wrap; }
   .flow-step p { display: none; }
 }
+
+/* ---- URL HINT ---- */
+.url-hint { font-size: 0.8rem; margin-top: 6px; min-height: 16px; }
+.url-valid  { color: var(--green); }
+.url-invalid { color: var(--red); }
