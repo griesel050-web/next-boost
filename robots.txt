@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /signup/
+Disallow: /dashboard/
+Disallow: /login/
+Disallow: /reset-password/
+Disallow: /confirm-email/
+
+Sitemap: https://boost.nexosites.xyz/sitemap.xml

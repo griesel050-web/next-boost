@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reset Password — Next Boost</title>
+  <meta name="robots" content="noindex"/>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
+  <link rel="stylesheet" href="/assets/css/main.css"/>
+</head>
+<body>
+  <!-- Request form -->
+  <div id="request-screen" class="auth-page">
+    <div class="auth-card">
+      <div class="auth-logo"><a href="/"><img src="/assets/img/logo.svg" alt="Next Boost"/></a></div>
+      <h1>Reset your password</h1>
+      <p class="auth-sub">Enter your email and we'll send you a reset link.</p>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="you@email.com" autocomplete="email"/>
+      </div>
+      <div class="error-msg" id="err"></div>
+      <button class="btn btn-primary btn-full" id="send-btn" onclick="sendReset()">Send reset link</button>
+      <div class="auth-footer"><a href="/login/">Back to login</a></div>
+    </div>
+  </div>
+
+  <!-- Sent confirmation -->
+  <div id="sent-screen" style="display:none" class="auth-page">
+    <div class="auth-card" style="text-align:center">
+      <div style="font-size:3rem;margin-bottom:20px">✉️</div>
+      <h1>Check your email</h1>
+      <p class="auth-sub">If that email is registered, you'll receive a reset link shortly. Check your spam folder too.</p>
+      <a href="/login/" class="btn btn-ghost btn-full" style="margin-top:16px">Back to login</a>
+    </div>
+  </div>
+
+  <!-- New password form (shown when redirected back with token) -->
+  <div id="new-pass-screen" style="display:none" class="auth-page">
+    <div class="auth-card">
+      <div class="auth-logo"><a href="/"><img src="/assets/img/logo.svg" alt="Next Boost"/></a></div>
+      <h1>Set new password</h1>
+      <p class="auth-sub">Choose a new password for your account.</p>
+      <div class="form-group">
+        <label for="newpass">New password</label>
+        <input type="password" id="newpass" placeholder="At least 6 characters" autocomplete="new-password"/>
+      </div>
+      <div class="form-group">
+        <label for="confirmpass">Confirm password</label>
+        <input type="password" id="confirmpass" placeholder="Repeat password" autocomplete="new-password"/>
+      </div>
+      <div class="error-msg" id="err2"></div>
+      <button class="btn btn-primary btn-full" id="update-btn" onclick="updatePassword()">Update password</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabase, go } from '/assets/js/shared.js';
+
+    // Check if this is a password reset callback (Supabase appends #access_token or ?type=recovery)
+    const hash = window.location.hash;
+    const params = new URLSearchParams(window.location.search);
+    const isRecovery = hash.includes('type=recovery') || params.get('type') === 'recovery';
+
+    if (isRecovery) {
+      // Supabase will handle setting the session from the URL fragment automatically
+      supabase.auth.onAuthStateChange((event) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          document.getElementById('request-screen').style.display = 'none';
+          document.getElementById('new-pass-screen').style.display = 'flex';
+        }
+      });
+    }
+
+    window.sendReset = async () => {
+      const email = document.getElementById('email').value.trim();
+      const errEl = document.getElementById('err');
+      const btn = document.getElementById('send-btn');
+      errEl.textContent = '';
+      if (!email) { errEl.textContent = 'Please enter your email.'; return; }
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+      await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'https://boost.nexosites.xyz/reset-password/'
+      });
+      // Always show sent screen (security: don't reveal if email exists)
+      document.getElementById('request-screen').style.display = 'none';
+      document.getElementById('sent-screen').style.display = 'flex';
+    };
+
+    window.updatePassword = async () => {
+      const newpass = document.getElementById('newpass').value;
+      const confirmpass = document.getElementById('confirmpass').value;
+      const errEl = document.getElementById('err2');
+      const btn = document.getElementById('update-btn');
+      errEl.textContent = '';
+      if (newpass.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+      if (newpass !== confirmpass) { errEl.textContent = 'Passwords do not match.'; return; }
+      btn.disabled = true;
+      btn.textContent = 'Updating…';
+      const { error } = await supabase.auth.updateUser({ password: newpass });
+      if (error) {
+        errEl.textContent = error.message;
+        btn.disabled = false;
+        btn.textContent = 'Update password';
+      } else {
+        go('/dashboard/');
+      }
+    };
+  </script>
+</body>
+</html>

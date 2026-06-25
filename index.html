@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Next Boost — Grow Your Social With Real Engagement</title>
+  <meta name="description" content="Complete tasks, earn points, and exchange them for real followers, likes, and views on TikTok, Instagram, and YouTube. Free to join."/>
+  <meta name="keywords" content="get free followers, get tiktok followers, instagram likes, youtube views, social media growth, follower exchange"/>
+  <link rel="canonical" href="https://boost.nexosites.xyz/"/>
+  <meta property="og:title" content="Next Boost — Grow Your Social With Real Engagement"/>
+  <meta property="og:description" content="Complete tasks, earn points, exchange for followers, likes, and views. Free to join."/>
+  <meta property="og:url" content="https://boost.nexosites.xyz/"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:image" content="https://boost.nexosites.xyz/assets/img/og.png"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="robots" content="index, follow"/>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
+  <link rel="stylesheet" href="/assets/css/main.css"/>
+  <link rel="stylesheet" href="/assets/css/landing.css"/>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Next Boost",
+    "url": "https://boost.nexosites.xyz/",
+    "description": "Social media engagement exchange platform"
+  }
+  </script>
+</head>
+<body>
+  <nav class="nav" id="main-nav">
+    <a class="nav-logo" href="/"><img src="/assets/img/logo.svg" alt="Next Boost"/></a>
+    <div class="nav-links">
+      <a href="/login/" class="btn btn-ghost btn-sm">Log in</a>
+      <a href="/signup/" class="btn btn-primary btn-sm">Sign up free</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-eyebrow">✦ Free · No credit card needed</div>
+      <h1 class="hero-title">Grow your social<br><span class="hero-grad">the smart way</span></h1>
+      <p class="hero-sub">Complete tasks for other creators, earn points, and spend them to get real followers, likes, and views on TikTok, Instagram, and YouTube.</p>
+      <div class="hero-cta">
+        <a href="/signup/" class="btn btn-primary btn-lg">Get started free</a>
+        <a href="/login/" class="btn btn-ghost btn-lg">Log in</a>
+      </div>
+      <div class="plat-row">
+        <span class="plat-chip"><span class="plat-dot" style="background:var(--tiktok)"></span>TikTok</span>
+        <span class="plat-chip"><span class="plat-dot" style="background:var(--instagram)"></span>Instagram</span>
+        <span class="plat-chip"><span class="plat-dot" style="background:var(--youtube)"></span>YouTube</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section">
+    <div class="container">
+      <h2 class="section-heading">How it works</h2>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-icon">🚀</div>
+          <h3>Sign up free</h3>
+          <p>Create your account in under a minute. You get 100 free points just for joining.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-icon">✅</div>
+          <h3>Complete tasks</h3>
+          <p>Follow, like, or view other creators' content. Earn points for every task you complete.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-icon">📤</div>
+          <h3>Post your task</h3>
+          <p>Spend points to post your own task. Other users complete it and your account grows.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-icon">📈</div>
+          <h3>Watch it grow</h3>
+          <p>Real users engage with your content — no bots, no fake accounts.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats-section">
+    <div class="container stats-inner">
+      <div class="stat-item"><div class="stat-num">100%</div><div class="stat-desc">Free to use</div></div>
+      <div class="stat-divider"></div>
+      <div class="stat-item"><div class="stat-num">3</div><div class="stat-desc">Platforms supported</div></div>
+      <div class="stat-divider"></div>
+      <div class="stat-item"><div class="stat-num">100</div><div class="stat-desc">Free points on signup</div></div>
+    </div>
+  </section>
+
+  <!-- CTA BANNER -->
+  <section class="cta-banner">
+    <div class="container">
+      <h2>Ready to grow?</h2>
+      <p>Join for free and start earning points today.</p>
+      <a href="/signup/" class="btn btn-primary btn-lg">Create your account</a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>© 2026 Next Boost · <a href="/login/">Log in</a> · <a href="/signup/">Sign up</a></p>
+  </footer>
+
+  <script type="module">
+    import { supabase, go } from '/assets/js/shared.js';
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      document.querySelector('.nav-links').innerHTML = `
+        <a href="/dashboard/" class="btn btn-ghost btn-sm">Dashboard</a>
+        <button class="btn btn-primary btn-sm" id="so">Sign out</button>
+      `;
+      document.getElementById('so').addEventListener('click', async () => { await supabase.auth.signOut(); location.reload(); });
+    }
+  </script>
+</body>
+</html>

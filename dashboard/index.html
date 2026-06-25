@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — Next Boost</title>
+  <meta name="robots" content="noindex"/>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
+  <link rel="stylesheet" href="/assets/css/main.css"/>
+  <link rel="stylesheet" href="/assets/css/dashboard.css"/>
+</head>
+<body>
+  <nav class="nav" id="main-nav">
+    <a class="nav-logo" href="/"><img src="/assets/img/logo.svg" alt="Next Boost"/></a>
+    <div class="nav-links">
+      <span class="nav-pts">⚡ <span id="nav-pts">…</span> pts</span>
+      <button class="btn btn-ghost btn-sm" id="signout-btn">Sign out</button>
+    </div>
+  </nav>
+
+  <main id="app" style="display:none">
+    <div class="dash-wrap">
+      <div class="dash-header">
+        <div class="dash-welcome">
+          <div class="avatar" id="user-avatar">?</div>
+          <div>
+            <h1 id="welcome-msg">Welcome back</h1>
+            <p id="welcome-sub" style="color:var(--muted);font-size:0.88rem"></p>
+          </div>
+        </div>
+        <div class="points-pill">⚡ <span id="pts-display">0</span> points</div>
+      </div>
+
+      <div class="tabs" role="tablist">
+        <button class="tab-btn active" role="tab" onclick="switchTab('earn')">Earn Points</button>
+        <button class="tab-btn" role="tab" onclick="switchTab('post')">Post a Task</button>
+        <button class="tab-btn" role="tab" onclick="switchTab('my-tasks')">My Tasks</button>
+        <button class="tab-btn" role="tab" onclick="switchTab('profile')">Profile</button>
+      </div>
+
+      <!-- ===== EARN TAB ===== -->
+      <div id="tab-earn" class="tab-panel">
+        <p class="tab-hint">Complete a task below and click <strong>Mark done</strong> to earn points. On your honour — complete the task first!</p>
+        <div id="earn-feed" class="task-feed"></div>
+      </div>
+
+      <!-- ===== POST TAB ===== -->
+      <div id="tab-post" class="tab-panel" style="display:none">
+        <div class="card card-pad" style="max-width:560px">
+          <h2 style="font-size:1.1rem;margin-bottom:20px">Post a new task</h2>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="p-platform">Platform</label>
+              <select id="p-platform">
+                <option value="tiktok">TikTok</option>
+                <option value="instagram">Instagram</option>
+                <option value="youtube">YouTube</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="p-type">What to do</label>
+              <select id="p-type">
+                <option value="follow">Follow</option>
+                <option value="like">Like</option>
+                <option value="view">View</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="p-target">Your username or link</label>
+            <input type="text" id="p-target" placeholder="e.g. @yourusername or https://..."/>
+          </div>
+          <div class="form-group">
+            <label for="p-desc">Instructions <span style="color:var(--muted2);font-weight:400;text-transform:none;font-size:0.8rem">(optional)</span></label>
+            <textarea id="p-desc" placeholder="e.g. Follow my TikTok @handle — I post daily gaming content"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="p-points">Points to offer per completion</label>
+            <select id="p-points">
+              <option value="10">10 points</option>
+              <option value="20">20 points</option>
+              <option value="30">30 points</option>
+              <option value="50">50 points</option>
+            </select>
+          </div>
+          <div class="post-cost-row">
+            This will cost <strong id="cost-preview" style="color:var(--orange)">10</strong> points from your balance
+            (you have <strong id="balance-preview" style="color:var(--orange)">0</strong>)
+          </div>
+          <div class="error-msg" id="post-err"></div>
+          <button class="btn btn-primary" id="post-btn" onclick="postTask()">Post task</button>
+        </div>
+      </div>
+
+      <!-- ===== MY TASKS TAB ===== -->
+      <div id="tab-my-tasks" class="tab-panel" style="display:none">
+        <p class="tab-hint">Tasks you've posted. Delete a task to stop it from appearing in the earn feed.</p>
+        <div id="my-tasks-feed" class="task-feed"></div>
+      </div>
+
+      <!-- ===== PROFILE TAB ===== -->
+      <div id="tab-profile" class="tab-panel" style="display:none">
+        <div class="profile-wrap">
+          <div class="profile-header">
+            <div class="avatar avatar-lg" id="profile-avatar">?</div>
+            <div>
+              <div class="profile-name" id="profile-name">—</div>
+              <div class="profile-email" id="profile-email">—</div>
+            </div>
+          </div>
+          <div class="stat-grid">
+            <div class="stat-box"><div class="stat-val" id="s-points">0</div><div class="stat-lbl">Points</div></div>
+            <div class="stat-box"><div class="stat-val" id="s-done">0</div><div class="stat-lbl">Tasks done</div></div>
+            <div class="stat-box"><div class="stat-val" id="s-posted">0</div><div class="stat-lbl">Tasks posted</div></div>
+          </div>
+          <div class="divider"></div>
+          <h3 style="font-size:0.95rem;margin-bottom:16px">Point history</h3>
+          <div id="ledger-feed"></div>
+          <div class="divider"></div>
+          <button class="btn btn-danger btn-sm" onclick="doSignOut()">Sign out</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Loading screen -->
+  <div id="loading-screen" style="display:flex;align-items:center;justify-content:center;min-height:80vh">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Confirm modal -->
+  <div class="modal-overlay" id="confirm-modal">
+    <div class="modal">
+      <h2>Mark task as done?</h2>
+      <p class="modal-sub" id="confirm-msg">Did you complete this task?</p>
+      <div class="alert alert-info" style="font-size:0.83rem">
+        Only mark done if you actually completed the task. This is an honour system.
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
+        <button class="btn btn-primary" id="confirm-btn" onclick="confirmDone()">Yes, I did it!</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabase, go, toast, esc, PLAT_EMOJI, PLAT_CLASS, TYPE_CLASS, TYPE_LABEL } from '/assets/js/shared.js';
+
+    let profile = null;
+    let pendingTaskId = null;
+    let pendingReward = 0;
+    let myCompletedIds = new Set();
+
+    // ---- INIT ----
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { go('/login/'); }
+    else { await init(session.user); }
+
+    async function init(user) {
+      try {
+        const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+        if (error) throw error;
+        profile = data;
+        renderUI();
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        loadEarnFeed();
+      } catch(e) {
+        toast('Failed to load profile: ' + e.message, 'error');
+      }
+    }
+
+    function renderUI() {
+      const initials = (profile.username || 'U')[0].toUpperCase();
+      document.getElementById('user-avatar').textContent = initials;
+      document.getElementById('profile-avatar').textContent = initials;
+      document.getElementById('welcome-msg').textContent = `Welcome back, ${profile.username}`;
+      document.getElementById('welcome-sub').textContent = `You have ${profile.points} points available`;
+      document.getElementById('nav-pts').textContent = profile.points;
+      document.getElementById('pts-display').textContent = profile.points;
+      document.getElementById('balance-preview').textContent = profile.points;
+      document.getElementById('profile-name').textContent = profile.username;
+      document.getElementById('profile-email').textContent = supabase.auth.getUser ? (await supabase.auth.getUser()).data.user?.email || '' : '';
+      document.getElementById('s-points').textContent = profile.points;
+      document.getElementById('s-done').textContent = profile.tasks_completed;
+      document.getElementById('s-posted').textContent = profile.tasks_posted;
+    }
+
+    function updatePoints(newPts) {
+      profile.points = newPts;
+      document.getElementById('nav-pts').textContent = newPts;
+      document.getElementById('pts-display').textContent = newPts;
+      document.getElementById('balance-preview').textContent = newPts;
+      document.getElementById('s-points').textContent = newPts;
+      document.getElementById('welcome-sub').textContent = `You have ${newPts} points available`;
+    }
+
+    // ---- TABS ----
+    window.switchTab = (tab) => {
+      const tabs = ['earn','post','my-tasks','profile'];
+      document.querySelectorAll('.tab-btn').forEach((btn, i) => btn.classList.toggle('active', tabs[i] === tab));
+      tabs.forEach(t => document.getElementById('tab-'+t).style.display = t === tab ? 'block' : 'none');
+      if (tab === 'earn') loadEarnFeed();
+      if (tab === 'my-tasks') loadMyTasks();
+      if (tab === 'profile') loadLedger();
+    };
+
+    // ---- EARN FEED ----
+    async function loadEarnFeed() {
+      const feed = document.getElementById('earn-feed');
+      feed.innerHTML = '<div class="spinner"></div>';
+      try {
+        // Get all tasks not owned by me
+        const { data: tasks, error } = await supabase
+          .from('tasks')
+          .select('*')
+          .eq('is_active', true)
+          .neq('owner_id', profile.id)
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+
+        // Get my completions
+        const { data: done } = await supabase
+          .from('completions')
+          .select('task_id')
+          .eq('user_id', profile.id);
+        myCompletedIds = new Set((done || []).map(d => d.task_id));
+
+        if (!tasks || tasks.length === 0) {
+          feed.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>No tasks yet. Be the first to post one!</p></div>`;
+          return;
+        }
+        feed.innerHTML = '';
+        tasks.forEach(t => feed.appendChild(buildTaskCard(t, false)));
+      } catch(e) {
+        feed.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>${esc(e.message)}</p></div>`;
+      }
+    }
+
+    function buildTaskCard(t, isOwn) {
+      const done = myCompletedIds.has(t.id);
+      const card = document.createElement('div');
+      card.className = 'task-card';
+      card.innerHTML = `
+        <div class="task-plat-icon ${PLAT_CLASS[t.platform]}">${PLAT_EMOJI[t.platform] || '🌐'}</div>
+        <div class="task-info">
+          <h4>${esc(t.target)}</h4>
+          <p>${esc(t.description || `${TYPE_LABEL[t.type]} on ${t.platform}`)}</p>
+        </div>
+        <div class="task-actions">
+          <span class="type-badge type-${t.type}">${TYPE_LABEL[t.type]}</span>
+          <span class="pts-badge">+${t.points_reward} pts</span>
+          ${isOwn
+            ? `<button class="btn btn-danger btn-sm" onclick="window.deleteTask('${t.id}')">Delete</button>`
+            : done
+              ? `<button class="btn btn-ghost btn-sm" disabled>Done ✓</button>`
+              : `<button class="btn btn-primary btn-sm" onclick="window.openConfirm('${t.id}', ${t.points_reward}, '${esc(t.target)}')">Mark done</button>`
+          }
+        </div>
+      `;
+      return card;
+    }
+
+    // ---- POST TASK ----
+    document.getElementById('p-points').addEventListener('change', e => {
+      document.getElementById('cost-preview').textContent = e.target.value;
+    });
+
+    window.postTask = async () => {
+      const platform = document.getElementById('p-platform').value;
+      const type = document.getElementById('p-type').value;
+      const target = document.getElementById('p-target').value.trim();
+      const desc = document.getElementById('p-desc').value.trim();
+      const points = parseInt(document.getElementById('p-points').value);
+      const errEl = document.getElementById('post-err');
+      const btn = document.getElementById('post-btn');
+      errEl.textContent = '';
+
+      if (!target) { errEl.textContent = 'Please enter your username or link.'; return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Posting…';
+
+      const { data, error } = await supabase.rpc('post_task', {
+        p_platform: platform, p_type: type, p_target: target,
+        p_description: desc || null, p_points_reward: points
+      });
+
+      btn.disabled = false;
+      btn.textContent = 'Post task';
+
+      if (error || data?.error) {
+        errEl.textContent = data?.error || error.message;
+        return;
+      }
+
+      // Refresh profile points
+      const { data: p } = await supabase.from('profiles').select('points,tasks_posted').eq('id', profile.id).single();
+      if (p) {
+        profile.points = p.points;
+        profile.tasks_posted = p.tasks_posted;
+        updatePoints(p.points);
+        document.getElementById('s-posted').textContent = p.tasks_posted;
+      }
+
+      document.getElementById('p-target').value = '';
+      document.getElementById('p-desc').value = '';
+      toast('Task posted! 🎉', 'success');
+    };
+
+    // ---- MY TASKS ----
+    async function loadMyTasks() {
+      const feed = document.getElementById('my-tasks-feed');
+      feed.innerHTML = '<div class="spinner"></div>';
+      try {
+        const { data: tasks, error } = await supabase
+          .from('tasks')
+          .select('*')
+          .eq('owner_id', profile.id)
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        if (!tasks || tasks.length === 0) {
+          feed.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>You haven't posted any tasks yet.</p></div>`;
+          return;
+        }
+        feed.innerHTML = '';
+        tasks.forEach(t => feed.appendChild(buildTaskCard(t, true)));
+      } catch(e) {
+        feed.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>${esc(e.message)}</p></div>`;
+      }
+    }
+
+    window.deleteTask = async (taskId) => {
+      const { error } = await supabase.from('tasks').delete().eq('id', taskId).eq('owner_id', profile.id);
+      if (error) { toast(error.message, 'error'); return; }
+      toast('Task deleted.', '');
+      loadMyTasks();
+    };
+
+    // ---- CONFIRM COMPLETE ----
+    window.openConfirm = (taskId, reward, target) => {
+      pendingTaskId = taskId;
+      pendingReward = reward;
+      document.getElementById('confirm-msg').textContent = `Did you complete the task for "${target}"? You'll earn ${reward} points.`;
+      document.getElementById('confirm-modal').classList.add('open');
+    };
+    window.closeConfirm = () => {
+      document.getElementById('confirm-modal').classList.remove('open');
+      pendingTaskId = null;
+    };
+    window.confirmDone = async () => {
+      if (!pendingTaskId) return;
+      const btn = document.getElementById('confirm-btn');
+      btn.disabled = true;
+      btn.textContent = 'Processing…';
+
+      const { data, error } = await supabase.rpc('complete_task', { p_task_id: pendingTaskId });
+
+      btn.disabled = false;
+      btn.textContent = 'Yes, I did it!';
+      closeConfirm();
+
+      if (error || data?.error) {
+        toast(data?.error || error.message, 'error');
+        return;
+      }
+
+      // Refresh points from DB (source of truth)
+      const { data: p } = await supabase.from('profiles').select('points,tasks_completed').eq('id', profile.id).single();
+      if (p) {
+        profile.points = p.points;
+        profile.tasks_completed = p.tasks_completed;
+        updatePoints(p.points);
+        document.getElementById('s-done').textContent = p.tasks_completed;
+      }
+
+      toast(`+${pendingReward} points earned! 🎉`, 'success');
+      myCompletedIds.add(pendingTaskId);
+      loadEarnFeed();
+    };
+
+    // ---- LEDGER ----
+    async function loadLedger() {
+      const feed = document.getElementById('ledger-feed');
+      feed.innerHTML = '<div class="spinner" style="margin:20px auto"></div>';
+      const { data, error } = await supabase
+        .from('point_ledger')
+        .select('*')
+        .eq('user_id', profile.id)
+        .order('created_at', { ascending: false })
+        .limit(30);
+      if (error || !data) { feed.innerHTML = '<p style="color:var(--muted);font-size:0.85rem">Could not load history.</p>'; return; }
+      if (data.length === 0) { feed.innerHTML = '<p style="color:var(--muted);font-size:0.85rem">No history yet.</p>'; return; }
+      const reasonLabel = { task_completion: 'Completed a task', task_posted: 'Posted a task', signup_bonus: 'Signup bonus' };
+      feed.innerHTML = data.map(entry => `
+        <div class="ledger-row">
+          <span class="ledger-reason">${reasonLabel[entry.reason] || entry.reason}</span>
+          <span class="ledger-delta ${entry.delta > 0 ? 'delta-pos' : 'delta-neg'}">${entry.delta > 0 ? '+' : ''}${entry.delta}</span>
+        </div>
+      `).join('');
+    }
+
+    // ---- SIGN OUT ----
+    window.doSignOut = async () => {
+      await supabase.auth.signOut();
+      go('/');
+    };
+    document.getElementById('signout-btn').addEventListener('click', window.doSignOut);
+
+    // Fix: async profile email
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user) document.getElementById('profile-email').textContent = data.user.email;
+    });
+  </script>
+</body>
+</html>

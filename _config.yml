@@ -1,0 +1,22 @@
+title: Next Boost
+description: Grow your social with real engagement
+url: "https://boost.nexosites.xyz"
+baseurl: ""
+
+# Tell Jekyll not to process these
+exclude:
+  - README.md
+  - LICENSE
+
+# Pass through all assets
+include:
+  - assets
+  - login
+  - signup
+  - dashboard
+  - reset-password
+  - confirm-email
+  - "404"
+
+# Disable Jekyll processing for plain HTML
+plugins: []

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign Up Free — Next Boost</title>
+  <meta name="description" content="Create your free Next Boost account and start growing your TikTok, Instagram, and YouTube following today."/>
+  <link rel="canonical" href="https://boost.nexosites.xyz/signup/"/>
+  <meta name="robots" content="index, follow"/>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
+  <link rel="stylesheet" href="/assets/css/main.css"/>
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-logo"><a href="/"><img src="/assets/img/logo.svg" alt="Next Boost"/></a></div>
+      <h1>Create your account</h1>
+      <p class="auth-sub">Free to join. Get 100 points just for signing up.</p>
+
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="yourcreatorname" autocomplete="username" maxlength="30"/>
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="you@email.com" autocomplete="email"/>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="At least 6 characters" autocomplete="new-password"/>
+      </div>
+      <div class="error-msg" id="err"></div>
+      <button class="btn btn-primary btn-full" id="signup-btn" onclick="doSignup()">Create account</button>
+      <div class="auth-footer">
+        Already have an account? <a href="/login/">Log in</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success state (shown after email sent) -->
+  <div id="success-screen" style="display:none" class="auth-page">
+    <div class="auth-card" style="text-align:center">
+      <div style="font-size:3rem;margin-bottom:20px">📬</div>
+      <h1>Check your email</h1>
+      <p class="auth-sub" id="success-msg">We sent a confirmation link to your email. Click it to activate your account.</p>
+      <a href="/login/" class="btn btn-ghost btn-full" style="margin-top:16px">Back to login</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabase, go } from '/assets/js/shared.js';
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) go('/dashboard/');
+
+    window.doSignup = async () => {
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const errEl = document.getElementById('err');
+      const btn = document.getElementById('signup-btn');
+      errEl.textContent = '';
+
+      if (!username || !email || !password) { errEl.textContent = 'Please fill in all fields.'; return; }
+      if (username.length < 3) { errEl.textContent = 'Username must be at least 3 characters.'; return; }
+      if (!/^[a-zA-Z0-9_]+$/.test(username)) { errEl.textContent = 'Username can only contain letters, numbers, and underscores.'; return; }
+      if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Creating account…';
+
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { username },
+          emailRedirectTo: 'https://boost.nexosites.xyz/confirm-email/'
+        }
+      });
+
+      if (error) {
+        const msgs = {
+          'User already registered': 'That email is already registered. Try logging in.',
+        };
+        errEl.textContent = msgs[error.message] || error.message;
+        btn.disabled = false;
+        btn.textContent = 'Create account';
+      } else {
+        document.querySelector('.auth-page').style.display = 'none';
+        document.getElementById('success-screen').style.display = 'flex';
+        document.getElementById('success-msg').textContent = `We sent a confirmation link to ${email}. Click it to activate your account and get your 100 free points.`;
+      }
+    };
+
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') window.doSignup(); });
+  </script>
+</body>
+</html>

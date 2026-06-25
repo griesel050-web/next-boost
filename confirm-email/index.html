@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Email Confirmed — Next Boost</title>
+  <meta name="robots" content="noindex"/>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
+  <link rel="stylesheet" href="/assets/css/main.css"/>
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-card" style="text-align:center" id="card">
+      <div class="spinner" style="margin:0 auto 24px"></div>
+      <h1>Confirming your account…</h1>
+      <p class="auth-sub">Please wait a moment.</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabase, go } from '/assets/js/shared.js';
+
+    // Supabase automatically processes the token from the URL fragment
+    // We just listen for the session to be established
+    const { data: { session }, error } = await supabase.auth.getSession();
+
+    const card = document.getElementById('card');
+
+    if (session) {
+      card.innerHTML = `
+        <div style="font-size:3rem;margin-bottom:20px">🎉</div>
+        <h1>Email confirmed!</h1>
+        <p class="auth-sub">Your account is active. You've got 100 free points to get started.</p>
+        <a href="/dashboard/" class="btn btn-primary btn-full" style="margin-top:20px">Go to dashboard</a>
+      `;
+    } else {
+      // Wait for auth state change (token may still be processing from URL hash)
+      const timeout = setTimeout(() => {
+        card.innerHTML = `
+          <div style="font-size:2.5rem;margin-bottom:20px">⚠️</div>
+          <h1>Something went wrong</h1>
+          <p class="auth-sub">This link may have expired. Try signing up again or contact support.</p>
+          <a href="/signup/" class="btn btn-ghost btn-full" style="margin-top:20px">Back to sign up</a>
+        `;
+      }, 5000);
+
+      supabase.auth.onAuthStateChange((event, sess) => {
+        clearTimeout(timeout);
+        if (event === 'SIGNED_IN' && sess) {
+          card.innerHTML = `
+            <div style="font-size:3rem;margin-bottom:20px">🎉</div>
+            <h1>Email confirmed!</h1>
+            <p class="auth-sub">Your account is active. You've got 100 free points to get started.</p>
+            <a href="/dashboard/" class="btn btn-primary btn-full" style="margin-top:20px">Go to dashboard</a>
+          `;
+        }
+      });
+    }
+  </script>
+</body>
+</html>
