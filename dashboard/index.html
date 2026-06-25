@@ -53,9 +53,11 @@
             <button class="filter-btn" onclick="setFilter('tiktok',this)">🎵 TikTok</button>
             <button class="filter-btn" onclick="setFilter('instagram',this)">📸 Instagram</button>
             <button class="filter-btn" onclick="setFilter('youtube',this)">▶️ YouTube</button>
+            <button class="filter-btn" onclick="setFilter('discord',this)">💬 Discord</button>
             <button class="filter-btn" onclick="setFilter('follow',this)">Follow</button>
             <button class="filter-btn" onclick="setFilter('like',this)">Like</button>
             <button class="filter-btn" onclick="setFilter('view',this)">View</button>
+            <button class="filter-btn" onclick="setFilter('join',this)">Join</button>
           </div>
         </div>
         <div id="earn-feed" class="task-feed"></div>
@@ -73,6 +75,7 @@
                 <option value="tiktok">TikTok</option>
                 <option value="instagram">Instagram</option>
                 <option value="youtube">YouTube</option>
+                <option value="discord">Discord</option>
               </select>
             </div>
             <div class="form-group">
@@ -231,6 +234,13 @@
       tiktok:    { hosts:['tiktok.com','vm.tiktok.com','vt.tiktok.com'], placeholder:'https://www.tiktok.com/@username', hint:'Must be a tiktok.com URL' },
       instagram: { hosts:['instagram.com','instagr.am'], placeholder:'https://www.instagram.com/username/', hint:'Must be an instagram.com URL' },
       youtube:   { hosts:['youtube.com','youtu.be','m.youtube.com'], placeholder:'https://www.youtube.com/@channel', hint:'Must be a youtube.com or youtu.be URL' },
+      discord:   { hosts:['discord.gg','discord.com'], placeholder:'https://discord.gg/yourserver', hint:'Must be a discord.gg or discord.com invite URL' },
+    };
+    const PLATFORM_TYPES = {
+      tiktok:    ['follow','like','view'],
+      instagram: ['follow','like','view'],
+      youtube:   ['follow','like','view'],
+      discord:   ['join'],
     };
     function validateUrl(url, platform) {
       try {
@@ -241,6 +251,11 @@
     window.onPlatformChange = () => {
       const p = document.getElementById('p-platform').value;
       document.getElementById('p-url').placeholder = PLATFORM_RULES[p].placeholder;
+      // Update type dropdown based on platform
+      const typeSelect = document.getElementById('p-type');
+      const types = PLATFORM_TYPES[p];
+      const typeLabels = { follow:'Follow', like:'Like', view:'View', join:'Join Server' };
+      typeSelect.innerHTML = types.map(t=>`<option value="${t}">${typeLabels[t]}</option>`).join('');
       onUrlInput();
     };
     window.onUrlInput = () => {
@@ -448,8 +463,12 @@
       const { data: task } = await supabase.from('tasks').select('*').eq('id',taskId).single();
       if (!task) { toast('Task not found','error'); return; }
       activeTaskUrl = task.target;
-      document.getElementById('tm-title').textContent = `${TYPE_LABEL[task.type]} on ${task.platform}`;
+      const isDiscord = task.platform === 'discord';
+      document.getElementById('tm-title').textContent = isDiscord ? 'Join Discord Server' : `${TYPE_LABEL[task.type]} on ${task.platform}`;
       document.getElementById('tm-sub').textContent = task.description || task.target;
+      // Update step text for Discord
+      document.querySelector('#fs-2 strong').textContent = isDiscord ? 'Stay in the server for 30s' : 'Stay for 30 seconds';
+      document.querySelector('#fs-2 p').textContent = isDiscord ? 'Join the server and stay for the timer' : 'Complete the action while the timer runs. Don\'t close this tab.';
 
       const { data, error } = await supabase.rpc('start_task',{ p_task_id: taskId });
       if (error||data?.error) { toast(data?.error||error.message,'error'); return; }
@@ -501,7 +520,9 @@
       document.getElementById('tm-timer-row').style.display = 'block';
       setFlowStep(2);
       showTimerRunning(30);
-      setupVisibilityDetection();
+      // Small delay before attaching listener so the window.open focus-loss
+      // is fully processed and won't trigger a false reset
+      setTimeout(setupVisibilityDetection, 800);
     };
 
     function showTimerRunning(remaining) {
@@ -529,8 +550,18 @@
 
     function setupVisibilityDetection() {
       removeVisibilityHandler();
+      // Ignore the FIRST hide event — it fires immediately when window.open()
+      // steals focus. We only care about the user manually switching away.
+      let initialHideIgnored = false;
+
       visibilityHandler = () => {
         if (document.hidden) {
+          if (!initialHideIgnored) {
+            // This is the tab-open focus-loss — skip it
+            initialHideIgnored = true;
+            return;
+          }
+          // User genuinely switched away — check how long they've been on timer
           const elapsed = (Date.now() - tabOpenedAt) / 1000;
           if (elapsed < 28) {
             timerAborted = true;
@@ -545,6 +576,9 @@
             setFlowStep(1);
             timerAborted = false;
           }
+        } else {
+          // Tab became visible again — mark initial hide as handled
+          initialHideIgnored = true;
         }
       };
       document.addEventListener('visibilitychange', visibilityHandler);

@@ -31,6 +31,7 @@
   --tiktok:    #ff0050;
   --instagram: #e1306c;
   --youtube:   #ff0000;
+  --discord:   #5865F2;
 
   --radius-sm: 8px;
   --radius:    14px;
@@ -232,9 +233,10 @@ h1, h2, h3, h4, h5 { font-family: 'Space Grotesk', sans-serif; line-height: 1.2;
   font-size: 1.3rem;
   flex-shrink: 0;
 }
-.plat-tiktok  { background: rgba(255,0,80,0.12); }
+.plat-tiktok    { background: rgba(255,0,80,0.12); }
 .plat-instagram { background: rgba(225,48,108,0.12); }
-.plat-youtube { background: rgba(255,0,0,0.12); }
+.plat-youtube   { background: rgba(255,0,0,0.10); }
+.plat-discord   { background: rgba(88,101,242,0.12); }
 .task-info { flex: 1; min-width: 0; }
 .task-info h4 { font-size: 0.95rem; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .task-info p { font-size: 0.82rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -250,6 +252,7 @@ h1, h2, h3, h4, h5 { font-family: 'Space Grotesk', sans-serif; line-height: 1.2;
 .type-follow { background: rgba(232,98,26,0.15); color: var(--orange-lt); }
 .type-like   { background: rgba(240,160,48,0.15); color: var(--amber); }
 .type-view   { background: rgba(61,186,111,0.15); color: var(--green); }
+.type-join   { background: rgba(88,101,242,0.15); color: #7c87f5; }
 .pts-badge {
   background: var(--surface2);
   border: 1px solid var(--border2);
