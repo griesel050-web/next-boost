@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin — Next Boost</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
+  <link rel="stylesheet" href="/assets/css/main.css"/>
+  <link rel="stylesheet" href="/assets/css/admin.css"/>
+</head>
+<body>
+  <nav class="nav">
+    <a class="nav-logo" href="/"><img src="/assets/img/logo.svg" alt="Next Boost"/></a>
+    <div class="nav-links">
+      <span class="admin-badge">⚡ Admin Panel</span>
+      <a href="/dashboard/" class="btn btn-ghost btn-sm">Dashboard</a>
+    </div>
+  </nav>
+
+  <div id="loading-screen" style="display:flex;align-items:center;justify-content:center;min-height:80vh">
+    <div class="spinner"></div>
+  </div>
+
+  <div id="app" style="display:none">
+    <div class="admin-wrap">
+
+      <!-- SIDEBAR -->
+      <aside class="admin-sidebar">
+        <nav class="sidebar-nav">
+          <button class="sidebar-btn active" onclick="adminTab('overview')">📊 Overview</button>
+          <button class="sidebar-btn" onclick="adminTab('users')">👥 Users</button>
+          <button class="sidebar-btn" onclick="adminTab('tasks')">📋 Tasks</button>
+          <button class="sidebar-btn" onclick="adminTab('reports')">🚩 Reports <span class="reports-count" id="reports-count" style="display:none">0</span></button>
+        </nav>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <main class="admin-main">
+
+        <!-- OVERVIEW -->
+        <div id="panel-overview" class="admin-panel active">
+          <h1 class="admin-title">Overview</h1>
+          <div class="stats-grid" id="stats-grid">
+            <div class="spinner"></div>
+          </div>
+        </div>
+
+        <!-- USERS -->
+        <div id="panel-users" class="admin-panel">
+          <div class="panel-header">
+            <h1 class="admin-title">Users</h1>
+            <div class="search-box">
+              <input type="text" id="user-search" placeholder="Search username…" oninput="debounceUserSearch()"/>
+            </div>
+          </div>
+          <div id="users-table-wrap">
+            <div class="spinner"></div>
+          </div>
+          <div class="load-more-row" id="users-load-more" style="display:none">
+            <button class="btn btn-ghost" onclick="loadMoreUsers()">Load more</button>
+          </div>
+        </div>
+
+        <!-- TASKS -->
+        <div id="panel-tasks" class="admin-panel">
+          <div class="panel-header">
+            <h1 class="admin-title">All Tasks</h1>
+            <div class="search-box">
+              <input type="text" id="task-search" placeholder="Search target or username…" oninput="debounceTaskSearch()"/>
+            </div>
+          </div>
+          <div id="tasks-table-wrap">
+            <div class="spinner"></div>
+          </div>
+          <div class="load-more-row" id="tasks-load-more" style="display:none">
+            <button class="btn btn-ghost" onclick="loadMoreTasks()">Load more</button>
+          </div>
+        </div>
+
+        <!-- REPORTS -->
+        <div id="panel-reports" class="admin-panel">
+          <h1 class="admin-title">Reports</h1>
+          <div id="reports-table-wrap">
+            <div class="spinner"></div>
+          </div>
+          <div class="load-more-row" id="reports-load-more" style="display:none">
+            <button class="btn btn-ghost" onclick="loadMoreReports()">Load more</button>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- EDIT POINTS MODAL -->
+  <div class="modal-overlay" id="points-modal">
+    <div class="modal" style="max-width:380px">
+      <h2>Edit points</h2>
+      <p class="modal-sub" id="points-modal-sub">Set new point balance for user</p>
+      <div class="form-group">
+        <label for="new-points">New point balance</label>
+        <input type="number" id="new-points" min="0" max="999999" placeholder="e.g. 500"/>
+      </div>
+      <div class="form-group">
+        <label for="points-reason">Reason (shown in ledger)</label>
+        <input type="text" id="points-reason" value="admin_adjustment" placeholder="admin_adjustment"/>
+      </div>
+      <div class="error-msg" id="points-err"></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closePointsModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmSetPoints()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BAN MODAL -->
+  <div class="modal-overlay" id="ban-modal">
+    <div class="modal" style="max-width:380px">
+      <h2>Ban user</h2>
+      <p class="modal-sub" id="ban-modal-sub">This will deactivate all their tasks.</p>
+      <div class="form-group">
+        <label for="ban-reason">Reason</label>
+        <input type="text" id="ban-reason" placeholder="e.g. Spam, fake tasks, abuse…"/>
+      </div>
+      <div class="error-msg" id="ban-err"></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeBanModal()">Cancel</button>
+        <button class="btn btn-danger" onclick="confirmBan()">Ban user</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabase, go, toast, esc } from '/assets/js/shared.js';
+
+    const PAGE = 20;
+    let usersOffset = 0, tasksOffset = 0, reportsOffset = 0;
+    let userSearchVal = '', taskSearchVal = '';
+    let editingUserId = null, editingUsername = '';
+    let userSearchTimer = null, taskSearchTimer = null;
+
+    // ---- AUTH CHECK ----
+    const { data:{ session } } = await supabase.auth.getSession();
+    if (!session) { go('/login/'); }
+
+    const { data: me } = await supabase.from('profiles').select('is_admin').eq('id', session.user.id).single();
+    if (!me?.is_admin) { go('/dashboard/'); }
+
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadOverview();
+
+    // ---- TABS ----
+    window.adminTab = (tab) => {
+      document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      document.getElementById('panel-'+tab).classList.add('active');
+      if (tab === 'overview') loadOverview();
+      if (tab === 'users') { usersOffset = 0; loadUsers(true); }
+      if (tab === 'tasks') { tasksOffset = 0; loadTasks(true); }
+      if (tab === 'reports') { reportsOffset = 0; loadReports(true); }
+    };
+
+    // ---- OVERVIEW ----
+    async function loadOverview() {
+      const grid = document.getElementById('stats-grid');
+      grid.innerHTML = '<div class="spinner"></div>';
+      const { data, error } = await supabase.rpc('admin_get_stats');
+      if (error) { grid.innerHTML = `<p style="color:var(--red)">${esc(error.message)}</p>`; return; }
+      const s = data;
+      const cards = [
+        { icon:'👥', label:'Total users',       val: s.total_users,       color:'var(--orange)' },
+        { icon:'🚫', label:'Banned users',       val: s.banned_users,      color:'var(--red)' },
+        { icon:'📋', label:'Active tasks',       val: s.active_tasks,      color:'var(--green)' },
+        { icon:'✅', label:'Total completions',  val: s.total_completions, color:'var(--amber)' },
+        { icon:'🚩', label:'Open reports',       val: s.open_reports,      color: s.open_reports > 0 ? 'var(--red)' : 'var(--muted)' },
+        { icon:'⚡', label:'Points in system',   val: s.points_in_system,  color:'var(--orange)' },
+      ];
+      grid.innerHTML = cards.map(c => `
+        <div class="stat-card">
+          <div class="stat-card-icon">${c.icon}</div>
+          <div class="stat-card-val" style="color:${c.color}">${Number(c.val).toLocaleString()}</div>
+          <div class="stat-card-lbl">${c.label}</div>
+        </div>`).join('');
+
+      // Update reports badge
+      if (s.open_reports > 0) {
+        const badge = document.getElementById('reports-count');
+        badge.textContent = s.open_reports;
+        badge.style.display = 'inline-flex';
+      }
+    }
+
+    // ---- USERS ----
+    async function loadUsers(reset = false) {
+      if (reset) { usersOffset = 0; document.getElementById('users-table-wrap').innerHTML = '<div class="spinner"></div>'; }
+      const { data, error } = await supabase.rpc('admin_get_users', { p_limit: PAGE, p_offset: usersOffset, p_search: userSearchVal || null });
+      if (error) { document.getElementById('users-table-wrap').innerHTML = `<p style="color:var(--red)">${esc(error.message)}</p>`; return; }
+      const users = data || [];
+      const wrap = document.getElementById('users-table-wrap');
+
+      if (reset) {
+        if (!users.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">👤</div><p>No users found.</p></div>'; return; }
+        wrap.innerHTML = `
+          <div class="admin-table">
+            <div class="admin-table-head">
+              <span>User</span><span>Points</span><span>Done</span><span>Tasks</span><span>Status</span><span>Actions</span>
+            </div>
+            <div id="users-rows"></div>
+          </div>`;
+      }
+
+      const rows = document.getElementById('users-rows');
+      users.forEach(u => {
+        const row = document.createElement('div');
+        row.className = 'admin-table-row' + (u.is_banned ? ' row-banned' : '');
+        row.innerHTML = `
+          <span class="user-cell">
+            <div class="user-mini-avatar" style="background:${u.is_banned?'var(--red)':'var(--orange)'}">${(u.username||'?')[0].toUpperCase()}</div>
+            <div>
+              <div class="user-name">${esc(u.display_name||u.username)}</div>
+              <div class="user-meta">@${esc(u.username)} · joined ${new Date(u.created_at).toLocaleDateString()}</div>
+            </div>
+          </span>
+          <span><strong>${u.points}</strong></span>
+          <span>${u.tasks_completed}</span>
+          <span>${u.active_tasks} active</span>
+          <span>${u.is_admin ? '<span class="badge-admin">Admin</span>' : u.is_banned ? '<span class="badge-banned">Banned</span>' : '<span class="badge-ok">Active</span>'}</span>
+          <span class="action-btns">
+            <button class="btn btn-ghost btn-sm" onclick="window.openPointsModal('${u.id}','${esc(u.username)}',${u.points})">Edit pts</button>
+            ${!u.is_admin ? (u.is_banned
+              ? `<button class="btn btn-sm" style="background:rgba(61,186,111,0.15);color:var(--green)" onclick="window.unbanUser('${u.id}','${esc(u.username)}')">Unban</button>`
+              : `<button class="btn btn-danger btn-sm" onclick="window.openBanModal('${u.id}','${esc(u.username)}')">Ban</button>`
+            ) : ''}
+          </span>`;
+        rows.appendChild(row);
+      });
+
+      usersOffset += users.length;
+      document.getElementById('users-load-more').style.display = users.length === PAGE ? 'flex' : 'none';
+    }
+
+    window.loadMoreUsers = () => loadUsers(false);
+
+    window.debounceUserSearch = () => {
+      clearTimeout(userSearchTimer);
+      userSearchTimer = setTimeout(() => {
+        userSearchVal = document.getElementById('user-search').value.trim();
+        loadUsers(true);
+      }, 400);
+    };
+
+    // ---- TASKS ----
+    async function loadTasks(reset = false) {
+      if (reset) { tasksOffset = 0; document.getElementById('tasks-table-wrap').innerHTML = '<div class="spinner"></div>'; }
+      const { data, error } = await supabase.rpc('admin_get_tasks', { p_limit: PAGE, p_offset: tasksOffset, p_search: taskSearchVal || null });
+      if (error) { document.getElementById('tasks-table-wrap').innerHTML = `<p style="color:var(--red)">${esc(error.message)}</p>`; return; }
+      const tasks = data || [];
+      const wrap = document.getElementById('tasks-table-wrap');
+
+      if (reset) {
+        if (!tasks.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>No tasks found.</p></div>'; return; }
+        wrap.innerHTML = `
+          <div class="admin-table">
+            <div class="admin-table-head">
+              <span>Target / Owner</span><span>Platform</span><span>Progress</span><span>Pts</span><span>Status</span><span>Action</span>
+            </div>
+            <div id="tasks-rows"></div>
+          </div>`;
+      }
+
+      const PLAT = { tiktok:'🎵', instagram:'📸', youtube:'▶️', discord:'💬' };
+      const rows = document.getElementById('tasks-rows');
+      tasks.forEach(t => {
+        const row = document.createElement('div');
+        row.className = 'admin-table-row';
+        row.id = 'task-row-' + t.id;
+        const pct = Math.round(t.completions_count / t.max_completions * 100);
+        row.innerHTML = `
+          <span>
+            <div class="task-target">${esc(t.target)}</div>
+            <div class="user-meta">by @${esc(t.owner_username)}</div>
+          </span>
+          <span>${PLAT[t.platform]||'🌐'} ${t.platform} · ${t.type}</span>
+          <span>
+            <div class="mini-progress"><div class="mini-progress-bar" style="width:${pct}%"></div></div>
+            <div class="user-meta">${t.completions_count}/${t.max_completions}</div>
+          </span>
+          <span>${t.points_reward} pts</span>
+          <span>${t.is_active ? '<span class="badge-ok">Active</span>' : '<span class="badge-banned">Closed</span>'}</span>
+          <span>
+            <button class="btn btn-danger btn-sm" onclick="window.adminDeleteTask('${t.id}')">Delete</button>
+          </span>`;
+        rows.appendChild(row);
+      });
+
+      tasksOffset += tasks.length;
+      document.getElementById('tasks-load-more').style.display = tasks.length === PAGE ? 'flex' : 'none';
+    }
+
+    window.loadMoreTasks = () => loadTasks(false);
+
+    window.debounceTaskSearch = () => {
+      clearTimeout(taskSearchTimer);
+      taskSearchTimer = setTimeout(() => {
+        taskSearchVal = document.getElementById('task-search').value.trim();
+        loadTasks(true);
+      }, 400);
+    };
+
+    // ---- REPORTS ----
+    async function loadReports(reset = false) {
+      if (reset) { reportsOffset = 0; document.getElementById('reports-table-wrap').innerHTML = '<div class="spinner"></div>'; }
+      const { data, error } = await supabase.rpc('admin_get_reports', { p_limit: PAGE, p_offset: reportsOffset });
+      if (error) { document.getElementById('reports-table-wrap').innerHTML = `<p style="color:var(--red)">${esc(error.message)}</p>`; return; }
+      const reports = data || [];
+      const wrap = document.getElementById('reports-table-wrap');
+
+      if (reset) {
+        if (!reports.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🚩</div><p>No reports. All clear!</p></div>'; return; }
+        wrap.innerHTML = `
+          <div class="admin-table">
+            <div class="admin-table-head">
+              <span>Task</span><span>Reason</span><span>Reporter</span><span>Actions</span>
+            </div>
+            <div id="reports-rows"></div>
+          </div>`;
+      }
+
+      const rows = document.getElementById('reports-rows');
+      reports.forEach(r => {
+        const row = document.createElement('div');
+        row.className = 'admin-table-row';
+        row.id = 'report-row-' + r.id;
+        const reasonLabels = { fake_task:'Fake task', spam:'Spam', wrong_platform:'Wrong platform', inappropriate:'Inappropriate', other:'Other' };
+        row.innerHTML = `
+          <span>
+            <div class="task-target">${esc(r.target)}</div>
+            <div class="user-meta">by @${esc(r.task_owner_username)} · ${r.is_active?'<span style="color:var(--green)">Active</span>':'<span style="color:var(--muted)">Closed</span>'}</div>
+          </span>
+          <span><span class="reason-badge">${reasonLabels[r.reason]||r.reason}</span></span>
+          <span>@${esc(r.reporter_username)}</span>
+          <span class="action-btns">
+            <button class="btn btn-danger btn-sm" onclick="window.adminDeleteTaskFromReport('${r.task_id}','${r.id}')">Delete task</button>
+            <button class="btn btn-ghost btn-sm" onclick="window.dismissReport('${r.id}')">Dismiss</button>
+          </span>`;
+        rows.appendChild(row);
+      });
+
+      reportsOffset += reports.length;
+      document.getElementById('reports-load-more').style.display = reports.length === PAGE ? 'flex' : 'none';
+    }
+
+    window.loadMoreReports = () => loadReports(false);
+
+    // ---- POINTS MODAL ----
+    window.openPointsModal = (userId, username, currentPts) => {
+      editingUserId = userId;
+      document.getElementById('points-modal-sub').textContent = `@${username} · current balance: ${currentPts} pts`;
+      document.getElementById('new-points').value = currentPts;
+      document.getElementById('points-reason').value = 'admin_adjustment';
+      document.getElementById('points-err').textContent = '';
+      document.getElementById('points-modal').classList.add('open');
+    };
+    window.closePointsModal = () => document.getElementById('points-modal').classList.remove('open');
+    window.confirmSetPoints = async () => {
+      const pts = parseInt(document.getElementById('new-points').value);
+      const reason = document.getElementById('points-reason').value.trim() || 'admin_adjustment';
+      if (isNaN(pts) || pts < 0) { document.getElementById('points-err').textContent = 'Enter a valid number.'; return; }
+      const { data, error } = await supabase.rpc('admin_set_points', { p_user_id: editingUserId, p_points: pts, p_reason: reason });
+      if (error || data?.error) { document.getElementById('points-err').textContent = data?.error || error.message; return; }
+      closePointsModal();
+      toast(`Points updated: ${data.old_points} → ${data.new_points}`, 'success');
+      loadUsers(true);
+    };
+
+    // ---- BAN MODAL ----
+    window.openBanModal = (userId, username) => {
+      editingUserId = userId;
+      editingUsername = username;
+      document.getElementById('ban-modal-sub').textContent = `Ban @${username}? This deactivates all their tasks.`;
+      document.getElementById('ban-reason').value = '';
+      document.getElementById('ban-err').textContent = '';
+      document.getElementById('ban-modal').classList.add('open');
+    };
+    window.closeBanModal = () => document.getElementById('ban-modal').classList.remove('open');
+    window.confirmBan = async () => {
+      const reason = document.getElementById('ban-reason').value.trim();
+      if (!reason) { document.getElementById('ban-err').textContent = 'Please enter a reason.'; return; }
+      const { data, error } = await supabase.rpc('admin_ban_user', { p_user_id: editingUserId, p_reason: reason });
+      if (error || data?.error) { document.getElementById('ban-err').textContent = data?.error || error.message; return; }
+      closeBanModal();
+      toast(`@${editingUsername} has been banned.`, 'success');
+      loadUsers(true);
+    };
+
+    window.unbanUser = async (userId, username) => {
+      if (!confirm(`Unban @${username}?`)) return;
+      const { data, error } = await supabase.rpc('admin_unban_user', { p_user_id: userId });
+      if (error || data?.error) { toast(data?.error || error.message, 'error'); return; }
+      toast(`@${username} has been unbanned.`, 'success');
+      loadUsers(true);
+    };
+
+    // ---- DELETE TASK ----
+    window.adminDeleteTask = async (taskId) => {
+      if (!confirm('Delete this task? Unused slot points will be refunded to the owner.')) return;
+      const { data, error } = await supabase.rpc('admin_delete_task', { p_task_id: taskId });
+      if (error || data?.error) { toast(data?.error || error.message, 'error'); return; }
+      toast(`Task deleted. ${data.refunded} pts refunded to owner.`, 'success');
+      document.getElementById('task-row-' + taskId)?.remove();
+    };
+
+    window.adminDeleteTaskFromReport = async (taskId, reportId) => {
+      if (!confirm('Delete this task and dismiss the report?')) return;
+      await supabase.rpc('admin_delete_task', { p_task_id: taskId });
+      await supabase.rpc('admin_dismiss_report', { p_report_id: reportId });
+      toast('Task deleted and report dismissed.', 'success');
+      document.getElementById('report-row-' + reportId)?.remove();
+    };
+
+    window.dismissReport = async (reportId) => {
+      const { data, error } = await supabase.rpc('admin_dismiss_report', { p_report_id: reportId });
+      if (error || data?.error) { toast(data?.error || error.message, 'error'); return; }
+      toast('Report dismissed.', '');
+      document.getElementById('report-row-' + reportId)?.remove();
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+/* ============================================================
+   NEXT BOOST — ADMIN CSS
+   ============================================================ */
+
+.admin-badge {
+  background: linear-gradient(135deg, var(--orange), var(--orange-dk));
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 4px 12px;
+  letter-spacing: 0.04em;
+}
+
+/* ---- LAYOUT ---- */
+.admin-wrap {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  min-height: calc(100vh - 64px);
+}
+@media(max-width:640px) {
+  .admin-wrap { grid-template-columns: 1fr; }
+  .admin-sidebar { display: flex; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--border); padding: 10px 16px; gap: 6px; }
+  .sidebar-nav { display: flex; flex-direction: row; gap: 6px; }
+  .sidebar-btn { white-space: nowrap; }
+}
+
+/* ---- SIDEBAR ---- */
+.admin-sidebar {
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  padding: 24px 12px;
+}
+.sidebar-nav { display: flex; flex-direction: column; gap: 4px; }
+.sidebar-btn {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 10px 14px;
+  border: none; border-radius: var(--radius-sm);
+  background: transparent; color: var(--muted);
+  font-size: 0.88rem; font-weight: 600;
+  font-family: 'Space Grotesk', sans-serif;
+  cursor: pointer; transition: all 0.16s;
+  text-align: left;
+}
+.sidebar-btn:hover { background: var(--surface2); color: var(--text); }
+.sidebar-btn.active { background: rgba(232,98,26,0.12); color: var(--orange); }
+.reports-count {
+  margin-left: auto;
+  background: var(--red); color: #fff;
+  font-size: 0.7rem; font-weight: 700;
+  border-radius: 10px; min-width: 18px; height: 18px;
+  display: inline-flex; align-items: center; justify-content: center; padding: 0 5px;
+}
+
+/* ---- MAIN ---- */
+.admin-main { padding: 32px 28px; }
+@media(max-width:640px) { .admin-main { padding: 20px 16px; } }
+.admin-panel { display: none; }
+.admin-panel.active { display: block; animation: fadeIn 0.18s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.admin-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 24px; }
+.panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.panel-header .admin-title { margin-bottom: 0; }
+.search-box input {
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: var(--radius-sm); padding: 9px 14px;
+  color: var(--text); font-size: 0.88rem; font-family: inherit;
+  width: 220px; outline: none; transition: border-color 0.18s;
+}
+.search-box input:focus { border-color: var(--orange); }
+
+/* ---- OVERVIEW STATS ---- */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; }
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px 20px; text-align: center;
+  transition: border-color 0.18s, transform 0.18s;
+}
+.stat-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.stat-card-icon { font-size: 1.8rem; margin-bottom: 10px; }
+.stat-card-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.9rem; font-weight: 700; line-height: 1; margin-bottom: 6px; }
+.stat-card-lbl { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* ---- TABLE ---- */
+.admin-table { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.admin-table-head {
+  display: grid; grid-template-columns: 2.5fr 1fr 1fr 1fr 1fr 1.5fr;
+  padding: 10px 16px; background: var(--surface2);
+  font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--muted);
+}
+.admin-table-row {
+  display: grid; grid-template-columns: 2.5fr 1fr 1fr 1fr 1fr 1.5fr;
+  padding: 12px 16px; border-top: 1px solid var(--border);
+  font-size: 0.86rem; align-items: center; transition: background 0.15s;
+}
+.admin-table-row:hover { background: var(--surface2); }
+.row-banned { background: rgba(232,74,74,0.04); }
+.row-banned:hover { background: rgba(232,74,74,0.08); }
+
+/* Tasks table has different columns */
+#tasks-table-wrap .admin-table-head,
+#tasks-table-wrap .admin-table-row { grid-template-columns: 2fr 1.2fr 1.2fr 0.8fr 0.8fr 1fr; }
+
+/* Reports table */
+#reports-table-wrap .admin-table-head,
+#reports-table-wrap .admin-table-row { grid-template-columns: 2fr 1fr 1fr 1.5fr; }
+
+@media(max-width:768px) {
+  .admin-table-head { display: none; }
+  .admin-table-row { grid-template-columns: 1fr 1fr; gap: 8px; padding: 14px 16px; }
+  #tasks-table-wrap .admin-table-row,
+  #reports-table-wrap .admin-table-row { grid-template-columns: 1fr 1fr; }
+}
+
+/* ---- TABLE CELLS ---- */
+.user-cell { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.user-mini-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; font-weight: 700; color: #fff;
+  font-family: 'Space Grotesk', sans-serif; flex-shrink: 0;
+}
+.user-name { font-weight: 600; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-meta { font-size: 0.76rem; color: var(--muted); margin-top: 1px; }
+.task-target { font-size: 0.84rem; font-weight: 500; word-break: break-all; }
+.action-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* ---- BADGES ---- */
+.badge-ok     { background: rgba(61,186,111,0.15); color: var(--green); border-radius: 20px; padding: 3px 10px; font-size: 0.74rem; font-weight: 700; }
+.badge-banned { background: rgba(232,74,74,0.15); color: var(--red); border-radius: 20px; padding: 3px 10px; font-size: 0.74rem; font-weight: 700; }
+.badge-admin  { background: rgba(232,98,26,0.15); color: var(--orange); border-radius: 20px; padding: 3px 10px; font-size: 0.74rem; font-weight: 700; }
+.reason-badge { background: var(--surface2); border: 1px solid var(--border2); border-radius: 20px; padding: 3px 10px; font-size: 0.76rem; color: var(--muted); }
+
+/* ---- MINI PROGRESS ---- */
+.mini-progress { height: 4px; background: var(--surface3); border-radius: 4px; overflow: hidden; margin-bottom: 4px; }
+.mini-progress-bar { height: 100%; background: linear-gradient(90deg, var(--orange), var(--amber)); border-radius: 4px; transition: width 0.3s; }
+
+/* ---- LOAD MORE ---- */
+.load-more-row { display: flex; justify-content: center; padding: 20px 0 0; }

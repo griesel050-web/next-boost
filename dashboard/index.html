@@ -66,6 +66,7 @@
         <button class="tab-btn" onclick="switchTab('my-tasks')">My Tasks</button>
         <button class="tab-btn" onclick="switchTab('leaderboard')">🏆 Top</button>
         <button class="tab-btn" onclick="switchTab('profile')">Profile</button>
+        <button class="tab-btn" onclick="switchTab('settings')">⚙️</button>
       </div>
 
       <!-- EARN TAB -->
@@ -84,6 +85,9 @@
           </div>
         </div>
         <div id="earn-feed" class="task-feed"></div>
+        <div class="load-more-row" id="earn-load-more" style="display:none">
+          <button class="btn btn-ghost" onclick="loadMoreTasks()">Load more tasks</button>
+        </div>
       </div>
 
       <!-- COMPLETED TAB -->
@@ -169,6 +173,56 @@
       <!-- PROFILE TAB -->
       <div id="tab-profile" class="tab-panel" style="display:none">
         <div class="profile-wrap" id="profile-content"></div>
+      </div>
+
+      <!-- SETTINGS TAB -->
+      <div id="tab-settings" class="tab-panel" style="display:none">
+        <div class="settings-wrap">
+          <h2 style="font-size:1.1rem;margin-bottom:24px">Appearance</h2>
+          <div class="form-group">
+            <label>Theme</label>
+            <div class="theme-grid" id="theme-grid">
+              <button class="theme-swatch" data-theme="dark-orange" onclick="pickTheme('dark-orange',this)">
+                <div class="theme-preview" style="background:linear-gradient(135deg,#0e0b09,#E8621A)"></div>
+                <span>Dark Orange</span>
+              </button>
+              <button class="theme-swatch" data-theme="dark-purple" onclick="pickTheme('dark-purple',this)">
+                <div class="theme-preview" style="background:linear-gradient(135deg,#0d0a14,#7c3aed)"></div>
+                <span>Dark Purple</span>
+              </button>
+              <button class="theme-swatch" data-theme="dark-blue" onclick="pickTheme('dark-blue',this)">
+                <div class="theme-preview" style="background:linear-gradient(135deg,#090d14,#0ea5e9)"></div>
+                <span>Dark Blue</span>
+              </button>
+              <button class="theme-swatch" data-theme="dark-green" onclick="pickTheme('dark-green',this)">
+                <div class="theme-preview" style="background:linear-gradient(135deg,#090e0b,#22c55e)"></div>
+                <span>Dark Green</span>
+              </button>
+              <button class="theme-swatch" data-theme="midnight" onclick="pickTheme('midnight',this)">
+                <div class="theme-preview" style="background:linear-gradient(135deg,#06070a,#4a5568)"></div>
+                <span>Midnight</span>
+              </button>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <h2 style="font-size:1.1rem;margin-bottom:24px">Custom Accent Color</h2>
+          <div class="form-group">
+            <label>Pick any accent color</label>
+            <div style="display:flex;align-items:center;gap:12px">
+              <input type="color" id="accent-color-input" value="#E8621A" style="width:48px;height:40px;border:none;background:none;cursor:pointer;border-radius:8px"/>
+              <span id="accent-color-val" style="color:var(--muted);font-size:0.88rem">#E8621A</span>
+              <button class="btn btn-ghost btn-sm" onclick="resetAccent()">Reset</button>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <button class="btn btn-primary" onclick="saveSettings()">Save settings</button>
+          <div id="settings-msg" style="margin-top:12px;font-size:0.85rem"></div>
+          <div class="divider"></div>
+          <div id="admin-link-wrap" style="display:none">
+            <h2 style="font-size:1.1rem;margin-bottom:12px">Admin</h2>
+            <a href="/admin/" class="btn btn-ghost">Open Admin Panel →</a>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -290,6 +344,9 @@
     let reportingTaskId=null;
     let earnFilter='all';
     let allTasks=[], myStatusMap={};
+    const EARN_PAGE = 15;
+    let earnOffset = 0;
+    let pendingTheme = null, pendingAccent = null;
 
     // ---- INIT ----
     const { data:{ session } } = await supabase.auth.getSession();
@@ -305,6 +362,7 @@
         if (pRes.error) throw pRes.error;
         profile = pRes.data;
         userEmail = uRes.data?.user?.email||'';
+        applyTheme(profile.theme||'dark-orange', profile.accent_color||null);
         renderHeader();
         document.getElementById('loading-screen').style.display='none';
         document.getElementById('app').style.display='block';
@@ -312,6 +370,7 @@
         await loadEarnFeed();
         checkDailyBonus();
         loadNotifications();
+        if (profile.is_admin) document.getElementById('admin-link-wrap').style.display='block';
       } catch(e) {
         document.getElementById('loading-screen').innerHTML=`<div style="text-align:center;padding:40px"><div style="font-size:2rem;margin-bottom:12px">⚠️</div><p style="color:var(--red);margin-bottom:16px">${esc(e.message)}</p><button class="btn btn-ghost btn-sm" onclick="location.reload()">Retry</button></div>`;
       }
@@ -338,7 +397,7 @@
     }
 
     // ---- TABS ----
-    const TAB_NAMES=['earn','completed','post','my-tasks','leaderboard','profile'];
+    const TAB_NAMES=['earn','completed','post','my-tasks','leaderboard','profile','settings'];
     window.switchTab=(tab)=>{
       document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',TAB_NAMES[i]===tab));
       TAB_NAMES.forEach(t=>document.getElementById('tab-'+t).style.display=t===tab?'block':'none');
@@ -347,6 +406,7 @@
       if(tab==='my-tasks') loadMyTasks();
       if(tab==='leaderboard') loadLeaderboard();
       if(tab==='profile') renderOwnProfile();
+      if(tab==='settings') renderSettings();
     };
 
     // ---- NOTIFICATIONS ----
@@ -414,35 +474,57 @@
     };
 
     // ---- EARN FEED ----
-    async function loadEarnFeed() {
+    async function loadEarnFeed(reset=true) {
       const feed=document.getElementById('earn-feed');
-      feed.innerHTML='<div class="spinner"></div>';
+      if(reset){ earnOffset=0; allTasks=[]; feed.innerHTML='<div class="spinner"></div>'; }
       try {
-        const { data:tasks,error }=await supabase.from('tasks').select('*').eq('is_active',true).neq('owner_id',profile.id).order('created_at',{ascending:false});
-        if (error) throw error;
-        const { data:myC }=await supabase.from('completions').select('task_id,status').eq('user_id',profile.id);
-        myStatusMap=Object.fromEntries((myC||[]).map(c=>[c.task_id,c.status]));
-        allTasks=tasks||[];
-        renderEarnFeed();
+        const { data:tasks,error }=await supabase.from('tasks').select('*')
+          .eq('is_active',true).neq('owner_id',profile.id)
+          .order('created_at',{ascending:false})
+          .range(earnOffset,earnOffset+EARN_PAGE-1);
+        if(error) throw error;
+        if(reset){
+          const { data:myC }=await supabase.from('completions').select('task_id,status').eq('user_id',profile.id);
+          myStatusMap=Object.fromEntries((myC||[]).map(c=>[c.task_id,c.status]));
+        }
+        const newTasks=tasks||[];
+        allTasks=[...allTasks,...newTasks];
+        earnOffset+=newTasks.length;
+        document.getElementById('earn-load-more').style.display=newTasks.length===EARN_PAGE?'flex':'none';
+        if(reset) feed.innerHTML='';
+        if(!allTasks.filter(t=>myStatusMap[t.id]!=='approved').length && reset){
+          feed.innerHTML=`<div class="empty-state"><div class="empty-icon">📭</div><p>No tasks here. Post one first!</p></div>`; return;
+        }
+        newTasks.filter(t=>myStatusMap[t.id]!=='approved').forEach((t,i)=>{
+          const card=buildEarnCard(t,myStatusMap[t.id]);
+          card.style.setProperty('--delay',`${i*0.05}s`);
+          card.classList.add('card-animate');
+          feed.appendChild(card);
+        });
       } catch(e) {
         feed.innerHTML=`<div class="empty-state"><div class="empty-icon">⚠️</div><p>${esc(e.message)}</p></div>`;
       }
     }
 
-    function renderEarnFeed() {
-      const feed=document.getElementById('earn-feed');
-      let tasks=allTasks.filter(t=>myStatusMap[t.id]!=='approved');
-      if (earnFilter!=='all') tasks=tasks.filter(t=>t.platform===earnFilter||t.type===earnFilter);
-      if (!tasks.length) { feed.innerHTML=`<div class="empty-state"><div class="empty-icon">📭</div><p>No tasks here. Check back later or post your own!</p></div>`; return; }
-      feed.innerHTML='';
-      tasks.forEach(t=>feed.appendChild(buildEarnCard(t,myStatusMap[t.id])));
-    }
+    function renderEarnFeed() { loadEarnFeed(true); }
+
+    window.loadMoreTasks=()=>loadEarnFeed(false);
 
     window.setFilter=(filter,btn)=>{
       earnFilter=filter;
       document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
-      renderEarnFeed();
+      // Re-filter from already loaded tasks, then fetch more if needed
+      const feed=document.getElementById('earn-feed');
+      feed.innerHTML='';
+      const filtered=allTasks.filter(t=>myStatusMap[t.id]!=='approved'&&(filter==='all'||t.platform===filter||t.type===filter));
+      if(!filtered.length){ feed.innerHTML=`<div class="empty-state"><div class="empty-icon">📭</div><p>No tasks match this filter.</p></div>`; return; }
+      filtered.forEach((t,i)=>{
+        const card=buildEarnCard(t,myStatusMap[t.id]);
+        card.style.setProperty('--delay',`${i*0.04}s`);
+        card.classList.add('card-animate');
+        feed.appendChild(card);
+      });
     };
 
     function buildEarnCard(t,status) {
@@ -855,6 +937,82 @@
       const { data,error }=await supabase.rpc('report_task',{ p_task_id:reportingTaskId,p_reason:reason });
       if (error||data?.error) { document.getElementById('report-err').textContent=data?.error||error.message; return; }
       closeReport(); toast('Reported. Thank you.','');
+    };
+
+    // ---- THEME / SETTINGS ----
+    const THEMES = {
+      'dark-orange': { accent:'#E8621A', accentDk:'#C4430A', accentLt:'#F5843A', bg:'#0e0b09', surface:'#171210', surface2:'#211a16', surface3:'#2c221c', border:'#3a2a22', border2:'#4a3628' },
+      'dark-purple': { accent:'#7c3aed', accentDk:'#5b21b6', accentLt:'#a855f7', bg:'#0d0a14', surface:'#130f1e', surface2:'#1c1630', surface3:'#271f40', border:'#32285a', border2:'#3e3270' },
+      'dark-blue':   { accent:'#0ea5e9', accentDk:'#0369a1', accentLt:'#38bdf8', bg:'#090d14', surface:'#0d1320', surface2:'#131c2e', surface3:'#1a2840', border:'#1e3050', border2:'#243860' },
+      'dark-green':  { accent:'#22c55e', accentDk:'#15803d', accentLt:'#4ade80', bg:'#090e0b', surface:'#0d1510', surface2:'#121f17', surface3:'#172a1e', border:'#1e3826', border2:'#264830' },
+      'midnight':    { accent:'#94a3b8', accentDk:'#64748b', accentLt:'#cbd5e1', bg:'#06070a', surface:'#0c0e14', surface2:'#111420', surface3:'#16192c', border:'#1e2238', border2:'#262b44' },
+    };
+
+    function applyTheme(themeKey, customAccent=null) {
+      const t = THEMES[themeKey] || THEMES['dark-orange'];
+      const root = document.documentElement;
+      root.style.setProperty('--bg', t.bg);
+      root.style.setProperty('--surface', t.surface);
+      root.style.setProperty('--surface2', t.surface2);
+      root.style.setProperty('--surface3', t.surface3);
+      root.style.setProperty('--border', t.border);
+      root.style.setProperty('--border2', t.border2);
+      if (customAccent && /^#[0-9A-Fa-f]{6}$/.test(customAccent)) {
+        root.style.setProperty('--orange', customAccent);
+        root.style.setProperty('--orange-dk', customAccent);
+        root.style.setProperty('--orange-lt', customAccent);
+      } else {
+        root.style.setProperty('--orange', t.accent);
+        root.style.setProperty('--orange-dk', t.accentDk);
+        root.style.setProperty('--orange-lt', t.accentLt);
+      }
+    }
+
+    function renderSettings() {
+      // Highlight current theme
+      document.querySelectorAll('.theme-swatch').forEach(b => {
+        b.classList.toggle('theme-selected', b.dataset.theme === (profile.theme||'dark-orange'));
+      });
+      const acc = profile.accent_color||'#E8621A';
+      document.getElementById('accent-color-input').value = acc;
+      document.getElementById('accent-color-val').textContent = acc;
+      pendingTheme = profile.theme||'dark-orange';
+      pendingAccent = profile.accent_color||null;
+    }
+
+    window.pickTheme=(theme,btn)=>{
+      pendingTheme=theme;
+      document.querySelectorAll('.theme-swatch').forEach(b=>b.classList.remove('theme-selected'));
+      btn.classList.add('theme-selected');
+      applyTheme(theme, pendingAccent);
+    };
+
+    document.getElementById('accent-color-input')?.addEventListener('input', e=>{
+      pendingAccent = e.target.value;
+      document.getElementById('accent-color-val').textContent = e.target.value;
+      applyTheme(pendingTheme||profile?.theme||'dark-orange', e.target.value);
+    });
+
+    window.resetAccent=()=>{
+      pendingAccent=null;
+      const theme=THEMES[pendingTheme||'dark-orange'];
+      document.getElementById('accent-color-input').value=theme.accent;
+      document.getElementById('accent-color-val').textContent=theme.accent;
+      applyTheme(pendingTheme||'dark-orange', null);
+    };
+
+    window.saveSettings=async()=>{
+      const msg=document.getElementById('settings-msg');
+      msg.textContent='Saving…'; msg.style.color='var(--muted)';
+      const { data,error }=await supabase.rpc('save_settings',{
+        p_theme: pendingTheme||'dark-orange',
+        p_accent_color: pendingAccent||null
+      });
+      if(error||data?.error){ msg.textContent=data?.error||error.message; msg.style.color='var(--red)'; return; }
+      profile.theme=pendingTheme||'dark-orange';
+      profile.accent_color=pendingAccent||null;
+      msg.textContent='✓ Settings saved!'; msg.style.color='var(--green)';
+      setTimeout(()=>msg.textContent='',3000);
     };
 
     // ---- SIGN OUT ----
