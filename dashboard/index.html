@@ -158,19 +158,28 @@
 
     async function init(user) {
       try {
-        const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-        if (error) throw error;
-        profile = data;
-        renderUI();
+        const [profileRes, userRes] = await Promise.all([
+          supabase.from('profiles').select('*').eq('id', user.id).single(),
+          supabase.auth.getUser()
+        ]);
+        if (profileRes.error) throw profileRes.error;
+        profile = profileRes.data;
+        const email = userRes.data?.user?.email || '';
+        renderUI(email);
         document.getElementById('loading-screen').style.display = 'none';
         document.getElementById('app').style.display = 'block';
         loadEarnFeed();
       } catch(e) {
-        toast('Failed to load profile: ' + e.message, 'error');
+        document.getElementById('loading-screen').innerHTML = `
+          <div style="text-align:center;padding:40px">
+            <div style="font-size:2rem;margin-bottom:12px">⚠️</div>
+            <p style="color:var(--red);margin-bottom:16px">Failed to load: ${e.message}</p>
+            <button class="btn btn-ghost btn-sm" onclick="location.reload()">Retry</button>
+          </div>`;
       }
     }
 
-    function renderUI() {
+    function renderUI(email = '') {
       const initials = (profile.username || 'U')[0].toUpperCase();
       document.getElementById('user-avatar').textContent = initials;
       document.getElementById('profile-avatar').textContent = initials;
@@ -180,7 +189,7 @@
       document.getElementById('pts-display').textContent = profile.points;
       document.getElementById('balance-preview').textContent = profile.points;
       document.getElementById('profile-name').textContent = profile.username;
-      document.getElementById('profile-email').textContent = supabase.auth.getUser ? (await supabase.auth.getUser()).data.user?.email || '' : '';
+      document.getElementById('profile-email').textContent = email;
       document.getElementById('s-points').textContent = profile.points;
       document.getElementById('s-done').textContent = profile.tasks_completed;
       document.getElementById('s-posted').textContent = profile.tasks_posted;
@@ -407,10 +416,6 @@
     };
     document.getElementById('signout-btn').addEventListener('click', window.doSignOut);
 
-    // Fix: async profile email
-    supabase.auth.getUser().then(({ data }) => {
-      if (data?.user) document.getElementById('profile-email').textContent = data.user.email;
-    });
   </script>
 </body>
 </html>
