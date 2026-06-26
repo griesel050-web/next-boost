@@ -336,6 +336,35 @@
     // AVATAR COLORS
     const AVATAR_COLORS = ['#E8621A','#C4430A','#5865F2','#22c55e','#e1306c','#ff0050','#F0A030','#7c3aed','#0ea5e9','#ef4444'];
 
+    // ---- THEMES (must be before init) ----
+    const THEMES = {
+      'dark-orange': { accent:'#E8621A', accentDk:'#C4430A', accentLt:'#F5843A', bg:'#0e0b09', surface:'#171210', surface2:'#211a16', surface3:'#2c221c', border:'#3a2a22', border2:'#4a3628' },
+      'dark-purple': { accent:'#7c3aed', accentDk:'#5b21b6', accentLt:'#a855f7', bg:'#0d0a14', surface:'#130f1e', surface2:'#1c1630', surface3:'#271f40', border:'#32285a', border2:'#3e3270' },
+      'dark-blue':   { accent:'#0ea5e9', accentDk:'#0369a1', accentLt:'#38bdf8', bg:'#090d14', surface:'#0d1320', surface2:'#131c2e', surface3:'#1a2840', border:'#1e3050', border2:'#243860' },
+      'dark-green':  { accent:'#22c55e', accentDk:'#15803d', accentLt:'#4ade80', bg:'#090e0b', surface:'#0d1510', surface2:'#121f17', surface3:'#172a1e', border:'#1e3826', border2:'#264830' },
+      'midnight':    { accent:'#94a3b8', accentDk:'#64748b', accentLt:'#cbd5e1', bg:'#06070a', surface:'#0c0e14', surface2:'#111420', surface3:'#16192c', border:'#1e2238', border2:'#262b44' },
+    };
+
+    function applyTheme(themeKey, customAccent=null) {
+      const t = THEMES[themeKey] || THEMES['dark-orange'];
+      const root = document.documentElement;
+      root.style.setProperty('--bg', t.bg);
+      root.style.setProperty('--surface', t.surface);
+      root.style.setProperty('--surface2', t.surface2);
+      root.style.setProperty('--surface3', t.surface3);
+      root.style.setProperty('--border', t.border);
+      root.style.setProperty('--border2', t.border2);
+      if (customAccent && /^#[0-9A-Fa-f]{6}$/.test(customAccent)) {
+        root.style.setProperty('--orange', customAccent);
+        root.style.setProperty('--orange-dk', customAccent);
+        root.style.setProperty('--orange-lt', customAccent);
+      } else {
+        root.style.setProperty('--orange', t.accent);
+        root.style.setProperty('--orange-dk', t.accentDk);
+        root.style.setProperty('--orange-lt', t.accentLt);
+      }
+    }
+
     // ---- STATE ----
     let profile=null, userEmail='';
     let activeTaskId=null, activeTaskUrl=null;
@@ -940,34 +969,6 @@
     };
 
     // ---- THEME / SETTINGS ----
-    const THEMES = {
-      'dark-orange': { accent:'#E8621A', accentDk:'#C4430A', accentLt:'#F5843A', bg:'#0e0b09', surface:'#171210', surface2:'#211a16', surface3:'#2c221c', border:'#3a2a22', border2:'#4a3628' },
-      'dark-purple': { accent:'#7c3aed', accentDk:'#5b21b6', accentLt:'#a855f7', bg:'#0d0a14', surface:'#130f1e', surface2:'#1c1630', surface3:'#271f40', border:'#32285a', border2:'#3e3270' },
-      'dark-blue':   { accent:'#0ea5e9', accentDk:'#0369a1', accentLt:'#38bdf8', bg:'#090d14', surface:'#0d1320', surface2:'#131c2e', surface3:'#1a2840', border:'#1e3050', border2:'#243860' },
-      'dark-green':  { accent:'#22c55e', accentDk:'#15803d', accentLt:'#4ade80', bg:'#090e0b', surface:'#0d1510', surface2:'#121f17', surface3:'#172a1e', border:'#1e3826', border2:'#264830' },
-      'midnight':    { accent:'#94a3b8', accentDk:'#64748b', accentLt:'#cbd5e1', bg:'#06070a', surface:'#0c0e14', surface2:'#111420', surface3:'#16192c', border:'#1e2238', border2:'#262b44' },
-    };
-
-    function applyTheme(themeKey, customAccent=null) {
-      const t = THEMES[themeKey] || THEMES['dark-orange'];
-      const root = document.documentElement;
-      root.style.setProperty('--bg', t.bg);
-      root.style.setProperty('--surface', t.surface);
-      root.style.setProperty('--surface2', t.surface2);
-      root.style.setProperty('--surface3', t.surface3);
-      root.style.setProperty('--border', t.border);
-      root.style.setProperty('--border2', t.border2);
-      if (customAccent && /^#[0-9A-Fa-f]{6}$/.test(customAccent)) {
-        root.style.setProperty('--orange', customAccent);
-        root.style.setProperty('--orange-dk', customAccent);
-        root.style.setProperty('--orange-lt', customAccent);
-      } else {
-        root.style.setProperty('--orange', t.accent);
-        root.style.setProperty('--orange-dk', t.accentDk);
-        root.style.setProperty('--orange-lt', t.accentLt);
-      }
-    }
-
     function renderSettings() {
       // Highlight current theme
       document.querySelectorAll('.theme-swatch').forEach(b => {
