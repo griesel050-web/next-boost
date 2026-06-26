@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Referral — Next Boost</title><meta name="robots" content="noindex"/>
+  <link rel="manifest" href="/manifest.json"/><meta name="theme-color" content="#E8621A"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
   <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
   <link rel="stylesheet" href="/assets/css/main.css"/>
   <link rel="stylesheet" href="/assets/css/app.css"/>
@@ -14,13 +17,12 @@
   <div class="page-content">
 <h1 class="page-title">Referral Program</h1>
 <p class="page-sub">Share your code. Both you and your friend get <strong style="color:var(--orange)">50 free points</strong> when they sign up and use it.</p>
-
 <div class="card card-pad" style="max-width:540px;margin-bottom:20px">
   <h3 style="font-size:0.95rem;margin-bottom:16px">Your referral code</h3>
   <div class="referral-code-box">
     <div>
       <div class="ref-code" id="ref-code">—</div>
-      <div class="ref-link" id="ref-link">—</div>
+      <div class="ref-link" id="ref-link" style="font-size:0.78rem;color:var(--muted);margin-top:4px;word-break:break-all">—</div>
     </div>
     <button class="btn btn-primary btn-sm" onclick="copyCode()">Copy link</button>
   </div>
@@ -29,53 +31,74 @@
     <div class="stat-box" style="flex:1;min-width:100px"><div class="stat-val" id="ref-earned">0</div><div class="stat-lbl">Points earned</div></div>
   </div>
 </div>
-
 <div class="card card-pad" style="max-width:540px">
   <h3 style="font-size:0.95rem;margin-bottom:6px">Have a referral code?</h3>
-  <p style="color:var(--muted);font-size:0.85rem;margin-bottom:16px">Enter a friend's code to get 50 bonus points (within 7 days of signing up).</p>
+  <p style="color:var(--muted);font-size:0.85rem;margin-bottom:16px">Enter a friend's code to get 50 bonus points (within 7 days of signup).</p>
   <div style="display:flex;gap:10px;flex-wrap:wrap">
-    <input type="text" id="ref-input" placeholder="Enter code e.g. AB12CD34" style="flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-size:0.9rem;outline:none"/>
+    <input type="text" id="ref-input" placeholder="e.g. AB12CD34" style="flex:1;min-width:150px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-size:0.9rem;outline:none;font-family:inherit"/>
     <button class="btn btn-primary" onclick="useCode()">Apply code</button>
   </div>
   <div class="error-msg" id="ref-err"></div>
 </div></div>
 </div>
 <nav class="mobile-nav-bar" id="mobile-nav"></nav>
-
 <script type="module">
-  import { supabase, esc } from '/assets/js/shared.js';
-  import { initApp } from '/assets/js/app.js';
-  const ctx=await initApp('referral'); if(!ctx) return;
-  const profile=ctx.profile;
+import { supabase, esc } from '/assets/js/shared.js';
+import { initApp, updateNavPoints } from '/assets/js/app.js';
+let profile;
 
-  document.getElementById('ref-code').textContent=profile.referral_code||'—';
-  const link=`https://boost.nexosites.xyz/signup/?ref=${profile.referral_code}`;
+async function main(){
+  const ctx=await initApp('referral');
+  if(!ctx) return;
+  profile=ctx.profile;
+
+  const code=profile.referral_code||'—';
+  const link=`https://boost.nexosites.xyz/signup/?ref=${code}`;
+  document.getElementById('ref-code').textContent=code;
   document.getElementById('ref-link').textContent=link;
   document.getElementById('ref-count').textContent=profile.referral_count||0;
 
-  // Count referral points earned
   const {data:ledger}=await supabase.from('point_ledger').select('delta').eq('user_id',profile.id).eq('reason','referral_reward');
-  const earned=(ledger||[]).reduce((s,r)=>s+r.delta,0);
-  document.getElementById('ref-earned').textContent=earned;
+  document.getElementById('ref-earned').textContent=(ledger||[]).reduce((s,r)=>s+r.delta,0);
 
-  window.copyCode=()=>{
-    navigator.clipboard.writeText(link).then(()=>{
-      const btn=event.currentTarget;
-      btn.textContent='Copied!';
-      setTimeout(()=>btn.textContent='Copy link',2000);
-    });
-  };
+  // Auto-apply pending referral from signup
+  const pending=sessionStorage.getItem('nb_apply_ref');
+  if(pending){
+    sessionStorage.removeItem('nb_apply_ref');
+    document.getElementById('ref-input').value=pending;
+    const {data,error}=await supabase.rpc('use_referral_code',{p_code:pending});
+    if(!error&&!data?.error){
+      const errEl=document.getElementById('ref-err');
+      errEl.style.color='var(--green)';
+      errEl.textContent=`✓ Referral code applied! +${data.bonus} points added.`;
+      const {data:p}=await supabase.from('profiles').select('points').eq('id',profile.id).single();
+      if(p){profile.points=p.points;updateNavPoints(p.points);}
+    }
+  }
+}
 
-  window.useCode=async()=>{
-    const code=document.getElementById('ref-input').value.trim();
-    const errEl=document.getElementById('ref-err');
-    errEl.textContent='';
-    if(!code){errEl.textContent='Please enter a code.';return;}
-    const {data,error}=await supabase.rpc('use_referral_code',{p_code:code});
-    if(error||data?.error){errEl.textContent=data?.error||error.message;return;}
-    errEl.style.color='var(--green)';
-    errEl.textContent=`✓ Code applied! +${data.bonus} points added to your balance.`;
-    document.getElementById('ref-input').value='';
-  };
+window.copyCode=()=>{
+  const link=document.getElementById('ref-link').textContent;
+  navigator.clipboard.writeText(link).then(()=>{
+    const btn=event.currentTarget; btn.textContent='Copied!';
+    setTimeout(()=>btn.textContent='Copy link',2000);
+  }).catch(()=>alert('Copy: '+link));
+};
+
+window.useCode=async()=>{
+  const code=document.getElementById('ref-input').value.trim();
+  const errEl=document.getElementById('ref-err');
+  errEl.textContent=''; errEl.style.color='';
+  if(!code){errEl.textContent='Please enter a code.';return;}
+  const {data,error}=await supabase.rpc('use_referral_code',{p_code:code});
+  if(error||data?.error){errEl.textContent=data?.error||error.message;return;}
+  errEl.style.color='var(--green)';
+  errEl.textContent=`✓ Code applied! +${data.bonus} points added.`;
+  document.getElementById('ref-input').value='';
+  const {data:p}=await supabase.from('profiles').select('points').eq('id',profile.id).single();
+  if(p){profile.points=p.points;updateNavPoints(p.points);}
+};
+
+main();
 </script>
 </body></html>

@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Leaderboard — Next Boost</title><meta name="robots" content="noindex"/>
+  <link rel="manifest" href="/manifest.json"/><meta name="theme-color" content="#E8621A"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
   <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
   <link rel="stylesheet" href="/assets/css/main.css"/>
   <link rel="stylesheet" href="/assets/css/app.css"/>
@@ -13,33 +16,40 @@
   <aside class="app-sidebar" id="app-sidebar"></aside>
   <div class="page-content">
 <h1 class="page-title">Leaderboard</h1>
+<p class="page-sub">Top 50 users. Click a row to view their profile.</p>
 <div class="lb-tabs">
-  <button class="lb-tab active" onclick="showBoard('all',this)">All-time</button>
-  <button class="lb-tab" onclick="showBoard('weekly',this)">This week</button>
+  <button class="lb-tab active" id="tab-alltime" onclick="showBoard('all',this)">All-time</button>
+  <button class="lb-tab" id="tab-weekly" onclick="showBoard('weekly',this)">This week</button>
 </div>
-<div id="lb-wrap"></div></div>
+<div id="lb-wrap"><div class="spinner"></div></div></div>
 </div>
 <nav class="mobile-nav-bar" id="mobile-nav"></nav>
-
 <script type="module">
-  import { supabase, esc } from '/assets/js/shared.js';
-  import { initApp } from '/assets/js/app.js';
-  const ctx=await initApp('leaderboard'); if(!ctx) return;
-  const profile=ctx.profile;
-  let currentBoard='all';
+import { supabase, esc } from '/assets/js/shared.js';
+import { initApp } from '/assets/js/app.js';
+let profile;
 
-  async function load(board){
-    const wrap=document.getElementById('lb-wrap');
-    wrap.innerHTML='<div class="spinner"></div>';
+async function main(){
+  const ctx=await initApp('leaderboard');
+  if(!ctx) return;
+  profile=ctx.profile;
+  await load('all');
+}
+
+async function load(board){
+  const wrap=document.getElementById('lb-wrap');
+  wrap.innerHTML='<div class="spinner"></div>';
+  try{
     const view=board==='weekly'?'weekly_leaderboard':'leaderboard';
     const ptField=board==='weekly'?'weekly_points':'points';
     const {data,error}=await supabase.from(view).select('*');
-    if(error||!data){wrap.innerHTML=`<p style="color:var(--muted)">${error?.message||'Could not load'}</p>`;return;}
+    if(error) throw error;
+    if(!data||!data.length){wrap.innerHTML='<div class="empty-state"><div class="empty-icon">🏆</div><p>No data yet.</p></div>';return;}
     const medals=['🥇','🥈','🥉'];
     wrap.innerHTML=`<div class="lb-table">
-      <div class="lb-header"><span>Rank</span><span>User</span><span>Points</span><span>Done</span></div>
+      <div class="lb-header"><span>Rank</span><span>User</span><span>Points</span><span class="lb-done">Done</span></div>
       ${data.map(u=>`
-        <div class="lb-row ${u.id===profile.id?'lb-me':''}" onclick="viewUser('${u.id}')">
+        <div class="lb-row${u.id===profile.id?' lb-me':''}" onclick="viewUser('${u.id}','${esc(u.display_name||u.username)}','${u.avatar_color||'var(--orange)'}',${u.points},${u.tasks_completed||0},${u.streak||0},'${esc(u.bio||'')}','${esc(u.username)}')">
           <span class="lb-rank">${medals[u.rank-1]||'#'+u.rank}</span>
           <span class="lb-user">
             <div style="width:28px;height:28px;border-radius:50%;background:${u.avatar_color||'var(--orange)'};display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:#fff;flex-shrink:0">${(u.display_name||u.username||'?')[0].toUpperCase()}</div>
@@ -49,36 +59,37 @@
           <span class="lb-done" style="color:var(--muted)">${u.tasks_completed||0}</span>
         </div>`).join('')}
     </div>`;
+  }catch(e){
+    wrap.innerHTML=`<div class="empty-state"><div class="empty-icon">⚠️</div><p>${esc(e.message)}</p></div>`;
   }
+}
 
-  window.showBoard=(board,btn)=>{
-    currentBoard=board;
-    document.querySelectorAll('.lb-tab').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    load(board);
-  };
+window.showBoard=(board,btn)=>{
+  document.querySelectorAll('.lb-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  load(board);
+};
 
-  window.viewUser=async(userId)=>{
-    const {data:u}=await supabase.from('public_profiles').select('*').eq('id',userId).single();
-    if(!u) return;
-    const ini=(u.display_name||u.username||'?')[0].toUpperCase();
-    const modal=document.createElement('div');
-    modal.className='modal-overlay open';
-    modal.innerHTML=`<div class="modal" style="max-width:400px;text-align:center">
-      <div class="avatar-xl" style="background:${u.avatar_color||'var(--orange)'};margin:0 auto 14px">${ini}</div>
-      <div style="font-size:1.3rem;font-weight:700;font-family:'Space Grotesk',sans-serif">${esc(u.display_name||u.username)}</div>
-      <div style="color:var(--muted);font-size:0.85rem;margin-bottom:10px">@${esc(u.username)}</div>
-      ${u.bio?`<p style="font-size:0.88rem;color:var(--muted);max-width:280px;margin:0 auto 16px;line-height:1.6">${esc(u.bio)}</p>`:''}
-      <div class="stat-grid" style="justify-content:center;margin-bottom:20px">
-        <div class="stat-box"><div class="stat-val">${u.points}</div><div class="stat-lbl">Points</div></div>
-        <div class="stat-box"><div class="stat-val">${u.tasks_completed}</div><div class="stat-lbl">Done</div></div>
-        <div class="stat-box"><div class="stat-val">${u.streak||0}🔥</div><div class="stat-lbl">Streak</div></div>
-      </div>
-      <button class="btn btn-ghost btn-full" onclick="this.closest('.modal-overlay').remove()">Close</button>
-    </div>`;
-    document.body.appendChild(modal);
-  };
+window.viewUser=(id,name,color,points,done,streak,bio,username)=>{
+  const existing=document.getElementById('user-modal');
+  if(existing) existing.remove();
+  const modal=document.createElement('div');
+  modal.id='user-modal'; modal.className='modal-overlay open';
+  modal.innerHTML=`<div class="modal" style="max-width:400px;text-align:center">
+    <div style="width:80px;height:80px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;color:#fff;margin:0 auto 14px;font-family:'Space Grotesk',sans-serif">${name[0].toUpperCase()}</div>
+    <div style="font-size:1.3rem;font-weight:700;font-family:'Space Grotesk',sans-serif">${esc(name)}</div>
+    <div style="color:var(--muted);font-size:0.85rem;margin-bottom:10px">@${esc(username)}</div>
+    ${bio?`<p style="font-size:0.88rem;color:var(--muted);max-width:280px;margin:0 auto 16px;line-height:1.6">${esc(bio)}</p>`:''}
+    <div class="stat-grid" style="justify-content:center;margin-bottom:20px">
+      <div class="stat-box"><div class="stat-val">${points}</div><div class="stat-lbl">Points</div></div>
+      <div class="stat-box"><div class="stat-val">${done}</div><div class="stat-lbl">Done</div></div>
+      <div class="stat-box"><div class="stat-val">${streak}🔥</div><div class="stat-lbl">Streak</div></div>
+    </div>
+    <button class="btn btn-ghost btn-full" onclick="document.getElementById('user-modal').remove()">Close</button>
+  </div>`;
+  document.body.appendChild(modal);
+};
 
-  load('all');
+main();
 </script>
 </body></html>

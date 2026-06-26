@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Settings — Next Boost</title><meta name="robots" content="noindex"/>
+  <link rel="manifest" href="/manifest.json"/><meta name="theme-color" content="#E8621A"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
   <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
   <link rel="stylesheet" href="/assets/css/main.css"/>
   <link rel="stylesheet" href="/assets/css/app.css"/>
@@ -14,14 +17,10 @@
   <div class="page-content">
 <h1 class="page-title">Settings</h1>
 <div class="settings-sections">
-
   <div class="settings-section">
-    <div class="settings-section-header">
-      <h3>🎨 Theme</h3>
-      <p>Choose your colour scheme</p>
-    </div>
+    <div class="settings-section-header"><h3>🎨 Theme</h3><p>Choose your colour scheme</p></div>
     <div class="settings-section-body">
-      <div class="theme-grid" id="theme-grid">
+      <div class="theme-grid">
         <button class="theme-swatch" data-theme="dark-orange" onclick="pickTheme('dark-orange',this)"><div class="theme-preview" style="background:linear-gradient(135deg,#0e0b09,#E8621A)"></div><span>Dark Orange</span></button>
         <button class="theme-swatch" data-theme="dark-purple" onclick="pickTheme('dark-purple',this)"><div class="theme-preview" style="background:linear-gradient(135deg,#0d0a14,#7c3aed)"></div><span>Dark Purple</span></button>
         <button class="theme-swatch" data-theme="dark-blue"   onclick="pickTheme('dark-blue',this)"><div class="theme-preview" style="background:linear-gradient(135deg,#090d14,#0ea5e9)"></div><span>Dark Blue</span></button>
@@ -30,80 +29,43 @@
       </div>
     </div>
   </div>
-
   <div class="settings-section">
-    <div class="settings-section-header">
-      <h3>🎯 Custom Accent</h3>
-      <p>Override the main accent color with any color you want</p>
-    </div>
+    <div class="settings-section-header"><h3>🎯 Custom Accent Color</h3><p>Override the main accent with any color</p></div>
     <div class="settings-section-body">
       <div class="accent-row">
         <input type="color" id="accent-input" value="#E8621A" oninput="previewAccent(this.value)"/>
         <span id="accent-val" style="color:var(--muted);font-size:0.88rem">#E8621A</span>
-        <button class="btn btn-ghost btn-sm" onclick="resetAccent()">Reset to theme default</button>
+        <button class="btn btn-ghost btn-sm" onclick="resetAccent()">Reset</button>
       </div>
     </div>
   </div>
-
-  <div class="settings-section">
-    <div class="settings-section-header">
-      <h3>🔔 Notifications</h3>
-      <p>Manage what you get notified about</p>
-    </div>
-    <div class="settings-section-body">
-      <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
-        <input type="checkbox" id="notif-achievements" checked style="width:16px;height:16px;accent-color:var(--orange)"/>
-        <span style="font-size:0.9rem">Achievement unlocked</span>
-      </label>
-      <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
-        <input type="checkbox" id="notif-referrals" checked style="width:16px;height:16px;accent-color:var(--orange)"/>
-        <span style="font-size:0.9rem">Referral bonuses</span>
-      </label>
-      <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
-        <input type="checkbox" id="notif-streak" checked style="width:16px;height:16px;accent-color:var(--orange)"/>
-        <span style="font-size:0.9rem">Streak milestones</span>
-      </label>
-    </div>
-  </div>
-
   <div class="settings-section" id="admin-section" style="display:none">
-    <div class="settings-section-header">
-      <h3>🛡️ Admin</h3>
-      <p>You have admin access</p>
-    </div>
-    <div class="settings-section-body">
-      <a href="/admin/" class="btn btn-primary" style="width:fit-content">Open Admin Panel →</a>
-    </div>
+    <div class="settings-section-header"><h3>🛡️ Admin</h3><p>You have admin access to the platform</p></div>
+    <div class="settings-section-body"><a href="/admin/" class="btn btn-primary" style="width:fit-content">Open Admin Panel →</a></div>
   </div>
-
   <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
     <button class="btn btn-primary" onclick="saveSettings()">Save settings</button>
-    <span id="settings-msg" style="font-size:0.85rem;color:var(--green)"></span>
+    <span id="settings-msg" style="font-size:0.85rem"></span>
   </div>
-
   <div class="settings-section" style="border-color:rgba(232,74,74,0.2)">
-    <div class="settings-section-header">
-      <h3>⚠️ Account</h3>
-      <p>Danger zone</p>
-    </div>
-    <div class="settings-section-body">
-      <button class="btn btn-danger btn-sm" onclick="doSignOut()">Sign out</button>
-    </div>
+    <div class="settings-section-header"><h3>⚠️ Account</h3><p>Danger zone</p></div>
+    <div class="settings-section-body"><button class="btn btn-danger btn-sm" onclick="doSignOut()">Sign out</button></div>
   </div>
 </div></div>
 </div>
 <nav class="mobile-nav-bar" id="mobile-nav"></nav>
-
 <script type="module">
-  import { supabase } from '/assets/js/shared.js';
-  import { initApp, THEMES, applyTheme } from '/assets/js/app.js';
-  const ctx=await initApp('settings'); if(!ctx) return;
+import { supabase } from '/assets/js/shared.js';
+import { initApp, THEMES, applyTheme } from '/assets/js/app.js';
+let pendingTheme, pendingAccent;
+
+async function main(){
+  const ctx=await initApp('settings');
+  if(!ctx) return;
   const profile=ctx.profile;
+  pendingTheme=profile.theme||'dark-orange';
+  pendingAccent=profile.accent_color||null;
 
-  let pendingTheme=profile.theme||'dark-orange';
-  let pendingAccent=profile.accent_color||null;
-
-  // Highlight current theme
   document.querySelectorAll('.theme-swatch').forEach(b=>{
     if(b.dataset.theme===pendingTheme) b.classList.add('theme-selected');
   });
@@ -111,37 +73,36 @@
     document.getElementById('accent-input').value=pendingAccent;
     document.getElementById('accent-val').textContent=pendingAccent;
   }
-
   if(profile.is_admin) document.getElementById('admin-section').style.display='block';
+}
 
-  window.pickTheme=(theme,btn)=>{
-    pendingTheme=theme;
-    document.querySelectorAll('.theme-swatch').forEach(b=>b.classList.remove('theme-selected'));
-    btn.classList.add('theme-selected');
-    applyTheme(theme, pendingAccent);
-  };
+window.pickTheme=(theme,btn)=>{
+  pendingTheme=theme;
+  document.querySelectorAll('.theme-swatch').forEach(b=>b.classList.remove('theme-selected'));
+  btn.classList.add('theme-selected');
+  applyTheme(theme,pendingAccent);
+};
+window.previewAccent=(val)=>{
+  pendingAccent=val;
+  document.getElementById('accent-val').textContent=val;
+  applyTheme(pendingTheme,val);
+};
+window.resetAccent=()=>{
+  pendingAccent=null;
+  const t=THEMES[pendingTheme];
+  document.getElementById('accent-input').value=t.accent;
+  document.getElementById('accent-val').textContent=t.accent;
+  applyTheme(pendingTheme,null);
+};
+window.saveSettings=async()=>{
+  const msg=document.getElementById('settings-msg');
+  msg.textContent='Saving…'; msg.style.color='var(--muted)';
+  const {data,error}=await supabase.rpc('save_settings',{p_theme:pendingTheme,p_accent_color:pendingAccent||null});
+  if(error||data?.error){msg.textContent=data?.error||error.message;msg.style.color='var(--red)';return;}
+  msg.textContent='✓ Saved!'; msg.style.color='var(--green)';
+  setTimeout(()=>msg.textContent='',3000);
+};
 
-  window.previewAccent=(val)=>{
-    pendingAccent=val;
-    document.getElementById('accent-val').textContent=val;
-    applyTheme(pendingTheme, val);
-  };
-
-  window.resetAccent=()=>{
-    pendingAccent=null;
-    const t=THEMES[pendingTheme];
-    document.getElementById('accent-input').value=t.accent;
-    document.getElementById('accent-val').textContent=t.accent;
-    applyTheme(pendingTheme, null);
-  };
-
-  window.saveSettings=async()=>{
-    const msg=document.getElementById('settings-msg');
-    msg.textContent='Saving…'; msg.style.color='var(--muted)';
-    const {data,error}=await supabase.rpc('save_settings',{p_theme:pendingTheme,p_accent_color:pendingAccent||null});
-    if(error||data?.error){msg.textContent=data?.error||error.message;msg.style.color='var(--red)';return;}
-    msg.textContent='✓ Saved!'; msg.style.color='var(--green)';
-    setTimeout(()=>msg.textContent='',3000);
-  };
+main();
 </script>
 </body></html>

@@ -2,21 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Earn Points — Next Boost</title>
-  <meta name="robots" content="noindex"/>
+  <title>Earn Points — Next Boost</title><meta name="robots" content="noindex"/>
+  <link rel="manifest" href="/manifest.json"/><meta name="theme-color" content="#E8621A"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
   <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
   <link rel="stylesheet" href="/assets/css/main.css"/>
   <link rel="stylesheet" href="/assets/css/app.css"/>
-  
 </head>
 <body>
 <nav class="nav" id="main-nav"></nav>
 <div class="app-shell">
   <aside class="app-sidebar" id="app-sidebar"></aside>
   <div class="page-content">
-    
 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:6px">
-  <div><h1 class="page-title">Earn Points</h1><p class="page-sub">Complete tasks to earn points instantly after the 30s timer.</p></div>
+  <div><h1 class="page-title">Earn Points</h1><p class="page-sub">Complete tasks to earn points after the 30s timer.</p></div>
 </div>
 <div class="filter-row">
   <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
@@ -32,84 +32,99 @@
 <div id="earn-feed" class="task-feed"><div class="spinner"></div></div>
 <div class="load-more-row" id="load-more" style="display:none">
   <button class="btn btn-ghost" onclick="loadMore()">Load more tasks</button>
-</div>
-  </div>
+</div></div>
 </div>
 <nav class="mobile-nav-bar" id="mobile-nav"></nav>
 <script type="module">
-  import { supabase, esc } from '/assets/js/shared.js';
-  import { initApp, updateNavPoints, checkOnboarding, initTaskModal } from '/assets/js/app.js';
-  const PLAT_EMOJI={tiktok:'🎵',instagram:'📸',youtube:'▶️',discord:'💬'};
-  const PLAT_CLASS={tiktok:'plat-tiktok',instagram:'plat-instagram',youtube:'plat-youtube',discord:'plat-discord'};
-  const TYPE_LABEL={follow:'Follow',like:'Like',view:'View',join:'Join'};
-  const PAGE=15;
-  let profile,offset=0,filter='all',myStatus={},allLoaded=[];
+import { supabase, esc } from '/assets/js/shared.js';
+import { initApp, updateNavPoints, checkOnboarding, initTaskModal } from '/assets/js/app.js';
+const PE={tiktok:'🎵',instagram:'📸',youtube:'▶️',discord:'💬'};
+const PC={tiktok:'plat-tiktok',instagram:'plat-instagram',youtube:'plat-youtube',discord:'plat-discord'};
+const TL={follow:'Follow',like:'Like',view:'View',join:'Join'};
+const PAGE=15;
+let profile,offset=0,filter='all',myStatus={},allLoaded=[];
 
+async function main(){
   const ctx=await initApp('earn');
-  if(!ctx) throw new Error('not authed');
+  if(!ctx) return;
   profile=ctx.profile;
   checkOnboarding(profile);
   initTaskModal(onComplete);
   await load(true);
+}
 
-  async function load(reset=true){
-    if(reset){offset=0;allLoaded=[];document.getElementById('earn-feed').innerHTML='<div class="spinner"></div>';}
-    const {data:tasks}=await supabase.from('tasks').select('*')
+async function load(reset=true){
+  if(reset){offset=0;allLoaded=[];document.getElementById('earn-feed').innerHTML='<div class="spinner"></div>';}
+  try{
+    const {data:tasks,error}=await supabase.from('tasks').select('*')
       .eq('is_active',true).neq('owner_id',profile.id)
       .order('is_boosted',{ascending:false}).order('created_at',{ascending:false})
       .range(offset,offset+PAGE-1);
+    if(error) throw error;
     if(reset){
       const {data:myC}=await supabase.from('completions').select('task_id,status').eq('user_id',profile.id);
       myStatus=Object.fromEntries((myC||[]).map(c=>[c.task_id,c.status]));
     }
-    const newT=(tasks||[]);
+    const newT=tasks||[];
     allLoaded=[...allLoaded,...newT];
     offset+=newT.length;
     document.getElementById('load-more').style.display=newT.length===PAGE?'flex':'none';
     render(reset);
+  }catch(e){
+    document.getElementById('earn-feed').innerHTML=`<div class="empty-state"><div class="empty-icon">⚠️</div><p>${esc(e.message)}</p></div>`;
   }
+}
 
-  function render(reset=true){
-    const feed=document.getElementById('earn-feed');
-    const filtered=allLoaded.filter(t=>myStatus[t.id]!=='approved'&&(filter==='all'||t.platform===filter||t.type===filter));
-    if(reset) feed.innerHTML='';
-    if(!filtered.length&&reset){feed.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div><p>No tasks right now. Post one first!</p></div>';return;}
-    filtered.slice(reset?0:Math.max(0,filtered.length-PAGE)).forEach((t,i)=>{
-      const slotsLeft=t.max_completions-t.completions_count;
-      const exp=Math.max(0,Math.ceil((new Date(t.expires_at)-Date.now())/86400000));
-      const st=myStatus[t.id];
-      let action='';
-      if(st==='submitted'||st==='pending') action=`<button class="btn btn-primary btn-sm" onclick="window.openTaskModal('${t.id}')">Resume ↗</button>`;
-      else if(slotsLeft<=0) action='<span class="status-chip chip-full">Full</span>';
-      else action=`<button class="btn btn-primary btn-sm" onclick="window.openTaskModal('${t.id}')">Start ↗</button>`;
-      const card=document.createElement('div');
-      card.className='task-card card-animate';
-      card.style.setProperty('--delay',`${i*0.04}s`);
-      card.innerHTML=`
-        <div class="task-plat-icon ${PLAT_CLASS[t.platform]||''}">${PLAT_EMOJI[t.platform]||'🌐'}</div>
-        <div class="task-info">
-          <h4>${esc(t.target)}${t.is_boosted?' <span class="boost-badge">⚡ Boosted</span>':''}</h4>
-          <p>${esc(t.description||TYPE_LABEL[t.type]+' on '+t.platform)} · <span class="expiry-label">${exp}d left</span></p>
-        </div>
-        <div class="task-actions">
-          <span class="type-badge type-${t.type}">${TYPE_LABEL[t.type]}</span>
-          <span class="pts-badge">+${t.points_reward} pts</span>
-          <span class="slots-badge">${slotsLeft}/${t.max_completions}</span>
-          ${action}
-          <button class="btn-report" title="Report" onclick="window.openReport('${t.id}')">⚑</button>
-        </div>`;
-      feed.appendChild(card);
-    });
-  }
+function render(reset=true){
+  const feed=document.getElementById('earn-feed');
+  const filtered=allLoaded.filter(t=>myStatus[t.id]!=='approved'&&(filter==='all'||t.platform===filter||t.type===filter));
+  if(reset) feed.innerHTML='';
+  if(!filtered.length&&reset){feed.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div><p>No tasks right now. <a href="/post-task/" style="color:var(--orange)">Post one first →</a></p></div>';return;}
+  const slice=reset?filtered:filtered.slice(Math.max(0,filtered.length-PAGE));
+  slice.forEach((t,i)=>{
+    if(reset&&feed.querySelector(`[data-id="${t.id}"]`)) return;
+    const sl=t.max_completions-t.completions_count;
+    const exp=Math.max(0,Math.ceil((new Date(t.expires_at)-Date.now())/86400000));
+    const st=myStatus[t.id];
+    let action='';
+    if(st==='submitted'||st==='pending') action=`<button class="btn btn-primary btn-sm" onclick="window.openTaskModal('${t.id}')">Resume ↗</button>`;
+    else if(sl<=0) action='<span class="status-chip chip-full">Full</span>';
+    else action=`<button class="btn btn-primary btn-sm" onclick="window.openTaskModal('${t.id}')">Start ↗</button>`;
+    const card=document.createElement('div');
+    card.className='task-card card-animate'; card.dataset.id=t.id;
+    card.style.setProperty('--delay',`${i*0.04}s`);
+    card.innerHTML=`
+      <div class="task-plat-icon ${PC[t.platform]||''}">${PE[t.platform]||'🌐'}</div>
+      <div class="task-info">
+        <h4>${esc(t.target)}${t.is_boosted?' <span class="boost-badge">⚡ Boosted</span>':''}</h4>
+        <p>${esc(t.description||TL[t.type]+' on '+t.platform)} · <span class="expiry-label">${exp}d left</span></p>
+      </div>
+      <div class="task-actions">
+        <span class="type-badge type-${t.type}">${TL[t.type]}</span>
+        <span class="pts-badge">+${t.points_reward} pts</span>
+        <span class="slots-badge">${sl}/${t.max_completions}</span>
+        ${action}
+        <button class="btn-report" title="Report" onclick="window.openReport('${t.id}')">⚑</button>
+      </div>`;
+    feed.appendChild(card);
+  });
+}
 
-  window.setFilter=(f,btn)=>{filter=f;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');render(true);};
-  window.loadMore=()=>load(false);
-  function onComplete(pts){
-    supabase.from('profiles').select('points').eq('id',profile.id).single().then(({data})=>{
-      if(data){profile.points=data.points;updateNavPoints(data.points);}
-    });
-    load(true);
-  }
+window.setFilter=(f,btn)=>{
+  filter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  render(true);
+};
+window.loadMore=()=>load(false);
+
+function onComplete(pts){
+  supabase.from('profiles').select('points').eq('id',profile.id).single().then(({data})=>{
+    if(data){profile.points=data.points;updateNavPoints(data.points);}
+  });
+  load(true);
+}
+
+main();
 </script>
-</body>
-</html>
+</body></html>

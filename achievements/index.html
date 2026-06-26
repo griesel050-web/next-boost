@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Achievements — Next Boost</title><meta name="robots" content="noindex"/>
+  <link rel="manifest" href="/manifest.json"/><meta name="theme-color" content="#E8621A"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
   <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
   <link rel="stylesheet" href="/assets/css/main.css"/>
   <link rel="stylesheet" href="/assets/css/app.css"/>
@@ -13,38 +16,46 @@
   <aside class="app-sidebar" id="app-sidebar"></aside>
   <div class="page-content">
 <h1 class="page-title">Achievements</h1>
-<p class="page-sub">Unlock achievements to earn bonus points. Grey = locked, coloured = earned.</p>
+<p class="page-sub">Unlock achievements to earn bonus points. Grey = locked.</p>
 <div id="ach-grid" class="achievements-grid"><div class="spinner"></div></div></div>
 </div>
 <nav class="mobile-nav-bar" id="mobile-nav"></nav>
-
 <script type="module">
-  import { supabase, esc } from '/assets/js/shared.js';
-  import { initApp } from '/assets/js/app.js';
-  const ctx=await initApp('achievements'); if(!ctx) return;
-  const profile=ctx.profile;
+import { supabase, esc } from '/assets/js/shared.js';
+import { initApp } from '/assets/js/app.js';
 
-  const {data:all}=await supabase.from('achievements').select('*').order('requirement_value');
-  const {data:earned}=await supabase.from('user_achievements').select('achievement_id').eq('user_id',profile.id);
-  const earnedSet=new Set((earned||[]).map(e=>e.achievement_id));
-
+async function main(){
+  const ctx=await initApp('achievements');
+  if(!ctx) return;
   const grid=document.getElementById('ach-grid');
-  if(!all||!all.length){grid.innerHTML='<p style="color:var(--muted)">No achievements yet.</p>';return;}
-  grid.innerHTML='';
-  all.forEach((a,i)=>{
-    const done=earnedSet.has(a.id);
-    const card=document.createElement('div');
-    card.className=`ach-card card-animate${done?' earned':''}`;
-    card.style.setProperty('--delay',`${i*0.04}s`);
-    card.innerHTML=`
-      <div class="ach-icon">${a.icon}</div>
-      <div>
-        <div class="ach-title">${esc(a.title)}</div>
-        <div class="ach-desc">${esc(a.description)}</div>
-        ${a.points_reward>0?`<div class="ach-pts">+${a.points_reward} pts</div>`:''}
-        ${done?'<div class="ach-earned-badge">✓ Earned</div>':''}
-      </div>`;
-    grid.appendChild(card);
-  });
+  try{
+    const [{data:all,error:e1},{data:earned}]=await Promise.all([
+      supabase.from('achievements').select('*').order('requirement_value'),
+      supabase.from('user_achievements').select('achievement_id').eq('user_id',ctx.profile.id)
+    ]);
+    if(e1) throw e1;
+    const earnedSet=new Set((earned||[]).map(e=>e.achievement_id));
+    if(!all||!all.length){grid.innerHTML='<p style="color:var(--muted)">No achievements yet.</p>';return;}
+    grid.innerHTML='';
+    all.forEach((a,i)=>{
+      const done=earnedSet.has(a.id);
+      const card=document.createElement('div');
+      card.className=`ach-card card-animate${done?' earned':''}`;
+      card.style.setProperty('--delay',`${i*0.04}s`);
+      card.innerHTML=`
+        <div class="ach-icon">${a.icon}</div>
+        <div>
+          <div class="ach-title">${esc(a.title)}</div>
+          <div class="ach-desc">${esc(a.description)}</div>
+          ${a.points_reward>0?`<div class="ach-pts">+${a.points_reward} pts reward</div>`:''}
+          ${done?'<div class="ach-earned-badge">✓ Earned</div>':''}
+        </div>`;
+      grid.appendChild(card);
+    });
+  }catch(e){
+    grid.innerHTML=`<div class="empty-state"><div class="empty-icon">⚠️</div><p>${esc(e.message)}</p></div>`;
+  }
+}
+main();
 </script>
 </body></html>

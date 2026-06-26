@@ -2,55 +2,71 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Completed Tasks — Next Boost</title>
-  <meta name="robots" content="noindex"/>
+  <title>Completed Tasks — Next Boost</title><meta name="robots" content="noindex"/>
+  <link rel="manifest" href="/manifest.json"/><meta name="theme-color" content="#E8621A"/>
   <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
   <link rel="stylesheet" href="/assets/css/main.css"/>
   <link rel="stylesheet" href="/assets/css/app.css"/>
-  
 </head>
 <body>
 <nav class="nav" id="main-nav"></nav>
 <div class="app-shell">
   <aside class="app-sidebar" id="app-sidebar"></aside>
   <div class="page-content">
-    <h1 class="page-title">Completed Tasks</h1><p class="page-sub">Tasks you've successfully earned points for.</p><div id="completed-feed" class="task-feed"><div class="spinner"></div></div>
+    <h1 class="page-title">Completed Tasks</h1>
+    <p class="page-sub">Tasks you've successfully earned points for.</p>
+    <div id="completed-feed" class="task-feed"><div class="spinner"></div></div>
   </div>
 </div>
 <nav class="mobile-nav-bar" id="mobile-nav"></nav>
 <script type="module">
   import { supabase, esc } from '/assets/js/shared.js';
   import { initApp } from '/assets/js/app.js';
-  const PLAT_EMOJI={tiktok:'🎵',instagram:'📸',youtube:'▶️',discord:'💬'};
-  const PLAT_CLASS={tiktok:'plat-tiktok',instagram:'plat-instagram',youtube:'plat-youtube',discord:'plat-discord'};
-  const TYPE_LABEL={follow:'Follow',like:'Like',view:'View',join:'Join'};
+  const PE={tiktok:'🎵',instagram:'📸',youtube:'▶️',discord:'💬'};
+  const PC={tiktok:'plat-tiktok',instagram:'plat-instagram',youtube:'plat-youtube',discord:'plat-discord'};
+  const TL={follow:'Follow',like:'Like',view:'View',join:'Join'};
 
-  const ctx=await initApp('completed');
-  if(!ctx) return;
-  const feed=document.getElementById('completed-feed');
-  const {data:completions}=await supabase.from('completions').select('task_id,reviewed_at')
-    .eq('user_id',ctx.profile.id).eq('status','approved').order('reviewed_at',{ascending:false});
-  if(!completions||!completions.length){feed.innerHTML='<div class="empty-state"><div class="empty-icon">🏅</div><p>No completed tasks yet. Start earning!</p></div>';return;}
-  const taskIds=completions.map(c=>c.task_id);
-  const {data:tasks}=await supabase.from('tasks').select('*').in('id',taskIds);
-  const taskMap=Object.fromEntries((tasks||[]).map(t=>[t.id,t]));
-  feed.innerHTML='';
-  completions.forEach((c,i)=>{
-    const t=taskMap[c.task_id]; if(!t) return;
-    const card=document.createElement('div');
-    card.className='task-card card-animate'; card.style.setProperty('--delay',`${i*0.04}s`);
-    card.innerHTML=`
-      <div class="task-plat-icon ${PLAT_CLASS[t.platform]||''}">${PLAT_EMOJI[t.platform]||'🌐'}</div>
-      <div class="task-info">
-        <h4>${esc(t.target)}</h4>
-        <p>${esc(t.description||TYPE_LABEL[t.type]+' on '+t.platform)}</p>
-      </div>
-      <div class="task-actions">
-        <span class="type-badge type-${t.type}">${TYPE_LABEL[t.type]}</span>
-        <span class="status-chip chip-approved">✓ +${t.points_reward} pts</span>
-      </div>`;
-    feed.appendChild(card);
-  });
+  async function main() {
+    const ctx = await initApp('completed');
+    if (!ctx) return;
+    const feed = document.getElementById('completed-feed');
+    try {
+      const { data: completions, error } = await supabase
+        .from('completions').select('task_id,reviewed_at')
+        .eq('user_id', ctx.profile.id).eq('status','approved')
+        .order('reviewed_at', { ascending: false });
+      if (error) throw error;
+      if (!completions || !completions.length) {
+        feed.innerHTML = '<div class="empty-state"><div class="empty-icon">🏅</div><p>No completed tasks yet. <a href="/earn/" style="color:var(--orange)">Start earning →</a></p></div>';
+        return;
+      }
+      const taskIds = completions.map(c => c.task_id);
+      const { data: tasks } = await supabase.from('tasks').select('*').in('id', taskIds);
+      const taskMap = Object.fromEntries((tasks||[]).map(t => [t.id, t]));
+      feed.innerHTML = '';
+      completions.forEach((c, i) => {
+        const t = taskMap[c.task_id];
+        if (!t) return;
+        const card = document.createElement('div');
+        card.className = 'task-card card-animate';
+        card.style.setProperty('--delay', `${i * 0.04}s`);
+        card.innerHTML = `
+          <div class="task-plat-icon ${PC[t.platform]||''}">${PE[t.platform]||'🌐'}</div>
+          <div class="task-info">
+            <h4>${esc(t.target)}</h4>
+            <p>${esc(t.description || TL[t.type] + ' on ' + t.platform)}</p>
+          </div>
+          <div class="task-actions">
+            <span class="type-badge type-${t.type}">${TL[t.type]}</span>
+            <span class="status-chip chip-approved">✓ +${t.points_reward} pts</span>
+          </div>`;
+        feed.appendChild(card);
+      });
+    } catch(e) {
+      feed.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>${esc(e.message)}</p></div>`;
+    }
+  }
+  main();
 </script>
 </body>
 </html>
