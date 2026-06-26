@@ -56,7 +56,7 @@ export function renderNav(profile) {
   if (!nav) return;
   if (profile) {
     nav.innerHTML = `
-      <a class="nav-logo" href="/"><img src="/assets/img/logo.svg" alt="Next Boost"/></a>
+      <a class="nav-logo" href="/"><img src="/assets/img/logo.png" alt="Next Boost"/></a>
       <div class="nav-links">
         <span class="nav-pts">⚡ <span id="nav-pts-val">${profile.points}</span> pts</span>
         <a href="/dashboard/" class="btn btn-ghost btn-sm">Dashboard</a>
@@ -69,7 +69,7 @@ export function renderNav(profile) {
     });
   } else {
     nav.innerHTML = `
-      <a class="nav-logo" href="/"><img src="/assets/img/logo.svg" alt="Next Boost"/></a>
+      <a class="nav-logo" href="/"><img src="/assets/img/logo.png" alt="Next Boost"/></a>
       <div class="nav-links">
         <a href="/login/" class="btn btn-ghost btn-sm">Log in</a>
         <a href="/signup/" class="btn btn-primary btn-sm">Sign up free</a>

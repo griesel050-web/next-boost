@@ -1,0 +1,16 @@
+{
+  "name": "Next Boost",
+  "short_name": "NextBoost",
+  "description": "Grow your social with real engagement",
+  "start_url": "/earn/",
+  "display": "standalone",
+  "background_color": "#0e0b09",
+  "theme_color": "#E8621A",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/assets/img/logo.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/assets/img/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "categories": ["social", "utilities"],
+  "screenshots": []
+}

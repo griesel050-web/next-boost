@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profile — Next Boost</title><meta name="robots" content="noindex"/>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
+  <link rel="stylesheet" href="/assets/css/main.css"/>
+  <link rel="stylesheet" href="/assets/css/app.css"/>
+</head>
+<body>
+<nav class="nav" id="main-nav"></nav>
+<div class="app-shell">
+  <aside class="app-sidebar" id="app-sidebar"></aside>
+  <div class="page-content">
+<div id="profile-content"><div class="spinner"></div></div></div>
+</div>
+<nav class="mobile-nav-bar" id="mobile-nav"></nav>
+
+<script type="module">
+  import { supabase, esc } from '/assets/js/shared.js';
+  import { initApp, updateNavPoints } from '/assets/js/app.js';
+  const COLORS=['#E8621A','#C4430A','#5865F2','#22c55e','#e1306c','#ff0050','#F0A030','#7c3aed','#0ea5e9','#ef4444'];
+  const ctx=await initApp('profile'); if(!ctx) return;
+  let profile=ctx.profile;
+  let pendingColor=profile.avatar_color||'#E8621A';
+
+  const wrap=document.getElementById('profile-content');
+  const ini=(profile.display_name||profile.username||'U')[0].toUpperCase();
+  wrap.innerHTML=`
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:28px;flex-wrap:wrap">
+      <div class="avatar-xl" id="edit-avatar" style="background:${profile.avatar_color||'#E8621A'}">${ini}</div>
+      <div>
+        <h1 class="page-title" style="margin-bottom:2px">${esc(profile.display_name||profile.username)}</h1>
+        <p class="page-sub" style="margin-bottom:8px">@${esc(profile.username)}</p>
+        <div class="color-picker" id="color-picker">
+          ${COLORS.map(c=>`<button class="color-swatch${c===pendingColor?' color-selected':''}" style="background:${c}" data-color="${c}" onclick="pickColor('${c}',this)"></button>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="stat-grid" style="margin-bottom:28px">
+      <div class="stat-box"><div class="stat-val">${profile.points}</div><div class="stat-lbl">Points</div></div>
+      <div class="stat-box"><div class="stat-val">${profile.tasks_completed}</div><div class="stat-lbl">Done</div></div>
+      <div class="stat-box"><div class="stat-val">${profile.tasks_posted}</div><div class="stat-lbl">Posted</div></div>
+      <div class="stat-box"><div class="stat-val">${profile.streak||0}🔥</div><div class="stat-lbl">Streak</div></div>
+    </div>
+    <div style="max-width:500px">
+      <div class="form-group">
+        <label>Display name</label>
+        <input type="text" id="edit-name" value="${esc(profile.display_name||profile.username)}" maxlength="30"/>
+      </div>
+      <div class="form-group">
+        <label>Bio <span style="font-weight:400;text-transform:none;font-size:0.8rem;color:var(--muted2)">(max 160 chars)</span></label>
+        <textarea id="edit-bio" maxlength="160" placeholder="Tell people about yourself…">${esc(profile.bio||'')}</textarea>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="text" value="${esc(ctx.email)}" disabled style="opacity:0.5"/>
+      </div>
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" value="${esc(profile.username)}" disabled style="opacity:0.5"/>
+      </div>
+      <div class="error-msg" id="profile-err"></div>
+      <button class="btn btn-primary" onclick="saveProfile()">Save changes</button>
+    </div>
+    <div class="divider"></div>
+    <h3 style="font-size:0.95rem;margin-bottom:16px">Point history</h3>
+    <div id="ledger-feed"></div>
+    <div class="divider"></div>
+    <button class="btn btn-danger btn-sm" onclick="doSignOut()">Sign out</button>`;
+
+  const LABELS={task_approved:'✓ Task completed',task_posted:'Posted a task',signup_bonus:'🎉 Signup bonus',daily_bonus:'🎁 Daily bonus',task_refund:'↩ Close refund',task_expired_refund:'⏰ Expired refund',achievement_reward:'🎖️ Achievement',referral_bonus:'🤝 Referral bonus',referral_reward:'🤝 Referral reward',task_boost:'⚡ Task boosted',admin_adjustment:'🛡️ Admin adjustment'};
+  const {data:ledger}=await supabase.from('point_ledger').select('*').eq('user_id',profile.id).order('created_at',{ascending:false}).limit(30);
+  const lf=document.getElementById('ledger-feed');
+  lf.innerHTML=(!ledger||!ledger.length)?'<p style="color:var(--muted);font-size:0.85rem">No history yet.</p>':
+    ledger.map(e=>`<div class="ledger-row"><span class="ledger-reason">${LABELS[e.reason]||e.reason}</span><span class="ledger-delta ${e.delta>0?'delta-pos':'delta-neg'}">${e.delta>0?'+':''}${e.delta}</span></div>`).join('');
+
+  window.pickColor=(color,btn)=>{
+    pendingColor=color;
+    document.querySelectorAll('.color-swatch').forEach(b=>b.classList.remove('color-selected'));
+    btn.classList.add('color-selected');
+    document.getElementById('edit-avatar').style.background=color;
+  };
+
+  window.saveProfile=async()=>{
+    const name=document.getElementById('edit-name').value.trim();
+    const bio=document.getElementById('edit-bio').value.trim();
+    const errEl=document.getElementById('profile-err');
+    errEl.textContent=''; errEl.style.color='';
+    const {data,error}=await supabase.rpc('update_profile',{p_display_name:name||null,p_bio:bio||null,p_avatar_color:pendingColor});
+    if(error||data?.error){errEl.textContent=data?.error||error.message;return;}
+    profile.display_name=name; profile.bio=bio; profile.avatar_color=pendingColor;
+    errEl.style.color='var(--green)'; errEl.textContent='✓ Profile saved!';
+    setTimeout(()=>{errEl.textContent='';errEl.style.color='';},3000);
+  };
+</script>
+</body></html>

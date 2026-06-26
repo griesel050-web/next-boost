@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Achievements — Next Boost</title><meta name="robots" content="noindex"/>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
+  <link rel="stylesheet" href="/assets/css/main.css"/>
+  <link rel="stylesheet" href="/assets/css/app.css"/>
+</head>
+<body>
+<nav class="nav" id="main-nav"></nav>
+<div class="app-shell">
+  <aside class="app-sidebar" id="app-sidebar"></aside>
+  <div class="page-content">
+<h1 class="page-title">Achievements</h1>
+<p class="page-sub">Unlock achievements to earn bonus points. Grey = locked, coloured = earned.</p>
+<div id="ach-grid" class="achievements-grid"><div class="spinner"></div></div></div>
+</div>
+<nav class="mobile-nav-bar" id="mobile-nav"></nav>
+
+<script type="module">
+  import { supabase, esc } from '/assets/js/shared.js';
+  import { initApp } from '/assets/js/app.js';
+  const ctx=await initApp('achievements'); if(!ctx) return;
+  const profile=ctx.profile;
+
+  const {data:all}=await supabase.from('achievements').select('*').order('requirement_value');
+  const {data:earned}=await supabase.from('user_achievements').select('achievement_id').eq('user_id',profile.id);
+  const earnedSet=new Set((earned||[]).map(e=>e.achievement_id));
+
+  const grid=document.getElementById('ach-grid');
+  if(!all||!all.length){grid.innerHTML='<p style="color:var(--muted)">No achievements yet.</p>';return;}
+  grid.innerHTML='';
+  all.forEach((a,i)=>{
+    const done=earnedSet.has(a.id);
+    const card=document.createElement('div');
+    card.className=`ach-card card-animate${done?' earned':''}`;
+    card.style.setProperty('--delay',`${i*0.04}s`);
+    card.innerHTML=`
+      <div class="ach-icon">${a.icon}</div>
+      <div>
+        <div class="ach-title">${esc(a.title)}</div>
+        <div class="ach-desc">${esc(a.description)}</div>
+        ${a.points_reward>0?`<div class="ach-pts">+${a.points_reward} pts</div>`:''}
+        ${done?'<div class="ach-earned-badge">✓ Earned</div>':''}
+      </div>`;
+    grid.appendChild(card);
+  });
+</script>
+</body></html>

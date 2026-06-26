@@ -13,7 +13,7 @@
 <body>
   <div class="auth-page">
     <div class="auth-card">
-      <div class="auth-logo"><a href="/"><img src="/assets/img/logo.svg" alt="Next Boost"/></a></div>
+      <div class="auth-logo"><a href="/"><img src="/assets/img/logo.png" alt="Next Boost" style="height:36px"/></a></div>
       <h1>Create your account</h1>
       <p class="auth-sub">Free to join. Get 100 points just for signing up.</p>
 
@@ -53,6 +53,16 @@
     const { data: { session } } = await supabase.auth.getSession();
     if (session) go('/dashboard/');
 
+    // Check for referral code in URL
+    const urlRef = new URLSearchParams(window.location.search).get('ref');
+    if (urlRef) {
+      const refNote = document.createElement('div');
+      refNote.className = 'alert alert-info';
+      refNote.style.marginBottom = '16px';
+      refNote.textContent = `🤝 Referral code "${urlRef}" — you'll both get 50 bonus points!`;
+      document.querySelector('.auth-card').insertBefore(refNote, document.querySelector('.form-group'));
+    }
+
     window.doSignup = async () => {
       const username = document.getElementById('username').value.trim();
       const email = document.getElementById('email').value.trim();
@@ -87,6 +97,9 @@
         btn.textContent = 'Create account';
       } else {
         document.querySelector('.auth-page').style.display = 'none';
+        // Store referral code to apply after confirmation
+        const urlRef = new URLSearchParams(window.location.search).get('ref');
+        if (urlRef) localStorage.setItem('nb_pending_ref', urlRef);
         document.getElementById('success-screen').style.display = 'flex';
         document.getElementById('success-msg').textContent = `We sent a confirmation link to ${email}. Click it to activate your account and get your 100 free points.`;
       }

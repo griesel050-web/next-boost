@@ -31,8 +31,16 @@
         <div style="font-size:3rem;margin-bottom:20px">🎉</div>
         <h1>Email confirmed!</h1>
         <p class="auth-sub">Your account is active. You've got 100 free points to get started.</p>
-        <a href="/dashboard/" class="btn btn-primary btn-full" style="margin-top:20px">Go to dashboard</a>
+        <a href="/earn/" class="btn btn-primary btn-full" style="margin-top:20px">Go to dashboard</a>
       `;
+      // Apply pending referral code if any
+      const pendingRef = localStorage.getItem('nb_pending_ref');
+      if (pendingRef) {
+        localStorage.removeItem('nb_pending_ref');
+        const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+        // Will be applied on first earn page load via initApp
+        sessionStorage.setItem('nb_apply_ref', pendingRef);
+      }
     } else {
       // Wait for auth state change (token may still be processing from URL hash)
       const timeout = setTimeout(() => {

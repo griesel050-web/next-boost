@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Post a Task — Next Boost</title>
+  <meta name="robots" content="noindex"/>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
+  <link rel="stylesheet" href="/assets/css/main.css"/>
+  <link rel="stylesheet" href="/assets/css/app.css"/>
+  
+</head>
+<body>
+<nav class="nav" id="main-nav"></nav>
+<div class="app-shell">
+  <aside class="app-sidebar" id="app-sidebar"></aside>
+  <div class="page-content">
+    
+<h1 class="page-title">Post a Task</h1>
+<p class="page-sub">Points are deducted upfront. Unused slots refunded on close. Tasks expire after 7 days.</p>
+<div class="card card-pad" style="max-width:560px">
+  <div class="form-row">
+    <div class="form-group">
+      <label for="p-platform">Platform</label>
+      <select id="p-platform" onchange="onPlatformChange()">
+        <option value="tiktok">TikTok</option>
+        <option value="instagram">Instagram</option>
+        <option value="youtube">YouTube</option>
+        <option value="discord">Discord</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="p-type">Task type</label>
+      <select id="p-type">
+        <option value="follow">Follow</option>
+        <option value="like">Like</option>
+        <option value="view">View</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="p-url">Profile / video URL</label>
+    <input type="url" id="p-url" placeholder="https://www.tiktok.com/@username" oninput="onUrlInput()"/>
+    <div class="url-hint" id="url-hint"></div>
+  </div>
+  <div class="form-group">
+    <label for="p-desc">Instructions <span style="color:var(--muted2);font-weight:400;text-transform:none;font-size:0.8rem">(optional)</span></label>
+    <textarea id="p-desc" placeholder="e.g. Follow my TikTok — I post daily gaming content"></textarea>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label for="p-points">Points per completion</label>
+      <select id="p-points" onchange="updateCost()">
+        <option value="10">10 pts</option>
+        <option value="20">20 pts</option>
+        <option value="30">30 pts</option>
+        <option value="50">50 pts</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="p-slots">Number of slots</label>
+      <input type="number" id="p-slots" value="5" min="1" max="500" oninput="updateCost()"/>
+    </div>
+  </div>
+  <div class="cost-box">
+    <div class="cost-row"><span>Points per completion</span><strong id="c-reward">10</strong></div>
+    <div class="cost-row"><span>Number of slots</span><strong id="c-slots">5</strong></div>
+    <div class="cost-row cost-total"><span>Total cost upfront</span><strong id="c-total" style="color:var(--orange)">50 pts</strong></div>
+    <div class="cost-row" style="border-top:none;padding-top:0;margin-top:-4px">
+      <span style="color:var(--muted)">Your balance</span><span id="c-balance" style="color:var(--muted)">0 pts</span>
+    </div>
+  </div>
+  <div class="error-msg" id="post-err"></div>
+  <button class="btn btn-primary" id="post-btn" onclick="postTask()">Post task</button>
+</div>
+  </div>
+</div>
+<nav class="mobile-nav-bar" id="mobile-nav"></nav>
+<script type="module">
+  import { supabase, esc } from '/assets/js/shared.js';
+  import { initApp, updateNavPoints } from '/assets/js/app.js';
+  const RULES={
+    tiktok:{hosts:['tiktok.com','vm.tiktok.com'],placeholder:'https://www.tiktok.com/@username',hint:'Must be a tiktok.com URL'},
+    instagram:{hosts:['instagram.com','instagr.am'],placeholder:'https://www.instagram.com/username/',hint:'Must be an instagram.com URL'},
+    youtube:{hosts:['youtube.com','youtu.be'],placeholder:'https://www.youtube.com/@channel',hint:'Must be a youtube.com or youtu.be URL'},
+    discord:{hosts:['discord.gg','discord.com'],placeholder:'https://discord.gg/yourserver',hint:'Must be a discord.gg invite URL'},
+  };
+  const PTYPES={tiktok:['follow','like','view'],instagram:['follow','like','view'],youtube:['follow','like','view'],discord:['join']};
+  const TLABELS={follow:'Follow',like:'Like',view:'View',join:'Join Server'};
+
+  function validateUrl(url,plat){try{const h=new URL(url).hostname.replace(/^www\./,'');return RULES[plat].hosts.some(x=>h===x.replace(/^www\./,'')||h.endsWith('.'+x.replace(/^www\./,'')));}catch{return false;}}
+
+  const ctx=await initApp('post-task');
+  if(!ctx) return;
+  let profile=ctx.profile;
+
+  window.onPlatformChange=()=>{
+    const p=document.getElementById('p-platform').value;
+    document.getElementById('p-url').placeholder=RULES[p].placeholder;
+    const types=PTYPES[p];
+    document.getElementById('p-type').innerHTML=types.map(t=>`<option value="${t}">${TLABELS[t]}</option>`).join('');
+    onUrlInput();
+  };
+  window.onUrlInput=()=>{
+    const url=document.getElementById('p-url').value.trim();
+    const plat=document.getElementById('p-platform').value;
+    const hint=document.getElementById('url-hint');
+    if(!url){hint.textContent='';hint.className='url-hint';return;}
+    if(validateUrl(url,plat)){hint.textContent='✓ Valid URL';hint.className='url-hint url-valid';}
+    else{hint.textContent='✗ '+RULES[plat].hint;hint.className='url-hint url-invalid';}
+  };
+  window.updateCost=()=>{
+    const r=parseInt(document.getElementById('p-points').value)||0;
+    const s=parseInt(document.getElementById('p-slots').value)||0;
+    document.getElementById('c-reward').textContent=r;
+    document.getElementById('c-slots').textContent=s;
+    document.getElementById('c-total').textContent=(r*s)+' pts';
+    document.getElementById('c-balance').textContent=profile.points+' pts';
+  };
+  onPlatformChange(); updateCost();
+
+  window.postTask=async()=>{
+    const platform=document.getElementById('p-platform').value;
+    const type=document.getElementById('p-type').value;
+    const url=document.getElementById('p-url').value.trim();
+    const desc=document.getElementById('p-desc').value.trim();
+    const reward=parseInt(document.getElementById('p-points').value);
+    const slots=parseInt(document.getElementById('p-slots').value);
+    const errEl=document.getElementById('post-err');
+    const btn=document.getElementById('post-btn');
+    errEl.textContent='';
+    if(!url){errEl.textContent='Please enter a URL.';return;}
+    if(!validateUrl(url,platform)){errEl.textContent=RULES[platform].hint+'. Example: '+RULES[platform].placeholder;return;}
+    if(!slots||slots<1){errEl.textContent='Enter at least 1 slot.';return;}
+    const total=reward*slots;
+    if(profile.points<total){errEl.textContent=`Not enough points. This costs ${total} pts, you have ${profile.points}.`;return;}
+    btn.disabled=true; btn.textContent='Posting…';
+    const {data,error}=await supabase.rpc('post_task',{p_platform:platform,p_type:type,p_target:url,p_description:desc||null,p_points_reward:reward,p_max_completions:slots});
+    btn.disabled=false; btn.textContent='Post task';
+    if(error||data?.error){errEl.textContent=data?.error||error.message;return;}
+    const {data:p}=await supabase.from('profiles').select('points,tasks_posted').eq('id',profile.id).single();
+    if(p){profile.points=p.points;updateNavPoints(p.points);}
+    document.getElementById('p-url').value='';
+    document.getElementById('p-desc').value='';
+    document.getElementById('p-slots').value='5';
+    document.getElementById('url-hint').textContent='';
+    updateCost();
+    // Show success
+    errEl.style.color='var(--green)';
+    errEl.textContent=`✓ Task posted! ${data.total_cost} pts deducted. (${slots} slots × ${reward} pts)`;
+    setTimeout(()=>{errEl.textContent='';errEl.style.color='';},4000);
+  };
+</script>
+</body>
+</html>

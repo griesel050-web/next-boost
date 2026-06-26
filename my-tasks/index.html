@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Tasks — Next Boost</title><meta name="robots" content="noindex"/>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
+  <link rel="stylesheet" href="/assets/css/main.css"/>
+  <link rel="stylesheet" href="/assets/css/app.css"/>
+</head>
+<body>
+<nav class="nav" id="main-nav"></nav>
+<div class="app-shell">
+  <aside class="app-sidebar" id="app-sidebar"></aside>
+  <div class="page-content">
+<h1 class="page-title">My Tasks</h1>
+<p class="page-sub">Closing a task refunds all unused slot points instantly.</p>
+<div id="tasks-feed" class="task-feed"><div class="spinner"></div></div></div>
+</div>
+<nav class="mobile-nav-bar" id="mobile-nav"></nav>
+
+<script type="module">
+  import { supabase, esc } from '/assets/js/shared.js';
+  import { initApp, updateNavPoints } from '/assets/js/app.js';
+  const PE={tiktok:'🎵',instagram:'📸',youtube:'▶️',discord:'💬'};
+  const PC={tiktok:'plat-tiktok',instagram:'plat-instagram',youtube:'plat-youtube',discord:'plat-discord'};
+  const TL={follow:'Follow',like:'Like',view:'View',join:'Join'};
+  const ctx=await initApp('my-tasks'); if(!ctx) return;
+  let profile=ctx.profile;
+
+  async function load(){
+    const feed=document.getElementById('tasks-feed');
+    feed.innerHTML='<div class="spinner"></div>';
+    const {data:tasks,error}=await supabase.from('tasks').select('*').eq('owner_id',profile.id).order('created_at',{ascending:false});
+    if(!tasks||!tasks.length){feed.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><p>No tasks yet. <a href="/post-task/" style="color:var(--orange)">Post your first →</a></p></div>';return;}
+    feed.innerHTML='';
+    tasks.forEach((t,i)=>{
+      const sl=t.max_completions-t.completions_count;
+      const unused=sl*t.points_reward;
+      const exp=Math.max(0,Math.ceil((new Date(t.expires_at)-Date.now())/86400000));
+      const pct=Math.round(t.completions_count/t.max_completions*100);
+      const card=document.createElement('div');
+      card.className='task-card card-animate'; card.style.setProperty('--delay',`${i*0.04}s`);
+      card.innerHTML=`
+        <div class="task-plat-icon ${PC[t.platform]||''}">${PE[t.platform]||'🌐'}</div>
+        <div class="task-info">
+          <h4 style="font-size:0.82rem;word-break:break-all">${esc(t.target)}</h4>
+          <p>${t.completions_count}/${t.max_completions} done · ${t.points_reward} pts each · ${exp}d left</p>
+          <div style="margin-top:6px;height:4px;background:var(--surface3);border-radius:4px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--orange),var(--amber));border-radius:4px"></div>
+          </div>
+        </div>
+        <div class="task-actions">
+          <span class="type-badge type-${t.type}">${TL[t.type]}</span>
+          ${t.is_boosted?'<span class="boost-badge">⚡ Boosted</span>':''}
+          ${t.is_active?'<span class="status-chip chip-active">Active</span>':'<span class="status-chip chip-closed">Closed</span>'}
+          <span class="slots-badge">${sl} left</span>
+          ${t.is_active?`<button class="btn btn-ghost btn-sm" onclick="window.boostTask('${t.id}')">⚡ Boost</button><button class="btn btn-ghost btn-sm" onclick="window.closeTask('${t.id}',${unused})">Close (+${unused} pts)</button>`:''}
+        </div>`;
+      feed.appendChild(card);
+    });
+  }
+
+  window.closeTask=async(id,refund)=>{
+    if(!confirm(`Close task? +${refund} pts refunded.`)) return;
+    const {data,error}=await supabase.rpc('close_task',{p_task_id:id});
+    if(error||data?.error){alert(data?.error||error.message);return;}
+    const {data:p}=await supabase.from('profiles').select('points').eq('id',profile.id).single();
+    if(p){profile.points=p.points;updateNavPoints(p.points);}
+    load();
+  };
+  window.boostTask=async(id)=>{
+    if(!confirm('Boost for 24h? Costs 50 pts — task pins to top of earn feed.')) return;
+    const {data,error}=await supabase.rpc('boost_task',{p_task_id:id});
+    if(error||data?.error){alert(data?.error||error.message);return;}
+    const {data:p}=await supabase.from('profiles').select('points').eq('id',profile.id).single();
+    if(p){profile.points=p.points;updateNavPoints(p.points);}
+    load();
+  };
+  load();
+</script>
+</body></html>
