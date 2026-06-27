@@ -32,6 +32,7 @@
             <option value="youtube">YouTube</option>
             <option value="discord">Discord</option>
             <option value="website">Website</option>
+            <option value="twitch">Twitch</option>
           </select>
         </div>
         <div class="form-group">
@@ -94,6 +95,7 @@ const RULES = {
   instagram: { hosts:['instagram.com','instagr.am'], placeholder:'https://www.instagram.com/username/', hint:'Must be an instagram.com URL', types:['follow','like','view'] },
   youtube:   { hosts:['youtube.com','youtu.be'], placeholder:'https://www.youtube.com/@channel', hint:'Must be a youtube.com or youtu.be URL', types:['follow','like','view'] },
   discord:   { hosts:['discord.gg','discord.com'], placeholder:'https://discord.gg/yourserver', hint:'Must be a discord.gg invite URL', types:['join'] },
+  twitch:    { hosts:['twitch.tv','www.twitch.tv'], placeholder:'https://www.twitch.tv/channelname', hint:'Must be a twitch.tv URL', types:['follow'] },
   website:   { hosts:[], placeholder:'https://yourwebsite.com', hint:'Must be a valid https:// URL', types:['website'] },
 };
 const TLABELS = { follow:'Follow', like:'Like', view:'View', join:'Join Server', website:'Visit Website' };

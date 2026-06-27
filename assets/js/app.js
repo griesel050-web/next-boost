@@ -45,6 +45,26 @@ export async function initApp(currentPage = '') {
   // Apply saved theme immediately
   applyTheme(profile.theme || 'dark-orange', profile.accent_color || null);
 
+  // Apply font
+  const fontMap = { space:'font-space', mono:'font-mono', rounded:'font-rounded' };
+  const fontClass = fontMap[profile.font_choice];
+  if (fontClass) document.body.classList.add(fontClass);
+  if (profile.font_choice === 'rounded') {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap';
+    document.head.appendChild(link);
+  }
+
+  // Apply compact mode
+  if (profile.compact_mode) document.body.classList.add('compact-mode');
+
+  // Apply custom background
+  if (profile.custom_bg) {
+    document.body.style.backgroundImage = `url('${profile.custom_bg}')`;
+    document.body.classList.add('has-custom-bg');
+  }
+
   // Render shell
   renderShell(profile, currentPage);
 

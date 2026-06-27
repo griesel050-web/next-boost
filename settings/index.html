@@ -15,90 +15,369 @@
 <div class="app-shell">
   <aside class="app-sidebar" id="app-sidebar"></aside>
   <div class="page-content">
-<h1 class="page-title">Settings</h1>
-<div class="settings-sections">
-  <div class="settings-section">
-    <div class="settings-section-header"><h3>🎨 Theme</h3><p>Choose your colour scheme</p></div>
-    <div class="settings-section-body">
-      <div class="theme-grid">
-        <button class="theme-swatch" data-theme="dark-orange" onclick="pickTheme('dark-orange',this)"><div class="theme-preview" style="background:linear-gradient(135deg,#0e0b09,#E8621A)"></div><span>Dark Orange</span></button>
-        <button class="theme-swatch" data-theme="dark-purple" onclick="pickTheme('dark-purple',this)"><div class="theme-preview" style="background:linear-gradient(135deg,#0d0a14,#7c3aed)"></div><span>Dark Purple</span></button>
-        <button class="theme-swatch" data-theme="dark-blue"   onclick="pickTheme('dark-blue',this)"><div class="theme-preview" style="background:linear-gradient(135deg,#090d14,#0ea5e9)"></div><span>Dark Blue</span></button>
-        <button class="theme-swatch" data-theme="dark-green"  onclick="pickTheme('dark-green',this)"><div class="theme-preview" style="background:linear-gradient(135deg,#090e0b,#22c55e)"></div><span>Dark Green</span></button>
-        <button class="theme-swatch" data-theme="midnight"    onclick="pickTheme('midnight',this)"><div class="theme-preview" style="background:linear-gradient(135deg,#06070a,#4a5568)"></div><span>Midnight</span></button>
+    <h1 class="page-title">Settings</h1>
+    <p class="page-sub">Customize your Next Boost experience.</p>
+
+    <div class="settings-sections">
+
+      <!-- APPEARANCE -->
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <h3>🎨 Theme</h3>
+          <p>Choose your colour scheme</p>
+        </div>
+        <div class="settings-section-body">
+          <div class="theme-grid">
+            <button class="theme-swatch" data-theme="dark-orange" onclick="pickTheme('dark-orange',this)">
+              <div class="theme-preview" style="background:linear-gradient(135deg,#0e0b09,#E8621A)"></div><span>Dark Orange</span>
+            </button>
+            <button class="theme-swatch" data-theme="dark-purple" onclick="pickTheme('dark-purple',this)">
+              <div class="theme-preview" style="background:linear-gradient(135deg,#0d0a14,#7c3aed)"></div><span>Dark Purple</span>
+            </button>
+            <button class="theme-swatch" data-theme="dark-blue" onclick="pickTheme('dark-blue',this)">
+              <div class="theme-preview" style="background:linear-gradient(135deg,#090d14,#0ea5e9)"></div><span>Dark Blue</span>
+            </button>
+            <button class="theme-swatch" data-theme="dark-green" onclick="pickTheme('dark-green',this)">
+              <div class="theme-preview" style="background:linear-gradient(135deg,#090e0b,#22c55e)"></div><span>Dark Green</span>
+            </button>
+            <button class="theme-swatch" data-theme="midnight" onclick="pickTheme('midnight',this)">
+              <div class="theme-preview" style="background:linear-gradient(135deg,#06070a,#4a5568)"></div><span>Midnight</span>
+            </button>
+          </div>
+        </div>
       </div>
+
+      <!-- ACCENT COLOR -->
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <h3>🎯 Custom Accent Color</h3>
+          <p>Override the main accent with any color you want</p>
+        </div>
+        <div class="settings-section-body">
+          <div class="accent-row">
+            <input type="color" id="accent-input" value="#E8621A" oninput="previewAccent(this.value)"/>
+            <span id="accent-val" style="color:var(--muted);font-size:0.88rem">#E8621A</span>
+            <button class="btn btn-ghost btn-sm" onclick="resetAccent()">Reset to theme</button>
+          </div>
+          <!-- Quick accent presets -->
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+            <span style="font-size:0.78rem;color:var(--muted);align-self:center">Presets:</span>
+            <button class="color-swatch" style="background:#E8621A;width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer" onclick="setAccentPreset('#E8621A')"></button>
+            <button class="color-swatch" style="background:#7c3aed;width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer" onclick="setAccentPreset('#7c3aed')"></button>
+            <button class="color-swatch" style="background:#0ea5e9;width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer" onclick="setAccentPreset('#0ea5e9')"></button>
+            <button class="color-swatch" style="background:#22c55e;width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer" onclick="setAccentPreset('#22c55e')"></button>
+            <button class="color-swatch" style="background:#e1306c;width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer" onclick="setAccentPreset('#e1306c')"></button>
+            <button class="color-swatch" style="background:#F0A030;width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer" onclick="setAccentPreset('#F0A030')"></button>
+            <button class="color-swatch" style="background:#ff0050;width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer" onclick="setAccentPreset('#ff0050')"></button>
+            <button class="color-swatch" style="background:#9146FF;width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer" onclick="setAccentPreset('#9146FF')"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- FONT -->
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <h3>✏️ Font Style</h3>
+          <p>Change the app's typography</p>
+        </div>
+        <div class="settings-section-body">
+          <div class="font-grid">
+            <button class="font-btn" data-font="inter" onclick="pickFont('inter',this)">
+              <div class="font-sample" style="font-family:'Inter',sans-serif">Aa</div>
+              <div class="font-name">Inter <span style="color:var(--orange)">(default)</span></div>
+            </button>
+            <button class="font-btn" data-font="space" onclick="pickFont('space',this)">
+              <div class="font-sample" style="font-family:'Space Grotesk',sans-serif">Aa</div>
+              <div class="font-name">Space Grotesk</div>
+            </button>
+            <button class="font-btn" data-font="mono" onclick="pickFont('mono',this)">
+              <div class="font-sample" style="font-family:'Courier New',monospace">Aa</div>
+              <div class="font-name">Monospace</div>
+            </button>
+            <button class="font-btn" data-font="rounded" onclick="pickFont('rounded',this)">
+              <div class="font-sample" style="font-family:'Nunito',sans-serif">Aa</div>
+              <div class="font-name">Rounded</div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LAYOUT -->
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <h3>📐 Layout</h3>
+          <p>Adjust how the interface is displayed</p>
+        </div>
+        <div class="settings-section-body" style="padding-top:0;padding-bottom:0">
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Compact mode</div>
+              <div class="toggle-desc">Reduces padding and spacing for more content on screen</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-compact"/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Show earn hints</div>
+              <div class="toggle-desc">Show tips and instructions in the earn feed</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-hints" checked/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRIVACY -->
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <h3>🔒 Privacy</h3>
+          <p>Control who can see your information</p>
+        </div>
+        <div class="settings-section-body" style="padding-top:0;padding-bottom:0">
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Public profile</div>
+              <div class="toggle-desc">Allow other users to view your profile from the leaderboard</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-public" checked/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTIFICATIONS -->
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <h3>🔔 Notifications</h3>
+          <p>Choose what you get notified about</p>
+        </div>
+        <div class="settings-section-body" style="padding-top:0;padding-bottom:0">
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Achievement alerts</div>
+              <div class="toggle-desc">Get notified when you unlock an achievement</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-notif-ach" checked/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Streak milestones</div>
+              <div class="toggle-desc">Celebrate your daily streak milestones</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-notif-streak" checked/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Referral bonuses</div>
+              <div class="toggle-desc">Know when a friend uses your referral code</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-notif-ref" checked/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- CUSTOM BACKGROUND -->
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <h3>🖼️ Custom Background</h3>
+          <p>Set a custom background image URL (optional)</p>
+        </div>
+        <div class="settings-section-body">
+          <div class="form-group" style="margin-bottom:10px">
+            <input type="url" id="custom-bg-input" placeholder="https://example.com/your-background.jpg"/>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-ghost btn-sm" onclick="previewBg()">Preview</button>
+            <button class="btn btn-ghost btn-sm" onclick="clearBg()">Remove background</button>
+          </div>
+          <p style="font-size:0.78rem;color:var(--muted);margin-top:8px">Use a dark image for best readability. Image must be a public URL.</p>
+        </div>
+      </div>
+
+      <!-- SAVE -->
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="saveSettings()">Save all settings</button>
+        <span id="settings-msg" style="font-size:0.85rem"></span>
+      </div>
+
+      <!-- DANGER ZONE -->
+      <div class="settings-section" style="border-color:rgba(232,74,74,0.25)">
+        <div class="settings-section-header">
+          <h3 style="color:var(--red)">⚠️ Danger Zone</h3>
+          <p>Irreversible actions</p>
+        </div>
+        <div class="settings-section-body">
+          <button class="btn btn-danger btn-sm" onclick="doSignOut()">Sign out</button>
+        </div>
+      </div>
+
     </div>
   </div>
-  <div class="settings-section">
-    <div class="settings-section-header"><h3>🎯 Custom Accent Color</h3><p>Override the main accent with any color</p></div>
-    <div class="settings-section-body">
-      <div class="accent-row">
-        <input type="color" id="accent-input" value="#E8621A" oninput="previewAccent(this.value)"/>
-        <span id="accent-val" style="color:var(--muted);font-size:0.88rem">#E8621A</span>
-        <button class="btn btn-ghost btn-sm" onclick="resetAccent()">Reset</button>
-      </div>
-    </div>
-  </div>
-  
-  <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-    <button class="btn btn-primary" onclick="saveSettings()">Save settings</button>
-    <span id="settings-msg" style="font-size:0.85rem"></span>
-  </div>
-  <div class="settings-section" style="border-color:rgba(232,74,74,0.2)">
-    <div class="settings-section-header"><h3>⚠️ Account</h3><p>Danger zone</p></div>
-    <div class="settings-section-body"><button class="btn btn-danger btn-sm" onclick="doSignOut()">Sign out</button></div>
-  </div>
-</div></div>
 </div>
 <nav class="mobile-nav-bar" id="mobile-nav"></nav>
 <script type="module">
 import { supabase } from '/assets/js/shared.js';
 import { initApp, THEMES, applyTheme } from '/assets/js/app.js';
-let pendingTheme, pendingAccent;
+let pendingTheme, pendingAccent, pendingFont, profile;
 
-async function main(){
-  const ctx=await initApp('settings');
-  if(!ctx) return;
-  const profile=ctx.profile;
-  pendingTheme=profile.theme||'dark-orange';
-  pendingAccent=profile.accent_color||null;
+const FONT_MAP = {
+  inter:   { class: '', family: "'Inter', sans-serif" },
+  space:   { class: 'font-space', family: "'Space Grotesk', sans-serif" },
+  mono:    { class: 'font-mono', family: "'Courier New', monospace" },
+  rounded: { class: 'font-rounded', family: "'Nunito', sans-serif" },
+};
 
-  document.querySelectorAll('.theme-swatch').forEach(b=>{
-    if(b.dataset.theme===pendingTheme) b.classList.add('theme-selected');
-  });
-  if(pendingAccent){
-    document.getElementById('accent-input').value=pendingAccent;
-    document.getElementById('accent-val').textContent=pendingAccent;
-  }
+function applyFont(font) {
+  document.body.classList.remove('font-space', 'font-mono', 'font-rounded');
+  const f = FONT_MAP[font] || FONT_MAP['inter'];
+  if (f.class) document.body.classList.add(f.class);
 }
 
-window.pickTheme=(theme,btn)=>{
-  pendingTheme=theme;
-  document.querySelectorAll('.theme-swatch').forEach(b=>b.classList.remove('theme-selected'));
+async function main() {
+  const ctx = await initApp('settings');
+  if (!ctx) return;
+  profile = ctx.profile;
+
+  pendingTheme = profile.theme || 'dark-orange';
+  pendingAccent = profile.accent_color || null;
+  pendingFont = profile.font_choice || 'inter';
+
+  // Highlight current theme
+  document.querySelectorAll('.theme-swatch').forEach(b => {
+    if (b.dataset.theme === pendingTheme) b.classList.add('theme-selected');
+  });
+
+  // Set accent
+  if (pendingAccent) {
+    document.getElementById('accent-input').value = pendingAccent;
+    document.getElementById('accent-val').textContent = pendingAccent;
+  }
+
+  // Highlight current font
+  document.querySelectorAll('.font-btn').forEach(b => {
+    if (b.dataset.font === pendingFont) b.classList.add('selected');
+  });
+
+  // Set toggles from profile
+  document.getElementById('toggle-compact').checked = profile.compact_mode || false;
+  document.getElementById('toggle-hints').checked = profile.show_earn_hints !== false;
+  document.getElementById('toggle-public').checked = profile.profile_public !== false;
+
+  // Custom BG
+  if (profile.custom_bg) {
+    document.getElementById('custom-bg-input').value = profile.custom_bg;
+  }
+
+  // Apply compact mode live
+  if (profile.compact_mode) document.body.classList.add('compact-mode');
+
+  // Toggle compact live preview
+  document.getElementById('toggle-compact').addEventListener('change', e => {
+    document.body.classList.toggle('compact-mode', e.target.checked);
+  });
+}
+
+window.pickTheme = (theme, btn) => {
+  pendingTheme = theme;
+  document.querySelectorAll('.theme-swatch').forEach(b => b.classList.remove('theme-selected'));
   btn.classList.add('theme-selected');
-  applyTheme(theme,pendingAccent);
+  applyTheme(theme, pendingAccent);
 };
-window.previewAccent=(val)=>{
-  pendingAccent=val;
-  document.getElementById('accent-val').textContent=val;
-  applyTheme(pendingTheme,val);
+
+window.previewAccent = (val) => {
+  pendingAccent = val;
+  document.getElementById('accent-val').textContent = val;
+  applyTheme(pendingTheme, val);
 };
-window.resetAccent=()=>{
-  pendingAccent=null;
-  const t=THEMES[pendingTheme];
-  document.getElementById('accent-input').value=t.accent;
-  document.getElementById('accent-val').textContent=t.accent;
-  applyTheme(pendingTheme,null);
+
+window.setAccentPreset = (val) => {
+  pendingAccent = val;
+  document.getElementById('accent-input').value = val;
+  document.getElementById('accent-val').textContent = val;
+  applyTheme(pendingTheme, val);
 };
-window.saveSettings=async()=>{
-  const msg=document.getElementById('settings-msg');
-  msg.textContent='Saving…'; msg.style.color='var(--muted)';
-  const {data,error}=await supabase.rpc('save_settings',{p_theme:pendingTheme,p_accent_color:pendingAccent||null});
-  if(error||data?.error){msg.textContent=data?.error||error.message;msg.style.color='var(--red)';return;}
-  msg.textContent='✓ Saved!'; msg.style.color='var(--green)';
-  setTimeout(()=>msg.textContent='',3000);
+
+window.resetAccent = () => {
+  pendingAccent = null;
+  const t = THEMES[pendingTheme];
+  document.getElementById('accent-input').value = t.accent;
+  document.getElementById('accent-val').textContent = t.accent;
+  applyTheme(pendingTheme, null);
+};
+
+window.pickFont = (font, btn) => {
+  pendingFont = font;
+  document.querySelectorAll('.font-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  applyFont(font);
+};
+
+window.previewBg = () => {
+  const url = document.getElementById('custom-bg-input').value.trim();
+  if (!url) return;
+  document.body.style.backgroundImage = `url('${url}')`;
+  document.body.classList.add('has-custom-bg');
+};
+
+window.clearBg = () => {
+  document.getElementById('custom-bg-input').value = '';
+  document.body.style.backgroundImage = '';
+  document.body.classList.remove('has-custom-bg');
+};
+
+window.saveSettings = async () => {
+  const msg = document.getElementById('settings-msg');
+  msg.textContent = 'Saving…'; msg.style.color = 'var(--muted)';
+
+  const customBg = document.getElementById('custom-bg-input').value.trim() || null;
+
+  const { data, error } = await supabase.rpc('save_settings', {
+    p_theme:           pendingTheme,
+    p_accent_color:    pendingAccent || null,
+    p_compact_mode:    document.getElementById('toggle-compact').checked,
+    p_show_earn_hints: document.getElementById('toggle-hints').checked,
+    p_profile_public:  document.getElementById('toggle-public').checked,
+    p_font_choice:     pendingFont || 'inter',
+    p_custom_bg:       customBg,
+  });
+
+  if (error || data?.error) {
+    msg.textContent = data?.error || error.message;
+    msg.style.color = 'var(--red)';
+    return;
+  }
+
+  // Apply bg
+  if (customBg) {
+    document.body.style.backgroundImage = `url('${customBg}')`;
+    document.body.classList.add('has-custom-bg');
+  } else {
+    document.body.style.backgroundImage = '';
+    document.body.classList.remove('has-custom-bg');
+  }
+
+  msg.textContent = '✓ All settings saved!';
+  msg.style.color = 'var(--green)';
+  setTimeout(() => msg.textContent = '', 3000);
 };
 
 main();
 </script>
-</body></html>
+</body>
+</html>
