@@ -61,17 +61,17 @@ function renderShell(profile, currentPage) {
     nav.innerHTML = `
       <a class="nav-logo" href="/"><img src="/assets/img/logo.png" alt="Next Boost" style="height:36px"/></a>
       <div class="nav-links" style="gap:8px">
-        <button class="notif-btn" id="notif-btn" onclick="toggleNotifs()" title="Notifications">
-          🔔<span class="notif-dot" id="notif-dot" style="display:none"></span>
-        </button>
-        <div class="pts-pill" id="nav-pts-pill">⚡ <span id="nav-pts">${profile.points}</span> pts</div>
         <button class="daily-pill" id="daily-pill" onclick="claimBonus()">
           <span class="dp-icon">🎁</span>
           <div style="display:flex;flex-direction:column;line-height:1.2">
             <span class="dp-label" id="dp-label">Daily bonus</span>
-            <span class="dp-pts" id="dp-pts">+15 pts</span>
+            <span class="dp-pts" id="dp-pts">+10 pts</span>
           </div>
           <span class="dp-streak" id="dp-streak" style="display:none"></span>
+        </button>
+        <div class="pts-pill" id="nav-pts-pill">⚡ <span id="nav-pts">${profile.points}</span> pts</div>
+        <button class="notif-btn" id="notif-btn" onclick="toggleNotifs()" title="Notifications">
+          🔔<span class="notif-dot" id="notif-dot" style="display:none"></span>
         </button>
       </div>`;
   }
@@ -93,7 +93,7 @@ function renderShell(profile, currentPage) {
     const links3 = [
       { href: '/profile/',     icon: '👤', label: 'Profile',      page: 'profile' },
       { href: '/settings/',    icon: '⚙️', label: 'Settings',     page: 'settings' },
-      ...(profile.is_admin ? [{ href: '/admin/', icon: '🛡️', label: 'Admin', page: 'admin' }] : []),
+      ...(profile.is_admin ? [{ href: '/admin/', icon: '🛡️', label: 'Admin Panel', page: 'admin' }] : []),
     ];
 
     const renderLinks = (arr) => arr.map(l => `
@@ -145,8 +145,8 @@ async function checkDailyBonus(profile) {
   const label = document.getElementById('dp-label');
   if (!pill) return;
 
-  const total = 15 + (data.streak_bonus || 0);
-  pts.textContent = data.streak_bonus > 0 ? `+${total} pts` : '+15 pts';
+  const total = 10 + (data.streak_bonus || 0);
+  pts.textContent = data.streak_bonus > 0 ? `+${total} pts` : '+10 pts';
   if (data.streak > 1) { streak.textContent = `🔥${data.streak}`; streak.style.display = 'inline-flex'; }
 
   if (data.claimed_today) {

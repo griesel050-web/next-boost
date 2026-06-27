@@ -432,3 +432,24 @@ h1, h2, h3, h4, h5 { font-family: 'Space Grotesk', sans-serif; line-height: 1.2;
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* ============================================================
+   CUSTOM SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--orange); }
+::-webkit-scrollbar-corner { background: var(--surface); }
+* { scrollbar-width: thin; scrollbar-color: var(--border2) var(--surface); }
+
+/* ============================================================
+   PAGE TRANSITION ANIMATIONS
+   ============================================================ */
+.page-content {
+  animation: pageIn 0.22s ease both;
+}
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

@@ -39,10 +39,7 @@
       </div>
     </div>
   </div>
-  <div class="settings-section" id="admin-section" style="display:none">
-    <div class="settings-section-header"><h3>🛡️ Admin</h3><p>You have admin access to the platform</p></div>
-    <div class="settings-section-body"><a href="/admin/" class="btn btn-primary" style="width:fit-content">Open Admin Panel →</a></div>
-  </div>
+  
   <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
     <button class="btn btn-primary" onclick="saveSettings()">Save settings</button>
     <span id="settings-msg" style="font-size:0.85rem"></span>
@@ -73,7 +70,6 @@ async function main(){
     document.getElementById('accent-input').value=pendingAccent;
     document.getElementById('accent-val').textContent=pendingAccent;
   }
-  if(profile.is_admin) document.getElementById('admin-section').style.display='block';
 }
 
 window.pickTheme=(theme,btn)=>{

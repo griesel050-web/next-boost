@@ -350,3 +350,6 @@
   .lb-header, .lb-row { grid-template-columns:44px 1fr 80px; }
   .lb-header span:last-child, .lb-row .lb-done { display:none; }
 }
+
+/* ---- WEBSITE PLATFORM ---- */
+.plat-website { background: rgba(100,116,139,0.15); }

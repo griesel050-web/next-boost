@@ -28,6 +28,7 @@
   <button class="filter-btn" onclick="setFilter('like',this)">Like</button>
   <button class="filter-btn" onclick="setFilter('view',this)">View</button>
   <button class="filter-btn" onclick="setFilter('join',this)">Join</button>
+  <button class="filter-btn" onclick="setFilter('website',this)">🌐 Website</button>
 </div>
 <div id="earn-feed" class="task-feed"><div class="spinner"></div></div>
 <div class="load-more-row" id="load-more" style="display:none">
@@ -38,9 +39,9 @@
 <script type="module">
 import { supabase, esc } from '/assets/js/shared.js';
 import { initApp, updateNavPoints, checkOnboarding, initTaskModal } from '/assets/js/app.js';
-const PE={tiktok:'🎵',instagram:'📸',youtube:'▶️',discord:'💬'};
-const PC={tiktok:'plat-tiktok',instagram:'plat-instagram',youtube:'plat-youtube',discord:'plat-discord'};
-const TL={follow:'Follow',like:'Like',view:'View',join:'Join'};
+const PE={tiktok:'🎵',instagram:'📸',youtube:'▶️',discord:'💬',website:'🌐'};
+const PC={tiktok:'plat-tiktok',instagram:'plat-instagram',youtube:'plat-youtube',discord:'plat-discord',website:'plat-website'};
+const TL={follow:'Follow',like:'Like',view:'View',join:'Join',website:'Visit'};
 const PAGE=15;
 let profile,offset=0,filter='all',myStatus={},allLoaded=[];
 
