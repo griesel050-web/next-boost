@@ -16,23 +16,22 @@
   <aside class="app-sidebar" id="app-sidebar"></aside>
   <div class="page-content">
     <h1 class="page-title">Post a Task</h1>
-    <p class="page-sub">Points deducted upfront. Unused slots refunded minus 7% fee on early close. Tasks expire after 7 days (no fee).</p>
-
-    <div class="alert alert-info" style="max-width:560px;margin-bottom:20px;font-size:0.85rem">
-      ⚠️ You can have a maximum of <strong>5 active tasks</strong> at a time. Your account must be at least 24 hours old to post.
+    <p class="page-sub">Points deducted upfront. Unused slots refunded minus 7% fee on early close. Tasks expire after 7 days.</p>
+    <div class="alert alert-info" style="max-width:580px;margin-bottom:20px;font-size:0.85rem">
+      ⚠️ Max <strong>5 active tasks</strong> at a time. Account must be at least 24 hours old.
     </div>
-
-    <div class="card card-pad" style="max-width:560px">
+    <div class="card card-pad" style="max-width:580px">
+      <!-- Platform + Type -->
       <div class="form-row">
         <div class="form-group">
           <label for="p-platform">Platform</label>
           <select id="p-platform" onchange="onPlatformChange()">
-            <option value="tiktok">TikTok</option>
-            <option value="instagram">Instagram</option>
-            <option value="youtube">YouTube</option>
-            <option value="discord">Discord</option>
-            <option value="website">Website</option>
-            <option value="twitch">Twitch</option>
+            <option value="tiktok">🎵 TikTok</option>
+            <option value="instagram">📸 Instagram</option>
+            <option value="youtube">▶️ YouTube</option>
+            <option value="discord">💬 Discord</option>
+            <option value="twitch">🟣 Twitch</option>
+            <option value="website">🌐 Website</option>
           </select>
         </div>
         <div class="form-group">
@@ -44,15 +43,18 @@
           </select>
         </div>
       </div>
+      <!-- URL -->
       <div class="form-group">
         <label for="p-url" id="url-label">Profile / video URL</label>
         <input type="url" id="p-url" placeholder="https://www.tiktok.com/@username" oninput="onUrlInput()"/>
         <div class="url-hint" id="url-hint"></div>
       </div>
+      <!-- Instructions -->
       <div class="form-group">
         <label for="p-desc">Instructions <span style="font-weight:400;text-transform:none;font-size:0.8rem;color:var(--muted2)">(optional)</span></label>
-        <textarea id="p-desc" placeholder="e.g. Visit our website and browse for 30 seconds"></textarea>
+        <textarea id="p-desc" placeholder="e.g. Visit our website and browse around for a bit"></textarea>
       </div>
+      <!-- Points + Slots (presets) -->
       <div class="form-row">
         <div class="form-group">
           <label for="p-points">Points per completion</label>
@@ -68,11 +70,33 @@
         </div>
         <div class="form-group">
           <label for="p-slots">Number of slots</label>
-          <input type="number" id="p-slots" value="5" min="1" max="500" oninput="updateCost()"/>
+          <select id="p-slots" onchange="updateCost()">
+            <option value="5">5 slots</option>
+            <option value="10">10 slots</option>
+            <option value="25">25 slots</option>
+            <option value="50">50 slots</option>
+            <option value="100">100 slots</option>
+            <option value="250">250 slots</option>
+          </select>
         </div>
       </div>
-      <div class="cost-box">
+      <!-- Duration (shown only for website/visit tasks) -->
+      <div class="form-group" id="duration-group" style="display:none">
+        <label for="p-duration">Time user must spend on page</label>
+        <select id="p-duration" onchange="updateCost()">
+          <option value="10000">10 seconds — free</option>
+          <option value="20000">20 seconds — +2 pts/slot</option>
+          <option value="30000">30 seconds — +5 pts/slot</option>
+          <option value="45000">45 seconds — +10 pts/slot</option>
+          <option value="60000">60 seconds — +20 pts/slot</option>
+          <option value="120000">2 minutes — +50 pts/slot</option>
+        </select>
+        <div style="font-size:0.78rem;color:var(--muted);margin-top:6px">Longer time = more credible visits = costs more. Default 10s applies to all non-website tasks.</div>
+      </div>
+      <!-- Cost breakdown -->
+      <div class="cost-box" id="cost-box">
         <div class="cost-row"><span>Points per completion</span><strong id="c-reward">20</strong></div>
+        <div class="cost-row" id="c-duration-row" style="display:none"><span>Duration surcharge per slot</span><strong id="c-duration-surcharge" style="color:var(--amber)">+0</strong></div>
         <div class="cost-row"><span>Number of slots</span><strong id="c-slots">5</strong></div>
         <div class="cost-row cost-total"><span>Total cost upfront</span><strong id="c-total" style="color:var(--orange)">100 pts</strong></div>
         <div class="cost-row" style="border-top:none;padding-top:0;margin-top:-4px">
@@ -95,17 +119,20 @@ const RULES = {
   instagram: { hosts:['instagram.com','instagr.am'], placeholder:'https://www.instagram.com/username/', hint:'Must be an instagram.com URL', types:['follow','like','view'] },
   youtube:   { hosts:['youtube.com','youtu.be'], placeholder:'https://www.youtube.com/@channel', hint:'Must be a youtube.com or youtu.be URL', types:['follow','like','view'] },
   discord:   { hosts:['discord.gg','discord.com'], placeholder:'https://discord.gg/yourserver', hint:'Must be a discord.gg invite URL', types:['join'] },
-  twitch:    { hosts:['twitch.tv','www.twitch.tv'], placeholder:'https://www.twitch.tv/channelname', hint:'Must be a twitch.tv URL', types:['follow'] },
+  twitch:    { hosts:['twitch.tv'], placeholder:'https://www.twitch.tv/channelname', hint:'Must be a twitch.tv URL', types:['follow','view'] },
   website:   { hosts:[], placeholder:'https://yourwebsite.com', hint:'Must be a valid https:// URL', types:['website'] },
 };
 const TLABELS = { follow:'Follow', like:'Like', view:'View', join:'Join Server', website:'Visit Website' };
+
+const DURATION_SURCHARGE = { 10000:0, 20000:2, 30000:5, 45000:10, 60000:20, 120000:50 };
+
 let profile;
 
 function validateUrl(url, plat) {
   try {
     const parsed = new URL(url);
     if (!parsed.protocol.startsWith('http')) return false;
-    if (plat === 'website') return true; // any https URL
+    if (plat === 'website') return true;
     const h = parsed.hostname.replace(/^www\./, '');
     return RULES[plat].hosts.some(x => h === x || h.endsWith('.' + x));
   } catch { return false; }
@@ -117,7 +144,12 @@ window.onPlatformChange = () => {
   document.getElementById('url-label').textContent = p === 'website' ? 'Website URL to visit' : 'Profile / video URL';
   const types = RULES[p].types;
   document.getElementById('p-type').innerHTML = types.map(t => `<option value="${t}">${TLABELS[t]}</option>`).join('');
+  // Show duration picker only for website tasks
+  const isWebsite = p === 'website';
+  document.getElementById('duration-group').style.display = isWebsite ? 'block' : 'none';
+  document.getElementById('c-duration-row').style.display = isWebsite ? 'flex' : 'none';
   onUrlInput();
+  updateCost();
 };
 
 window.onUrlInput = () => {
@@ -130,11 +162,16 @@ window.onUrlInput = () => {
 };
 
 window.updateCost = () => {
-  const r = parseInt(document.getElementById('p-points').value) || 0;
-  const s = parseInt(document.getElementById('p-slots').value) || 0;
-  document.getElementById('c-reward').textContent = r;
-  document.getElementById('c-slots').textContent = s;
-  document.getElementById('c-total').textContent = (r * s) + ' pts';
+  const reward = parseInt(document.getElementById('p-points').value) || 0;
+  const slots = parseInt(document.getElementById('p-slots').value) || 0;
+  const durMs = parseInt(document.getElementById('p-duration').value) || 10000;
+  const surcharge = DURATION_SURCHARGE[durMs] || 0;
+  const total = (reward + surcharge) * slots;
+
+  document.getElementById('c-reward').textContent = reward;
+  document.getElementById('c-slots').textContent = slots;
+  document.getElementById('c-duration-surcharge').textContent = surcharge > 0 ? `+${surcharge}` : 'Free';
+  document.getElementById('c-total').textContent = total + ' pts';
   if (profile) document.getElementById('c-balance').textContent = profile.points + ' pts';
 };
 
@@ -145,20 +182,26 @@ window.postTask = async () => {
   const desc = document.getElementById('p-desc').value.trim();
   const reward = parseInt(document.getElementById('p-points').value);
   const slots = parseInt(document.getElementById('p-slots').value);
+  const durMs = parseInt(document.getElementById('p-duration').value) || 10000;
   const errEl = document.getElementById('post-err');
   const btn = document.getElementById('post-btn');
   errEl.textContent = ''; errEl.style.color = '';
 
   if (!url) { errEl.textContent = 'Please enter a URL.'; return; }
   if (!validateUrl(url, platform)) { errEl.textContent = RULES[platform].hint; return; }
-  if (!slots || slots < 1) { errEl.textContent = 'Enter at least 1 slot.'; return; }
-  const total = reward * slots;
-  if (profile.points < total) { errEl.textContent = `Not enough points. This costs ${total} pts, you have ${profile.points}.`; return; }
+
+  const surcharge = DURATION_SURCHARGE[durMs] || 0;
+  const total = (reward + surcharge) * slots;
+  if (profile.points < total) {
+    errEl.textContent = `Not enough points. This costs ${total} pts, you have ${profile.points}.`;
+    return;
+  }
 
   btn.disabled = true; btn.textContent = 'Posting…';
   const { data, error } = await supabase.rpc('post_task', {
     p_platform: platform, p_type: type, p_target: url,
-    p_description: desc || null, p_points_reward: reward, p_max_completions: slots
+    p_description: desc || null, p_points_reward: reward,
+    p_max_completions: slots, p_required_duration_ms: durMs
   });
   btn.disabled = false; btn.textContent = 'Post task';
 
@@ -169,11 +212,11 @@ window.postTask = async () => {
 
   document.getElementById('p-url').value = '';
   document.getElementById('p-desc').value = '';
-  document.getElementById('p-slots').value = '5';
   document.getElementById('url-hint').textContent = '';
   errEl.style.color = 'var(--green)';
-  errEl.textContent = `✓ Task posted! ${data.total_cost} pts deducted.`;
-  setTimeout(() => { errEl.textContent = ''; errEl.style.color = ''; }, 4000);
+  const durSecs = durMs / 1000;
+  errEl.textContent = `✓ Task posted! ${data.total_cost} pts deducted. (${slots} slots × ${durSecs}s timer)`;
+  setTimeout(() => { errEl.textContent = ''; errEl.style.color = ''; }, 5000);
 };
 
 async function main() {

@@ -15,81 +15,148 @@
 <div class="app-shell">
   <aside class="app-sidebar" id="app-sidebar"></aside>
   <div class="page-content">
-<h1 class="page-title">Leaderboard</h1>
-<p class="page-sub">Top 50 users. Click a row to view their profile.</p>
-<div class="lb-tabs">
-  <button class="lb-tab active" id="tab-alltime" onclick="showBoard('all',this)">All-time</button>
-  <button class="lb-tab" id="tab-weekly" onclick="showBoard('weekly',this)">This week</button>
-</div>
-<div id="lb-wrap"><div class="spinner"></div></div></div>
+    <h1 class="page-title">Leaderboard</h1>
+
+    <!-- User's own rank card -->
+    <div id="my-rank-card" style="display:none">
+      <div class="lb-user-card" id="my-card-inner">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <!-- Tab switcher -->
+    <div class="lb-tabs">
+      <button class="lb-tab active" data-board="all" onclick="showBoard('all',this)">🏆 All-time</button>
+      <button class="lb-tab" data-board="weekly" onclick="showBoard('weekly',this)">📅 This week</button>
+      <button class="lb-tab" data-board="daily" onclick="showBoard('daily',this)">⚡ Today</button>
+    </div>
+
+    <div id="lb-wrap"></div>
+  </div>
 </div>
 <nav class="mobile-nav-bar" id="mobile-nav"></nav>
+
+<!-- User profile modal -->
+<div class="modal-overlay" id="user-modal" style="display:none" onclick="if(event.target===this)closeUserModal()">
+  <div class="modal" style="max-width:400px;text-align:center" id="user-modal-inner"></div>
+</div>
+
 <script type="module">
 import { supabase, esc } from '/assets/js/shared.js';
 import { initApp } from '/assets/js/app.js';
 let profile;
+const medals = ['🥇','🥈','🥉'];
 
-async function main(){
-  const ctx=await initApp('leaderboard');
-  if(!ctx) return;
-  profile=ctx.profile;
-  await load('all');
+async function main() {
+  const ctx = await initApp('leaderboard');
+  if (!ctx) return;
+  profile = ctx.profile;
+  await loadBoard('all');
+  renderMyCard('all');
 }
 
-async function load(board){
-  const wrap=document.getElementById('lb-wrap');
-  wrap.innerHTML='<div class="spinner"></div>';
-  try{
-    const view=board==='weekly'?'weekly_leaderboard':'leaderboard';
-    const ptField=board==='weekly'?'weekly_points':'points';
-    const {data,error}=await supabase.from(view).select('*');
-    if(error) throw error;
-    if(!data||!data.length){wrap.innerHTML='<div class="empty-state"><div class="empty-icon">🏆</div><p>No data yet.</p></div>';return;}
-    const medals=['🥇','🥈','🥉'];
-    wrap.innerHTML=`<div class="lb-table">
-      <div class="lb-header"><span>Rank</span><span>User</span><span>Points</span><span class="lb-done">Done</span></div>
-      ${data.map(u=>`
-        <div class="lb-row${u.id===profile.id?' lb-me':''}" onclick="viewUser('${u.id}','${esc(u.display_name||u.username)}','${u.avatar_color||'var(--orange)'}',${u.points},${u.tasks_completed||0},${u.streak||0},'${esc(u.bio||'')}','${esc(u.username)}')">
-          <span class="lb-rank">${medals[u.rank-1]||'#'+u.rank}</span>
-          <span class="lb-user">
-            <div style="width:28px;height:28px;border-radius:50%;background:${u.avatar_color||'var(--orange)'};display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:#fff;flex-shrink:0">${(u.display_name||u.username||'?')[0].toUpperCase()}</div>
-            ${esc(u.display_name||u.username)}${u.id===profile.id?'<span class="lb-you">you</span>':''}
-          </span>
-          <span class="lb-pts">⚡ ${u[ptField]||0}</span>
-          <span class="lb-done" style="color:var(--muted)">${u.tasks_completed||0}</span>
-        </div>`).join('')}
-    </div>`;
-  }catch(e){
-    wrap.innerHTML=`<div class="empty-state"><div class="empty-icon">⚠️</div><p>${esc(e.message)}</p></div>`;
+const VIEW_MAP = {
+  all:    { view: 'leaderboard',        ptField: 'points',       label: 'all-time pts' },
+  weekly: { view: 'weekly_leaderboard', ptField: 'weekly_points', label: 'pts this week' },
+  daily:  { view: 'daily_leaderboard',  ptField: 'daily_points',  label: 'pts today' },
+};
+let currentBoard = 'all';
+
+async function loadBoard(board) {
+  currentBoard = board;
+  const wrap = document.getElementById('lb-wrap');
+  wrap.innerHTML = '<div class="spinner"></div>';
+  const { view, ptField, label } = VIEW_MAP[board];
+  try {
+    const { data, error } = await supabase.from(view).select('*');
+    if (error) throw error;
+    if (!data || !data.length) {
+      wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🏆</div><p>No data yet. Start earning!</p></div>';
+      return;
+    }
+    wrap.innerHTML = `
+      <div class="lb-table">
+        <div class="lb-header">
+          <span>Rank</span><span>User</span><span>${label}</span><span class="lb-done">Tasks done</span>
+        </div>
+        ${data.map(u => buildRow(u, ptField)).join('')}
+      </div>`;
+  } catch(e) {
+    wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>${esc(e.message)}</p></div>`;
   }
+  renderMyCard(board);
 }
 
-window.showBoard=(board,btn)=>{
-  document.querySelectorAll('.lb-tab').forEach(b=>b.classList.remove('active'));
+function buildRow(u, ptField) {
+  const isMe = u.id === profile.id;
+  const ini = (u.display_name || u.username || '?')[0].toUpperCase();
+  return `
+    <div class="lb-row${isMe ? ' lb-me' : ''}"
+         onclick="showUser('${u.id}','${esc(u.display_name||u.username)}','${u.avatar_color||'var(--orange)'}',${u[ptField]||0},${u.tasks_completed||0},'${esc(u.username)}')"
+         style="cursor:pointer">
+      <span class="lb-rank">${medals[u.rank-1] || '#'+u.rank}</span>
+      <span class="lb-user">
+        <div style="width:30px;height:30px;border-radius:50%;background:${u.avatar_color||'var(--orange)'};display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:700;color:#fff;flex-shrink:0;font-family:'Space Grotesk',sans-serif">${ini}</div>
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(u.display_name||u.username)}</span>
+        ${isMe ? '<span class="lb-you">you</span>' : ''}
+      </span>
+      <span class="lb-pts">⚡ ${(u[ptField]||0).toLocaleString()}</span>
+      <span class="lb-done" style="color:var(--muted)">${u.tasks_completed||0}</span>
+    </div>`;
+}
+
+async function renderMyCard(board) {
+  const { view, ptField, label } = VIEW_MAP[board];
+  const { data } = await supabase.from(view).select('*').eq('id', profile.id).single();
+  const card = document.getElementById('my-rank-card');
+  const inner = document.getElementById('my-card-inner');
+  if (!data) { card.style.display = 'none'; return; }
+  const ini = (profile.display_name || profile.username || '?')[0].toUpperCase();
+  inner.innerHTML = `
+    <div class="lb-user-card-rank">${medals[data.rank-1] || '#'+data.rank}</div>
+    <div style="width:44px;height:44px;border-radius:50%;background:${profile.avatar_color||'var(--orange)'};display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:#fff;flex-shrink:0;font-family:'Space Grotesk',sans-serif">${ini}</div>
+    <div class="lb-user-card-info">
+      <div class="lb-user-card-name">${esc(profile.display_name||profile.username)}</div>
+      <div class="lb-user-card-sub">Your ranking · ${label}</div>
+    </div>
+    <div class="lb-user-card-stats">
+      <div class="lb-user-card-stat"><div class="val">⚡ ${(data[ptField]||0).toLocaleString()}</div><div class="lbl">${label}</div></div>
+      <div class="lb-user-card-stat"><div class="val">${data.tasks_completed||0}</div><div class="lbl">Tasks done</div></div>
+      <div class="lb-user-card-stat"><div class="val">#${data.rank}</div><div class="lbl">Rank</div></div>
+    </div>`;
+  card.style.display = 'block';
+}
+
+window.showBoard = (board, btn) => {
+  document.querySelectorAll('.lb-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  load(board);
+  loadBoard(board);
 };
 
-window.viewUser=(id,name,color,points,done,streak,bio,username)=>{
-  const existing=document.getElementById('user-modal');
-  if(existing) existing.remove();
-  const modal=document.createElement('div');
-  modal.id='user-modal'; modal.className='modal-overlay open';
-  modal.innerHTML=`<div class="modal" style="max-width:400px;text-align:center">
-    <div style="width:80px;height:80px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;color:#fff;margin:0 auto 14px;font-family:'Space Grotesk',sans-serif">${name[0].toUpperCase()}</div>
+window.showUser = (id, name, color, points, done, username) => {
+  const modal = document.getElementById('user-modal');
+  const inner = document.getElementById('user-modal-inner');
+  const ini = name[0].toUpperCase();
+  inner.innerHTML = `
+    <div style="width:80px;height:80px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;color:#fff;margin:0 auto 14px;font-family:'Space Grotesk',sans-serif">${ini}</div>
     <div style="font-size:1.3rem;font-weight:700;font-family:'Space Grotesk',sans-serif">${esc(name)}</div>
-    <div style="color:var(--muted);font-size:0.85rem;margin-bottom:10px">@${esc(username)}</div>
-    ${bio?`<p style="font-size:0.88rem;color:var(--muted);max-width:280px;margin:0 auto 16px;line-height:1.6">${esc(bio)}</p>`:''}
+    <div style="color:var(--muted);font-size:0.85rem;margin-bottom:16px">@${esc(username)}</div>
     <div class="stat-grid" style="justify-content:center;margin-bottom:20px">
-      <div class="stat-box"><div class="stat-val">${points}</div><div class="stat-lbl">Points</div></div>
+      <div class="stat-box"><div class="stat-val">${points.toLocaleString()}</div><div class="stat-lbl">Points</div></div>
       <div class="stat-box"><div class="stat-val">${done}</div><div class="stat-lbl">Done</div></div>
-      <div class="stat-box"><div class="stat-val">${streak}🔥</div><div class="stat-lbl">Streak</div></div>
     </div>
-    <button class="btn btn-ghost btn-full" onclick="document.getElementById('user-modal').remove()">Close</button>
-  </div>`;
-  document.body.appendChild(modal);
+    <button class="btn btn-ghost btn-full" onclick="closeUserModal()">Close</button>`;
+  modal.style.display = 'flex';
+  modal.classList.add('open');
+};
+
+window.closeUserModal = () => {
+  const modal = document.getElementById('user-modal');
+  modal.style.display = 'none';
+  modal.classList.remove('open');
 };
 
 main();
 </script>
-</body></html>
+</body>
+</html>

@@ -391,3 +391,67 @@ body.has-custom-bg { background-attachment: fixed; background-size: cover; backg
 .font-btn.selected { border-color: var(--orange); background: rgba(232,98,26,0.08); }
 .font-btn .font-sample { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; color: var(--text); }
 .font-btn .font-name { font-size: 0.72rem; color: var(--muted); font-family: 'Inter', sans-serif; }
+
+/* ---- FILTER DROPDOWNS ---- */
+.filter-dropdowns {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.filter-select {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238a7060' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+.filter-select:hover, .filter-select:focus { border-color: var(--orange); }
+.filter-select option { background: var(--surface); }
+
+/* ---- LEADERBOARD USER CARD ---- */
+.lb-user-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.lb-user-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--orange);
+}
+.lb-user-card-rank {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--orange);
+  min-width: 48px;
+  text-align: center;
+}
+.lb-user-card-info { flex: 1; min-width: 0; }
+.lb-user-card-name { font-size: 1rem; font-weight: 700; margin-bottom: 2px; }
+.lb-user-card-sub { font-size: 0.8rem; color: var(--muted); }
+.lb-user-card-stats { display: flex; gap: 12px; flex-wrap: wrap; }
+.lb-user-card-stat { text-align: center; }
+.lb-user-card-stat .val { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--orange); }
+.lb-user-card-stat .lbl { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }

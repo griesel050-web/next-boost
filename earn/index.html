@@ -18,18 +18,30 @@
 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:6px">
   <div><h1 class="page-title">Earn Points</h1><p class="page-sub">Complete tasks to earn points after the 30s timer.</p></div>
 </div>
-<div class="filter-row">
-  <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
-  <button class="filter-btn" onclick="setFilter('tiktok',this)">🎵 TikTok</button>
-  <button class="filter-btn" onclick="setFilter('instagram',this)">📸 Instagram</button>
-  <button class="filter-btn" onclick="setFilter('youtube',this)">▶️ YouTube</button>
-  <button class="filter-btn" onclick="setFilter('discord',this)">💬 Discord</button>
-  <button class="filter-btn" onclick="setFilter('follow',this)">Follow</button>
-  <button class="filter-btn" onclick="setFilter('like',this)">Like</button>
-  <button class="filter-btn" onclick="setFilter('view',this)">View</button>
-  <button class="filter-btn" onclick="setFilter('join',this)">Join</button>
-  <button class="filter-btn" onclick="setFilter('website',this)">🌐 Website</button>
-  <button class="filter-btn" onclick="setFilter('twitch',this)">🟣 Twitch</button>
+<div class="filter-dropdowns">
+  <select class="filter-select" id="filter-platform" onchange="applyFilters()">
+    <option value="all">All Platforms</option>
+    <option value="tiktok">🎵 TikTok</option>
+    <option value="instagram">📸 Instagram</option>
+    <option value="youtube">▶️ YouTube</option>
+    <option value="discord">💬 Discord</option>
+    <option value="twitch">🟣 Twitch</option>
+    <option value="website">🌐 Website</option>
+  </select>
+  <select class="filter-select" id="filter-type" onchange="applyFilters()">
+    <option value="all">All Types</option>
+    <option value="follow">Follow</option>
+    <option value="like">Like</option>
+    <option value="view">View</option>
+    <option value="join">Join</option>
+    <option value="website">Visit</option>
+  </select>
+  <select class="filter-select" id="filter-sort" onchange="applyFilters()">
+    <option value="newest">Newest first</option>
+    <option value="points_high">Highest reward</option>
+    <option value="points_low">Lowest reward</option>
+    <option value="slots">Most slots left</option>
+  </select>
 </div>
 <div id="earn-feed" class="task-feed"><div class="spinner"></div></div>
 <div class="load-more-row" id="load-more" style="display:none">
@@ -44,7 +56,7 @@ const PE={tiktok:'🎵',instagram:'📸',youtube:'▶️',discord:'💬',website
 const PC={tiktok:'plat-tiktok',instagram:'plat-instagram',youtube:'plat-youtube',discord:'plat-discord',website:'plat-website',twitch:'plat-twitch'};
 const TL={follow:'Follow',like:'Like',view:'View',join:'Join',website:'Visit',twitch:'Follow'};
 const PAGE=15;
-let profile,offset=0,filter='all',myStatus={},allLoaded=[];
+let profile,offset=0,filterPlat='all',filterType='all',filterSort='newest',myStatus={},allLoaded=[];
 
 async function main(){
   const ctx=await initApp('earn');
@@ -79,7 +91,12 @@ async function load(reset=true){
 
 function render(reset=true){
   const feed=document.getElementById('earn-feed');
-  const filtered=allLoaded.filter(t=>myStatus[t.id]!=='approved'&&(filter==='all'||t.platform===filter||t.type===filter));
+  let filtered=allLoaded.filter(t=>myStatus[t.id]!=='approved');
+  if(filterPlat!=='all') filtered=filtered.filter(t=>t.platform===filterPlat);
+  if(filterType!=='all') filtered=filtered.filter(t=>t.type===filterType);
+  if(filterSort==='points_high') filtered.sort((a,b)=>b.points_reward-a.points_reward);
+  else if(filterSort==='points_low') filtered.sort((a,b)=>a.points_reward-b.points_reward);
+  else if(filterSort==='slots') filtered.sort((a,b)=>(b.max_completions-b.completions_count)-(a.max_completions-a.completions_count));
   if(reset) feed.innerHTML='';
   if(!filtered.length&&reset){feed.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div><p>No tasks right now. <a href="/post-task/" style="color:var(--orange)">Post one first →</a></p></div>';return;}
   const slice=reset?filtered:filtered.slice(Math.max(0,filtered.length-PAGE));
@@ -112,10 +129,11 @@ function render(reset=true){
   });
 }
 
-window.setFilter=(f,btn)=>{
-  filter=f;
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+window.applyFilters=()=>{
+  const plat=document.getElementById('filter-platform').value;
+  const type=document.getElementById('filter-type').value;
+  const sort=document.getElementById('filter-sort').value;
+  filterPlat=plat; filterType=type; filterSort=sort;
   render(true);
 };
 window.loadMore=()=>load(false);

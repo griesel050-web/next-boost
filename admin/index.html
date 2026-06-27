@@ -32,6 +32,7 @@
           <button class="sidebar-btn" onclick="adminTab('users')">👥 Users</button>
           <button class="sidebar-btn" onclick="adminTab('tasks')">📋 Tasks</button>
           <button class="sidebar-btn" onclick="adminTab('reports')">🚩 Reports <span class="reports-count" id="reports-count" style="display:none">0</span></button>
+          <button class="sidebar-btn" onclick="adminTab('suspicious')">🤖 Suspicious</button>
         </nav>
       </aside>
 
@@ -76,6 +77,13 @@
           <div class="load-more-row" id="tasks-load-more" style="display:none">
             <button class="btn btn-ghost" onclick="loadMoreTasks()">Load more</button>
           </div>
+        </div>
+
+        <!-- SUSPICIOUS -->
+        <div id="panel-suspicious" class="admin-panel">
+          <h1 class="admin-title">Suspicious Activity</h1>
+          <p style="color:var(--muted);font-size:0.85rem;margin-bottom:20px">Completions with high cheat scores. Score 60+ = rejected automatically.</p>
+          <div id="suspicious-wrap"><div class="spinner"></div></div>
         </div>
 
         <!-- REPORTS -->
@@ -161,6 +169,7 @@
       if (tab === 'users') { usersOffset = 0; loadUsers(true); }
       if (tab === 'tasks') { tasksOffset = 0; loadTasks(true); }
       if (tab === 'reports') { reportsOffset = 0; loadReports(true); }
+      if (tab === 'suspicious') loadSuspicious();
     };
 
     // ---- OVERVIEW ----
@@ -426,6 +435,56 @@
       if (error || data?.error) { toast(data?.error || error.message, 'error'); return; }
       toast('Report dismissed.', '');
       document.getElementById('report-row-' + reportId)?.remove();
+    };
+
+    // ---- SUSPICIOUS ----
+    async function loadSuspicious() {
+      const wrap = document.getElementById('suspicious-wrap');
+      wrap.innerHTML = '<div class="spinner"></div>';
+      const { data, error } = await supabase.rpc('admin_get_suspicious', { p_limit: 50 });
+      if (error || !data || !data.length) {
+        wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><p>No suspicious activity detected.</p></div>';
+        return;
+      }
+      wrap.innerHTML = `
+        <div class="admin-table">
+          <div class="admin-table-head" style="grid-template-columns:1.5fr 0.8fr 0.8fr 0.8fr 0.8fr 1fr 1fr">
+            <span>User</span><span>Cheat Score</span><span>Mouse</span><span>Scroll</span><span>Focus Losses</span><span>Status</span><span>Actions</span>
+          </div>
+          <div id="sus-rows"></div>
+        </div>`;
+      const rows = document.getElementById('sus-rows');
+      data.forEach(s => {
+        const row = document.createElement('div');
+        row.className = 'admin-table-row';
+        row.style.gridTemplateColumns = '1.5fr 0.8fr 0.8fr 0.8fr 0.8fr 1fr 1fr';
+        const scoreColor = s.cheat_score >= 60 ? 'var(--red)' : s.cheat_score >= 30 ? 'var(--amber)' : 'var(--muted)';
+        row.innerHTML = `
+          <span>
+            <div class="user-name">${esc(s.completer)}</div>
+            <div class="user-meta">Rep: ${s.reputation} ${s.is_flagged ? '⚑ Flagged' : ''}</div>
+          </span>
+          <span style="color:${scoreColor};font-weight:700">${s.cheat_score}</span>
+          <span>${s.mouse_events}</span>
+          <span>${s.scroll_events}</span>
+          <span>${s.focus_losses}</span>
+          <span>${s.status === 'approved' ? '<span class="badge-ok">Approved</span>' : '<span class="badge-banned">Rejected</span>'}</span>
+          <span class="action-btns">
+            <button class="btn btn-ghost btn-sm" onclick="window.resetRep('${s.completer}')">Reset rep</button>
+          </span>`;
+        rows.appendChild(row);
+      });
+    }
+
+    window.resetRep = async (username) => {
+      const { data: u } = await supabase.from('profiles').select('id').eq('username', username).single();
+      if (!u) { toast('User not found', 'error'); return; }
+      const newRep = parseInt(prompt(`Set reputation for @${username}:`, '0'));
+      if (isNaN(newRep)) return;
+      const { data, error } = await supabase.rpc('admin_set_reputation', { p_user_id: u.id, p_reputation: newRep });
+      if (error || data?.error) { toast(data?.error || error.message, 'error'); return; }
+      toast(`Reputation for @${username} set to ${newRep}`, 'success');
+      loadSuspicious();
     };
   </script>
 </body>
