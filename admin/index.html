@@ -14,7 +14,7 @@
     <a class="nav-logo" href="/"><img src="/assets/img/logo.png" alt="Next Boost" style="height:36px"/></a>
     <div class="nav-links">
       <span class="admin-badge">⚡ Admin Panel</span>
-      <a href="/dashboard/" class="btn btn-ghost btn-sm">Dashboard</a>
+      <a href="/earn/" class="btn btn-ghost btn-sm">Dashboard</a>
     </div>
   </nav>
 
@@ -153,7 +153,7 @@
     if (!session) { go('/login/'); }
 
     const { data: me } = await supabase.from('profiles').select('is_admin').eq('id', session.user.id).single();
-    if (!me?.is_admin) { go('/dashboard/'); }
+    if (!me?.is_admin) { go('/earn/'); }
 
     document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';

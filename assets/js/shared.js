@@ -36,7 +36,7 @@ export async function requireAuth() {
 // Redirect if already authenticated
 export async function redirectIfAuth() {
   const { data: { session } } = await supabase.auth.getSession();
-  if (session) go('/dashboard/');
+  if (session) go('/earn/');
 }
 
 // ---- USER PROFILE ----

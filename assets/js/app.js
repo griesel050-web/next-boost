@@ -1,15 +1,8 @@
 // ============================================================
 // NEXT BOOST — app.js  (complete rebuild)
 // ============================================================
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { esc } from './shared.js';
-
-const SUPABASE_URL  = 'https://slufbzzfofzptwjefzmu.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsdWZienpmb2Z6cHR3amVmem11Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMTk1MDMsImV4cCI6MjA5Nzg5NTUwM30.bM_TxEv6pvouItyW_I8l3zGu3JVqQoAfScuxB5b2hiI';
-
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON, {
-  auth:{ autoRefreshToken:true, persistSession:true, detectSessionInUrl:true }
-});
+import { supabase, esc } from './shared.js';
+export { supabase };
 
 function toast(msg, type=''){
   let el=document.getElementById('nb-toast');

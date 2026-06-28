@@ -51,7 +51,7 @@ function renderProfile(email){
       <div class="stat-box"><div class="stat-val">${profile.tasks_completed}</div><div class="stat-lbl">Done</div></div>
       <div class="stat-box"><div class="stat-val">${profile.tasks_posted}</div><div class="stat-lbl">Posted</div></div>
       <div class="stat-box"><div class="stat-val">${profile.streak||0}🔥</div><div class="stat-lbl">Streak</div></div>
-      <div class="stat-box"><div class="stat-val" style="color:${(profile.reputation||0)>=50?'var(--green)':(profile.reputation||0)>=0?'var(--amber)":'var(--red)'}">${profile.reputation||0}</div><div class="stat-lbl">Reputation</div></div>
+      <div class="stat-box"><div class="stat-val" id="rep-val">${profile.reputation||0}</div><div class="stat-lbl">Reputation</div></div>
     </div>
     <div style="max-width:500px">
       <div class="form-group"><label>Display name</label><input type="text" id="edit-name" value="${esc(profile.display_name||profile.username)}" maxlength="30"/></div>
@@ -67,6 +67,12 @@ function renderProfile(email){
     <div class="divider"></div>
     <button class="btn btn-danger btn-sm" onclick="doSignOut()">Sign out</button>`;
   loadLedger();
+  // Set reputation color safely after render
+  const repEl = document.getElementById('rep-val');
+  if (repEl) {
+    const rep = profile.reputation || 0;
+    repEl.style.color = rep >= 50 ? 'var(--green)' : rep >= 0 ? 'var(--amber)' : 'var(--red)';
+  }
 }
 
 async function loadLedger(){

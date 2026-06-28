@@ -51,7 +51,7 @@
     import { supabase, go } from '/assets/js/shared.js';
 
     const { data: { session } } = await supabase.auth.getSession();
-    if (session) go('/dashboard/');
+    if (session) go('/earn/');
 
     // Check for referral code in URL
     const urlRef = new URLSearchParams(window.location.search).get('ref');

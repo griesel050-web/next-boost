@@ -43,7 +43,7 @@
 
     // Redirect if already logged in
     const { data: { session } } = await supabase.auth.getSession();
-    if (session) go('/dashboard/');
+    if (session) go('/earn/');
 
     window.doLogin = async () => {
       const email = document.getElementById('email').value.trim();
@@ -68,7 +68,7 @@
         btn.disabled = false;
         btn.textContent = 'Log in';
       } else {
-        go('/dashboard/');
+        go('/earn/');
       }
     };
 

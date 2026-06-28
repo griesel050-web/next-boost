@@ -140,7 +140,7 @@
     // Auto-redirect logged in users to dashboard
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
-      go('/dashboard/');
+      go('/earn/');
     }
   </script>
 </body>

@@ -81,17 +81,17 @@
         </div>
       </div>
       <!-- Duration (shown only for website/visit tasks) -->
-      <div class="form-group" id="duration-group" style="display:none">
+      <div class="form-group" id="duration-group">
         <label for="p-duration">Time user must spend on page</label>
         <select id="p-duration" onchange="updateCost()">
-          <option value="10000">10 seconds — free</option>
+          <option value="10000">10 seconds — free (default)</option>
           <option value="20000">20 seconds — +2 pts/slot</option>
           <option value="30000">30 seconds — +5 pts/slot</option>
           <option value="45000">45 seconds — +10 pts/slot</option>
           <option value="60000">60 seconds — +20 pts/slot</option>
           <option value="120000">2 minutes — +50 pts/slot</option>
         </select>
-        <div style="font-size:0.78rem;color:var(--muted);margin-top:6px">Longer time = more credible visits = costs more. Default 10s applies to all non-website tasks.</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-top:6px">Longer time = more credible engagement. Extra cost per slot on top of the base reward. Max 120 seconds.</div>
       </div>
       <!-- Cost breakdown -->
       <div class="cost-box" id="cost-box">
@@ -144,10 +144,9 @@ window.onPlatformChange = () => {
   document.getElementById('url-label').textContent = p === 'website' ? 'Website URL to visit' : 'Profile / video URL';
   const types = RULES[p].types;
   document.getElementById('p-type').innerHTML = types.map(t => `<option value="${t}">${TLABELS[t]}</option>`).join('');
-  // Show duration picker only for website tasks
-  const isWebsite = p === 'website';
-  document.getElementById('duration-group').style.display = isWebsite ? 'block' : 'none';
-  document.getElementById('c-duration-row').style.display = isWebsite ? 'flex' : 'none';
+  // Show duration picker for ALL platforms
+  document.getElementById('duration-group').style.display = 'block';
+  document.getElementById('c-duration-row').style.display = 'flex';
   onUrlInput();
   updateCost();
 };
@@ -213,9 +212,10 @@ window.postTask = async () => {
   document.getElementById('p-url').value = '';
   document.getElementById('p-desc').value = '';
   document.getElementById('url-hint').textContent = '';
+  const durSecs = Math.round(durMs / 1000);
+  const durLabel = durSecs >= 60 ? `${durSecs/60}min` : `${durSecs}s`;
   errEl.style.color = 'var(--green)';
-  const durSecs = durMs / 1000;
-  errEl.textContent = `✓ Task posted! ${data.total_cost} pts deducted. (${slots} slots × ${durSecs}s timer)`;
+  errEl.textContent = `Task posted! ${data.total_cost} pts deducted. (${slots} slots x ${durLabel} timer)`;
   setTimeout(() => { errEl.textContent = ''; errEl.style.color = ''; }, 5000);
 };
 
