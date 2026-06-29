@@ -26,6 +26,7 @@
     <option value="youtube">▶️ YouTube</option>
     <option value="discord">💬 Discord</option>
     <option value="twitch">🟣 Twitch</option>
+    <option value="twitter">🐦 Twitter / X</option>
     <option value="website">🌐 Website</option>
   </select>
   <select class="filter-select" id="filter-type" onchange="applyFilters()">
@@ -52,9 +53,9 @@
 <script type="module">
 import { supabase, esc } from '/assets/js/shared.js';
 import { initApp, updateNavPoints, checkOnboarding, initTaskModal } from '/assets/js/app.js';
-const PE={tiktok:'🎵',instagram:'📸',youtube:'▶️',discord:'💬',website:'🌐',twitch:'🟣'};
-const PC={tiktok:'plat-tiktok',instagram:'plat-instagram',youtube:'plat-youtube',discord:'plat-discord',website:'plat-website',twitch:'plat-twitch'};
-const TL={follow:'Follow',like:'Like',view:'View',join:'Join',website:'Visit',twitch:'Follow'};
+const PE={tiktok:'🎵',instagram:'📸',youtube:'▶️',discord:'💬',website:'🌐',twitch:'🟣',twitter:'🐦'};
+const PC={tiktok:'plat-tiktok',instagram:'plat-instagram',youtube:'plat-youtube',discord:'plat-discord',website:'plat-website',twitch:'plat-twitch',twitter:'plat-twitter'};
+const TL={follow:'Follow',like:'Like',view:'View',join:'Join',website:'Visit',twitch:'Follow',retweet:'Retweet'};
 const PAGE=15;
 let profile,offset=0,filterPlat='all',filterType='all',filterSort='newest',myStatus={},allLoaded=[];
 

@@ -453,3 +453,7 @@ h1, h2, h3, h4, h5 { font-family: 'Space Grotesk', sans-serif; line-height: 1.2;
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ---- Twitter/X platform ---- */
+:root { --twitter: #1DA1F2; }
+.plat-twitter { background: rgba(29,161,242,0.15); color: var(--twitter); }

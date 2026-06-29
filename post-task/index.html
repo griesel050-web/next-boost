@@ -31,6 +31,7 @@
             <option value="youtube">▶️ YouTube</option>
             <option value="discord">💬 Discord</option>
             <option value="twitch">🟣 Twitch</option>
+            <option value="twitter">🐦 Twitter / X</option>
             <option value="website">🌐 Website</option>
           </select>
         </div>
@@ -121,8 +122,9 @@ const RULES = {
   discord:   { hosts:['discord.gg','discord.com'], placeholder:'https://discord.gg/yourserver', hint:'Must be a discord.gg invite URL', types:['join'] },
   twitch:    { hosts:['twitch.tv'], placeholder:'https://www.twitch.tv/channelname', hint:'Must be a twitch.tv URL', types:['follow','view'] },
   website:   { hosts:[], placeholder:'https://yourwebsite.com', hint:'Must be a valid https:// URL', types:['website'] },
+  twitter:   { hosts:['twitter.com','x.com'], placeholder:'https://x.com/username', hint:'Must be a twitter.com or x.com URL', types:['follow','like','retweet'] },
 };
-const TLABELS = { follow:'Follow', like:'Like', view:'View', join:'Join Server', website:'Visit Website' };
+const TLABELS = { follow:'Follow', like:'Like', view:'View', join:'Join Server', website:'Visit Website', retweet:'Retweet' };
 
 const DURATION_SURCHARGE = { 10000:0, 20000:2, 30000:5, 45000:10, 60000:20, 120000:50 };
 

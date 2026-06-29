@@ -9,94 +9,246 @@
   <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
   <link rel="stylesheet" href="/assets/css/main.css"/>
   <link rel="stylesheet" href="/assets/css/app.css"/>
+  <style>
+    .referral-tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:24px}
+    .tier-card{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:16px;text-align:center;transition:.2s}
+    .tier-card.active-tier{border-color:var(--orange);box-shadow:0 0 0 1px var(--orange)}
+    .tier-icon{font-size:2rem;margin-bottom:6px}
+    .tier-name{font-weight:700;font-size:0.95rem;margin-bottom:4px}
+    .tier-req{font-size:0.78rem;color:var(--muted);margin-bottom:8px}
+    .tier-perks{font-size:0.82rem;color:var(--text);line-height:1.6}
+    .tier-badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:0.72rem;font-weight:700;background:var(--orange);color:#fff;margin-top:8px}
+    .ref-tree{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:16px;margin-bottom:20px}
+    .ref-tree-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.85rem}
+    .ref-tree-row:last-child{border-bottom:none}
+    .ref-tree-level{font-size:0.72rem;padding:2px 8px;border-radius:999px;font-weight:600;flex-shrink:0}
+    .lvl1{background:rgba(232,98,26,0.15);color:var(--orange)}
+    .lvl2{background:rgba(148,163,184,0.15);color:#94a3b8}
+    .ref-tree-name{flex:1;font-weight:500}
+    .ref-tree-pts{color:var(--orange);font-weight:700;font-size:0.82rem}
+    .progress-bar-wrap{background:var(--surface3);border-radius:999px;height:8px;margin:8px 0 4px;overflow:hidden}
+    .progress-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--orange-lt));transition:width .4s}
+  </style>
 </head>
 <body>
 <nav class="nav" id="main-nav"></nav>
 <div class="app-shell">
   <aside class="app-sidebar" id="app-sidebar"></aside>
   <div class="page-content">
-<h1 class="page-title">Referral Program</h1>
-<p class="page-sub">Share your code. Both you and your friend get <strong style="color:var(--orange)">50 free points</strong> when they sign up and use it.</p>
-<div class="card card-pad" style="max-width:540px;margin-bottom:20px">
-  <h3 style="font-size:0.95rem;margin-bottom:16px">Your referral code</h3>
-  <div class="referral-code-box">
-    <div>
-      <div class="ref-code" id="ref-code">—</div>
-      <div class="ref-link" id="ref-link" style="font-size:0.78rem;color:var(--muted);margin-top:4px;word-break:break-all">—</div>
+    <h1 class="page-title">Referral Program</h1>
+    <p class="page-sub">Invite friends and earn from <strong style="color:var(--orange)">two levels</strong> of referrals. The more you refer, the higher your tier.</p>
+
+    <!-- Tier overview -->
+    <h3 style="font-size:0.85rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:12px">Your Tier</h3>
+    <div class="referral-tiers" id="tier-cards">
+      <div class="tier-card" data-tier="starter">
+        <div class="tier-icon">🌱</div>
+        <div class="tier-name">Starter</div>
+        <div class="tier-req">0–4 referrals</div>
+        <div class="tier-perks">+50 pts per L1 referral<br>No L2 earnings</div>
+      </div>
+      <div class="tier-card" data-tier="booster">
+        <div class="tier-icon">🚀</div>
+        <div class="tier-name">Booster</div>
+        <div class="tier-req">5–19 referrals</div>
+        <div class="tier-perks">+60 pts per L1 referral<br>+10 pts per L2 referral</div>
+      </div>
+      <div class="tier-card" data-tier="grower">
+        <div class="tier-icon">📈</div>
+        <div class="tier-name">Grower</div>
+        <div class="tier-req">20–49 referrals</div>
+        <div class="tier-perks">+75 pts per L1 referral<br>+15 pts per L2 referral</div>
+      </div>
+      <div class="tier-card" data-tier="elite">
+        <div class="tier-icon">👑</div>
+        <div class="tier-name">Elite</div>
+        <div class="tier-req">50+ referrals</div>
+        <div class="tier-perks">+100 pts per L1 referral<br>+25 pts per L2 referral</div>
+      </div>
     </div>
-    <button class="btn btn-primary btn-sm" onclick="copyCode()">Copy link</button>
+
+    <!-- Your code -->
+    <div class="card card-pad" style="max-width:540px;margin-bottom:20px">
+      <h3 style="font-size:0.95rem;margin-bottom:16px">Your referral code</h3>
+      <div class="referral-code-box">
+        <div>
+          <div class="ref-code" id="ref-code">—</div>
+          <div class="ref-link" id="ref-link" style="font-size:0.78rem;color:var(--muted);margin-top:4px;word-break:break-all">—</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="copyCode()">Copy link</button>
+      </div>
+
+      <!-- Progress to next tier -->
+      <div id="tier-progress" style="margin-top:16px;display:none">
+        <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:var(--muted)">
+          <span id="tier-progress-label"></span>
+          <span id="tier-progress-count"></span>
+        </div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="tier-progress-bar" style="width:0%"></div></div>
+      </div>
+
+      <div style="display:flex;gap:16px;margin-top:20px;flex-wrap:wrap">
+        <div class="stat-box" style="flex:1;min-width:80px"><div class="stat-val" id="ref-l1">0</div><div class="stat-lbl">L1 referred</div></div>
+        <div class="stat-box" style="flex:1;min-width:80px"><div class="stat-val" id="ref-l2">0</div><div class="stat-lbl">L2 referred</div></div>
+        <div class="stat-box" style="flex:1;min-width:80px"><div class="stat-val" id="ref-earned">0</div><div class="stat-lbl">Pts earned</div></div>
+      </div>
+    </div>
+
+    <!-- Referral tree -->
+    <div class="card card-pad" style="max-width:540px;margin-bottom:20px">
+      <h3 style="font-size:0.95rem;margin-bottom:12px">Your referral network</h3>
+      <div id="ref-tree-wrap"><div class="spinner"></div></div>
+    </div>
+
+    <!-- Apply a code -->
+    <div class="card card-pad" style="max-width:540px">
+      <h3 style="font-size:0.95rem;margin-bottom:6px">Have a referral code?</h3>
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:16px">Enter a friend's code to get bonus points (within 7 days of signup).</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <input type="text" id="ref-input" placeholder="e.g. AB12CD34" style="flex:1;min-width:150px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-size:0.9rem;outline:none;font-family:inherit"/>
+        <button class="btn btn-primary" onclick="useCode()">Apply code</button>
+      </div>
+      <div class="error-msg" id="ref-err"></div>
+    </div>
   </div>
-  <div style="display:flex;gap:16px;margin-top:20px;flex-wrap:wrap">
-    <div class="stat-box" style="flex:1;min-width:100px"><div class="stat-val" id="ref-count">0</div><div class="stat-lbl">Friends referred</div></div>
-    <div class="stat-box" style="flex:1;min-width:100px"><div class="stat-val" id="ref-earned">0</div><div class="stat-lbl">Points earned</div></div>
-  </div>
-</div>
-<div class="card card-pad" style="max-width:540px">
-  <h3 style="font-size:0.95rem;margin-bottom:6px">Have a referral code?</h3>
-  <p style="color:var(--muted);font-size:0.85rem;margin-bottom:16px">Enter a friend's code to get 50 bonus points (within 7 days of signup).</p>
-  <div style="display:flex;gap:10px;flex-wrap:wrap">
-    <input type="text" id="ref-input" placeholder="e.g. AB12CD34" style="flex:1;min-width:150px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-size:0.9rem;outline:none;font-family:inherit"/>
-    <button class="btn btn-primary" onclick="useCode()">Apply code</button>
-  </div>
-  <div class="error-msg" id="ref-err"></div>
-</div></div>
 </div>
 <nav class="mobile-nav-bar" id="mobile-nav"></nav>
 <script type="module">
 import { supabase, esc } from '/assets/js/shared.js';
 import { initApp, updateNavPoints } from '/assets/js/app.js';
+
+const TIERS = [
+  { id:'starter', min:0,  max:4,  l1:50,  l2:0  },
+  { id:'booster', min:5,  max:19, l1:60,  l2:10 },
+  { id:'grower',  min:20, max:49, l1:75,  l2:15 },
+  { id:'elite',   min:50, max:Infinity, l1:100, l2:25 },
+];
+function getTier(count){ return TIERS.slice().reverse().find(t=>count>=t.min)||TIERS[0]; }
+
 let profile;
 
 async function main(){
-  const ctx=await initApp('referral');
+  const ctx = await initApp('referral');
   if(!ctx) return;
-  profile=ctx.profile;
+  profile = ctx.profile;
 
-  const code=profile.referral_code||'—';
-  const link=`https://boost.nexosites.xyz/signup/?ref=${code}`;
-  document.getElementById('ref-code').textContent=code;
-  document.getElementById('ref-link').textContent=link;
-  document.getElementById('ref-count').textContent=profile.referral_count||0;
+  const code = profile.referral_code || '—';
+  const link = `https://boost.nexosites.xyz/signup/?ref=${code}`;
+  document.getElementById('ref-code').textContent = code;
+  document.getElementById('ref-link').textContent = link;
 
-  const {data:ledger}=await supabase.from('point_ledger').select('delta').eq('user_id',profile.id).eq('reason','referral_reward');
-  document.getElementById('ref-earned').textContent=(ledger||[]).reduce((s,r)=>s+r.delta,0);
+  // Load L1 referrals (users who used your code)
+  const { data: l1Users } = await supabase
+    .from('profiles')
+    .select('id,username,display_name,created_at')
+    .eq('referred_by', profile.id);
+
+  const l1Count = (l1Users||[]).length;
+  document.getElementById('ref-l1').textContent = l1Count;
+
+  // Load L2 referrals (users referred by your L1s)
+  let l2Count = 0;
+  let l2Users = [];
+  if(l1Count > 0){
+    const l1Ids = (l1Users||[]).map(u=>u.id);
+    const { data: l2 } = await supabase
+      .from('profiles')
+      .select('id,username,display_name,referred_by,created_at')
+      .in('referred_by', l1Ids);
+    l2Users = l2||[];
+    l2Count = l2Users.length;
+  }
+  document.getElementById('ref-l2').textContent = l2Count;
+
+  // Total earned
+  const { data: ledger } = await supabase
+    .from('point_ledger')
+    .select('delta')
+    .eq('user_id', profile.id)
+    .in('reason', ['referral_reward','referral_l2_reward']);
+  document.getElementById('ref-earned').textContent = (ledger||[]).reduce((s,r)=>s+r.delta,0);
+
+  // Tier UI
+  const tier = getTier(l1Count);
+  document.querySelectorAll('.tier-card').forEach(c=>{
+    c.classList.remove('active-tier');
+    const existing = c.querySelector('.tier-badge');
+    if(existing) existing.remove();
+  });
+  const activeCard = document.querySelector(`.tier-card[data-tier="${tier.id}"]`);
+  if(activeCard){
+    activeCard.classList.add('active-tier');
+    const badge = document.createElement('div');
+    badge.className = 'tier-badge';
+    badge.textContent = 'Your tier';
+    activeCard.appendChild(badge);
+  }
+
+  // Progress bar to next tier
+  const nextTier = TIERS.find(t=>t.min > l1Count);
+  if(nextTier){
+    const need = nextTier.min - l1Count;
+    const pct = Math.min(100, (l1Count / nextTier.min) * 100);
+    document.getElementById('tier-progress').style.display='block';
+    document.getElementById('tier-progress-label').textContent = `${need} more to unlock ${nextTier.id.charAt(0).toUpperCase()+nextTier.id.slice(1)}`;
+    document.getElementById('tier-progress-count').textContent = `${l1Count}/${nextTier.min}`;
+    document.getElementById('tier-progress-bar').style.width = pct+'%';
+  }
+
+  // Referral tree
+  const treeWrap = document.getElementById('ref-tree-wrap');
+  if(!l1Count){ treeWrap.innerHTML='<p style="color:var(--muted);font-size:0.85rem">No referrals yet. Share your link!</p>'; }
+  else {
+    const l1Map = Object.fromEntries((l1Users||[]).map(u=>[u.id,u]));
+    let html = '';
+    (l1Users||[]).forEach(u=>{
+      const name = esc(u.display_name||u.username||'User');
+      html += `<div class="ref-tree-row"><span class="ref-tree-level lvl1">L1</span><span class="ref-tree-name">${name}</span><span class="ref-tree-pts">+${tier.l1} pts</span></div>`;
+      const myL2 = l2Users.filter(v=>v.referred_by===u.id);
+      myL2.forEach(v=>{
+        const vname = esc(v.display_name||v.username||'User');
+        html += `<div class="ref-tree-row" style="padding-left:24px"><span class="ref-tree-level lvl2">L2</span><span class="ref-tree-name">${vname}</span><span class="ref-tree-pts">+${tier.l2} pts</span></div>`;
+      });
+    });
+    treeWrap.innerHTML = `<div class="ref-tree">${html}</div>`;
+  }
 
   // Auto-apply pending referral from signup
-  const pending=sessionStorage.getItem('nb_apply_ref');
+  const pending = sessionStorage.getItem('nb_apply_ref');
   if(pending){
     sessionStorage.removeItem('nb_apply_ref');
-    document.getElementById('ref-input').value=pending;
-    const {data,error}=await supabase.rpc('use_referral_code',{p_code:pending});
+    document.getElementById('ref-input').value = pending;
+    const { data, error } = await supabase.rpc('use_referral_code',{p_code:pending});
     if(!error&&!data?.error){
-      const errEl=document.getElementById('ref-err');
+      const errEl = document.getElementById('ref-err');
       errEl.style.color='var(--green)';
       errEl.textContent=`✓ Referral code applied! +${data.bonus} points added.`;
-      const {data:p}=await supabase.from('profiles').select('points').eq('id',profile.id).single();
-      if(p){profile.points=p.points;updateNavPoints(p.points);}
+      const { data:p } = await supabase.from('profiles').select('points').eq('id',profile.id).single();
+      if(p){ profile.points=p.points; updateNavPoints(p.points); }
     }
   }
 }
 
-window.copyCode=()=>{
-  const link=document.getElementById('ref-link').textContent;
+window.copyCode = () => {
+  const link = document.getElementById('ref-link').textContent;
   navigator.clipboard.writeText(link).then(()=>{
     const btn=event.currentTarget; btn.textContent='Copied!';
     setTimeout(()=>btn.textContent='Copy link',2000);
   }).catch(()=>alert('Copy: '+link));
 };
 
-window.useCode=async()=>{
-  const code=document.getElementById('ref-input').value.trim();
-  const errEl=document.getElementById('ref-err');
+window.useCode = async () => {
+  const code = document.getElementById('ref-input').value.trim();
+  const errEl = document.getElementById('ref-err');
   errEl.textContent=''; errEl.style.color='';
-  if(!code){errEl.textContent='Please enter a code.';return;}
-  const {data,error}=await supabase.rpc('use_referral_code',{p_code:code});
-  if(error||data?.error){errEl.textContent=data?.error||error.message;return;}
+  if(!code){ errEl.textContent='Please enter a code.'; return; }
+  const { data, error } = await supabase.rpc('use_referral_code',{p_code:code});
+  if(error||data?.error){ errEl.textContent=data?.error||error.message; return; }
   errEl.style.color='var(--green)';
   errEl.textContent=`✓ Code applied! +${data.bonus} points added.`;
   document.getElementById('ref-input').value='';
-  const {data:p}=await supabase.from('profiles').select('points').eq('id',profile.id).single();
-  if(p){profile.points=p.points;updateNavPoints(p.points);}
+  const { data:p } = await supabase.from('profiles').select('points').eq('id',profile.id).single();
+  if(p){ profile.points=p.points; updateNavPoints(p.points); }
 };
 
 main();

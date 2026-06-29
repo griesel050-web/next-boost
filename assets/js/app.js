@@ -132,23 +132,32 @@ export function updateNavPoints(pts){
 }
 
 // ---- DAILY BONUS ----
+// Streak milestones: day → bonus pts on top of base 10
+const STREAK_MILESTONES=[{days:3,bonus:5,label:'3-day'},{days:7,bonus:15,label:'7-day'},{days:14,bonus:30,label:'14-day'},{days:30,bonus:60,label:'30-day'},{days:60,bonus:100,label:'60-day'},{days:100,bonus:150,label:'100-day'}];
+function streakBonus(streak){let b=0;STREAK_MILESTONES.forEach(m=>{if(streak>=m.days)b=m.bonus;});return b;}
+function nextStreakMilestone(streak){return STREAK_MILESTONES.find(m=>m.days>streak)||null;}
+
 async function checkDailyBonus(){
   const{data}=await supabase.rpc('check_daily_bonus');
   if(!data)return;
   const pill=document.getElementById('daily-pill');
   if(!pill)return;
-  const streak=document.getElementById('dp-streak');
+  const streak=data.streak||0;
+  const bonus=streakBonus(streak);
+  const total=10+bonus;
+  const streakEl=document.getElementById('dp-streak');
   const pts=document.getElementById('dp-pts');
   const label=document.getElementById('dp-label');
-  const total=10+(data.streak_bonus||0);
-  if(pts)pts.textContent=data.streak_bonus>0?`+${total} pts`:'+10 pts';
-  if(streak&&data.streak>1){streak.textContent=`🔥${data.streak}`;streak.style.display='inline-flex';}
+  if(pts)pts.textContent=bonus>0?`+${total} pts`:'+10 pts';
+  if(streakEl&&streak>1){streakEl.textContent=`🔥${streak}`;streakEl.style.display='inline-flex';}
   if(data.claimed_today){
     pill.disabled=true;pill.classList.add('claimed');
     if(label)label.textContent='Come back tomorrow';
     if(pts)pts.textContent='Claimed';
   }else{
     pill.classList.add('ready');
+    const next=nextStreakMilestone(streak);
+    if(next&&label){const need=next.days-streak;label.textContent=need===1?`🎯 Tomorrow: ${next.label} streak!`:`Daily bonus · ${need}d to ${next.label}`;}
   }
 }
 
@@ -161,11 +170,18 @@ window.claimBonus=async()=>{
     if(pill&&!data?.error?.includes('Already'))pill.disabled=false;
     return;
   }
+  const streak=data.streak||0;
+  const bonus=streakBonus(streak);
   const label=document.getElementById('dp-label');
   const pts=document.getElementById('dp-pts');
   if(label)label.textContent='Come back tomorrow';
   if(pts)pts.textContent='Claimed';
-  const msg=data.streak_bonus>0?`+${data.points_earned} pts! 🔥 ${data.streak} day streak!`:`+${data.points_earned} pts daily bonus! 🎁`;
+  // Check if we just hit a milestone
+  const milestone=STREAK_MILESTONES.slice().reverse().find(m=>m.days===streak);
+  let msg;
+  if(milestone) msg=`🎉 ${milestone.label} streak! +${data.points_earned} pts!`;
+  else if(bonus>0) msg=`+${data.points_earned} pts! 🔥 ${streak} day streak!`;
+  else msg=`+${data.points_earned} pts daily bonus! 🎁`;
   toast(msg,'success');
   const navPts=document.getElementById('nav-pts');
   if(navPts)navPts.textContent=parseInt(navPts.textContent||'0')+data.points_earned;

@@ -109,7 +109,7 @@ export function esc(s) {
 }
 
 // ---- PLATFORM HELPERS ----
-export const PLAT_EMOJI = { tiktok: '🎵', instagram: '📸', youtube: '▶️', discord: '💬', website: '🌐', twitch: '🟣' };
-export const PLAT_CLASS = { tiktok: 'plat-tiktok', instagram: 'plat-instagram', youtube: 'plat-youtube', discord: 'plat-discord', website: 'plat-website', twitch: 'plat-twitch' };
-export const TYPE_CLASS  = { follow: 'type-follow', like: 'type-like', view: 'type-view', join: 'type-join', website: 'type-view' };
-export const TYPE_LABEL  = { follow: 'Follow', like: 'Like', view: 'View', join: 'Join', website: 'Visit' };
+export const PLAT_EMOJI = { tiktok: '🎵', instagram: '📸', youtube: '▶️', discord: '💬', website: '🌐', twitch: '🟣', twitter: '🐦' };
+export const PLAT_CLASS = { tiktok: 'plat-tiktok', instagram: 'plat-instagram', youtube: 'plat-youtube', discord: 'plat-discord', website: 'plat-website', twitch: 'plat-twitch', twitter: 'plat-twitter' };
+export const TYPE_CLASS  = { follow: 'type-follow', like: 'type-like', view: 'type-view', join: 'type-join', website: 'type-view', retweet: 'type-view' };
+export const TYPE_LABEL  = { follow: 'Follow', like: 'Like', view: 'View', join: 'Join', website: 'Visit', retweet: 'Retweet' };

@@ -90,15 +90,19 @@ async function loadBoard(board) {
 function buildRow(u, ptField) {
   const isMe = u.id === profile.id;
   const ini = (u.display_name || u.username || '?')[0].toUpperCase();
+  const badge = u.top_badge ? `<span title="${esc(u.top_badge_title||u.top_badge)}" style="font-size:1rem;line-height:1">${u.top_badge}</span>` : '';
+  const streakBadge = (u.current_streak||0)>=7 ? `<span title="${u.current_streak}-day streak" style="font-size:0.72rem;background:rgba(255,100,0,0.15);color:#ff6400;padding:1px 6px;border-radius:999px;font-weight:700">🔥${u.current_streak}</span>` : '';
   return `
     <div class="lb-row${isMe ? ' lb-me' : ''}"
-         onclick="showUser('${u.id}','${esc(u.display_name||u.username)}','${u.avatar_color||'var(--orange)'}',${u[ptField]||0},${u.tasks_completed||0},'${esc(u.username)}')"
+         onclick="showUser('${u.id}','${esc(u.display_name||u.username)}','${u.avatar_color||'var(--orange)'}',${u[ptField]||0},${u.tasks_completed||0},'${esc(u.username)}','${u.top_badge||''}','${esc(u.top_badge_title||'')}',${u.current_streak||0},${u.achievements_count||0})"
          style="cursor:pointer">
       <span class="lb-rank">${medals[u.rank-1] || '#'+u.rank}</span>
       <span class="lb-user">
         <div style="width:30px;height:30px;border-radius:50%;background:${u.avatar_color||'var(--orange)'};display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:700;color:#fff;flex-shrink:0;font-family:'Space Grotesk',sans-serif">${ini}</div>
-        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(u.display_name||u.username)}</span>
-        ${isMe ? '<span class="lb-you">you</span>' : ''}
+        <div style="display:flex;flex-direction:column;min-width:0">
+          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(u.display_name||u.username)}${isMe ? ' <span class="lb-you">you</span>' : ''}</span>
+          <span style="display:flex;gap:4px;align-items:center;margin-top:2px">${badge}${streakBadge}</span>
+        </div>
       </span>
       <span class="lb-pts">⚡ ${(u[ptField]||0).toLocaleString()}</span>
       <span class="lb-done" style="color:var(--muted)">${u.tasks_completed||0}</span>
