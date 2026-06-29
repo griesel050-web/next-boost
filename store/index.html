@@ -1,407 +1,254 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Buy Points — Next Boost</title>
-    <meta name="robots" content="noindex" />
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#E8621A" />
-    <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/assets/css/main.css" />
-    <link rel="stylesheet" href="/assets/css/app.css" />
-    <link rel="stylesheet" href="/assets/css/store.css" />
-  </head>
-  <body>
-    <nav class="nav" id="main-nav"></nav>
-    <div class="app-shell">
-      <aside class="app-sidebar" id="app-sidebar"></aside>
-      <div class="page-content">
-        <h1 class="page-title">Buy Points</h1>
-        <p class="page-sub">
-          Purchase points via PayPal. All purchases are manually reviewed within
-          24 hours.
-        </p>
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Buy Points — Next Boost</title><meta name="robots" content="noindex"/>
+  <link rel="manifest" href="/manifest.json"/><meta name="theme-color" content="#E8621A"/>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
+  <link rel="stylesheet" href="/assets/css/main.css"/>
+  <link rel="stylesheet" href="/assets/css/app.css"/>
+  <link rel="stylesheet" href="/assets/css/store.css"/>
+</head>
+<body>
+<nav class="nav" id="main-nav"></nav>
+<div class="app-shell">
+  <aside class="app-sidebar" id="app-sidebar"></aside>
+  <div class="page-content">
+    <h1 class="page-title">Buy Points</h1>
+    <p class="page-sub">Purchase points via PayPal. All purchases are manually reviewed within 24 hours.</p>
 
-        <!-- HOW IT WORKS -->
-        <div class="store-how">
-          <div class="how-step">
-            <div class="how-num">1</div>
-            <div>
-              <strong>Pick a package</strong>
-              <p>Choose how many points you want</p>
-            </div>
-          </div>
-          <div class="how-arrow">→</div>
-          <div class="how-step">
-            <div class="how-num">2</div>
-            <div>
-              <strong>Pay via PayPal</strong>
-              <p>Send payment to our PayPal Me link</p>
-            </div>
-          </div>
-          <div class="how-arrow">→</div>
-          <div class="how-step">
-            <div class="how-num">3</div>
-            <div>
-              <strong>Submit reference</strong>
-              <p>Enter your PayPal transaction ID</p>
-            </div>
-          </div>
-          <div class="how-arrow">→</div>
-          <div class="how-step">
-            <div class="how-num">4</div>
-            <div>
-              <strong>Get your points</strong>
-              <p>Approved within 24 hours</p>
-            </div>
-          </div>
-        </div>
+    <!-- HOW IT WORKS -->
+    <div class="store-how">
+      <div class="how-step"><div class="how-num">1</div><div><strong>Pick a package</strong><p>Choose how many points you want</p></div></div>
+      <div class="how-arrow">→</div>
+      <div class="how-step"><div class="how-num">2</div><div><strong>Pay via PayPal</strong><p>Send payment to our PayPal Me link</p></div></div>
+      <div class="how-arrow">→</div>
+      <div class="how-step"><div class="how-num">3</div><div><strong>Submit reference</strong><p>Enter your PayPal transaction ID</p></div></div>
+      <div class="how-arrow">→</div>
+      <div class="how-step"><div class="how-num">4</div><div><strong>Get your points</strong><p>Approved within 24 hours</p></div></div>
+    </div>
 
-        <!-- PACKAGES -->
-        <div class="packages-grid" id="packages-grid">
-          <div
-            class="package-card"
-            data-pkg="starter"
-            data-pts="500"
-            data-usd="2.00"
-            onclick="selectPackage(this)"
-          >
-            <div class="pkg-badge">Starter</div>
-            <div class="pkg-pts">500 <span>pts</span></div>
-            <div class="pkg-price">$2.00</div>
-            <div class="pkg-rate">$0.004 per point</div>
-            <ul class="pkg-features">
-              <li>✓ Post 2–3 tasks</li>
-              <li>✓ Instant after approval</li>
-            </ul>
-            <button class="btn btn-ghost btn-full pkg-btn">Select</button>
-          </div>
-          <div
-            class="package-card popular"
-            data-pkg="boost"
-            data-pts="1500"
-            data-usd="5.00"
-            onclick="selectPackage(this)"
-          >
-            <div class="pkg-popular-badge">Most Popular</div>
-            <div class="pkg-badge">Boost</div>
-            <div class="pkg-pts">1,500 <span>pts</span></div>
-            <div class="pkg-price">$5.00</div>
-            <div class="pkg-rate">$0.0033 per point</div>
-            <ul class="pkg-features">
-              <li>✓ Post 5–7 tasks</li>
-              <li>✓ Boost 1 task</li>
-              <li>✓ Best starter value</li>
-            </ul>
-            <button class="btn btn-primary btn-full pkg-btn">Select</button>
-          </div>
-          <div
-            class="package-card"
-            data-pkg="pro"
-            data-pts="3500"
-            data-usd="10.00"
-            onclick="selectPackage(this)"
-          >
-            <div class="pkg-badge">Pro</div>
-            <div class="pkg-pts">3,500 <span>pts</span></div>
-            <div class="pkg-price">$10.00</div>
-            <div class="pkg-rate">$0.0029 per point</div>
-            <ul class="pkg-features">
-              <li>✓ Post 10+ tasks</li>
-              <li>✓ Boost multiple tasks</li>
-              <li>✓ Great for creators</li>
-            </ul>
-            <button class="btn btn-ghost btn-full pkg-btn">Select</button>
-          </div>
-          <div
-            class="package-card"
-            data-pkg="elite"
-            data-pts="8000"
-            data-usd="20.00"
-            onclick="selectPackage(this)"
-          >
-            <div class="pkg-badge">Elite</div>
-            <div class="pkg-pts">8,000 <span>pts</span></div>
-            <div class="pkg-price">$20.00</div>
-            <div class="pkg-rate">$0.0025 per point — best value</div>
-            <ul class="pkg-features">
-              <li>✓ Maximum growth</li>
-              <li>✓ Unlimited boosts</li>
-              <li>✓ Best value per point</li>
-            </ul>
-            <button class="btn btn-ghost btn-full pkg-btn">Select</button>
-          </div>
-        </div>
-
-        <!-- CHECKOUT PANEL -->
-        <div
-          class="checkout-panel card card-pad"
-          id="checkout-panel"
-          style="display: none; max-width: 540px; margin-top: 32px"
-        >
-          <h3 style="font-size: 1rem; margin-bottom: 4px">
-            Complete your purchase
-          </h3>
-          <p
-            style="color: var(--muted); font-size: 0.85rem; margin-bottom: 20px"
-          >
-            Selected: <strong id="co-summary">—</strong>
-          </p>
-
-          <div class="checkout-step">
-            <div class="cs-num">1</div>
-            <div class="cs-body">
-              <strong>Send payment via PayPal</strong>
-              <p>
-                Click the button below to open PayPal Me and send exactly
-                <strong id="co-amount" style="color: var(--orange)"
-                  >$0.00</strong
-                >.
-              </p>
-              <p
-                style="font-size: 0.8rem; color: var(--muted); margin-top: 4px"
-              >
-                Include your username
-                <strong id="co-username" style="color: var(--text)"></strong> in
-                the PayPal note so we can match your payment.
-              </p>
-              <a
-                id="paypal-btn"
-                href="#"
-                target="_blank"
-                class="btn btn-paypal"
-                style="
-                  margin-top: 12px;
-                  display: inline-flex;
-                  align-items: center;
-                  gap: 8px;
-                "
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path
-                    d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.59 3.025-2.566 6.243-8.558 6.243H9.82l-1.35 8.543h4.927l.97-6.148h1.763c4.754 0 7.445-2.498 8.325-7.45a5.06 5.06 0 0 0-.233-1.701z"
-                  />
-                </svg>
-                Pay with PayPal
-              </a>
-            </div>
-          </div>
-
-          <div class="checkout-step" style="margin-top: 20px">
-            <div class="cs-num">2</div>
-            <div class="cs-body">
-              <strong>Enter your PayPal transaction reference</strong>
-              <p>
-                After paying, copy the transaction ID from your PayPal receipt
-                email (looks like: 1AB23456CD789012E).
-              </p>
-              <div class="form-group" style="margin-top: 12px">
-                <label for="paypal-ref">Transaction ID or note reference</label>
-                <input
-                  type="text"
-                  id="paypal-ref"
-                  placeholder="e.g. 1AB23456CD789012E"
-                  maxlength="100"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="alert alert-info"
-            style="font-size: 0.83rem; margin-bottom: 16px"
-          >
-            ⏱️ Purchases are reviewed manually within 24 hours. You'll get a
-            notification when approved. Do not submit multiple purchase requests
-            for the same payment.
-          </div>
-
-          <div class="error-msg" id="co-err"></div>
-          <div style="display: flex; gap: 10px; flex-wrap: wrap">
-            <button
-              class="btn btn-primary"
-              id="submit-btn"
-              onclick="submitPurchase()"
-            >
-              Submit for review
-            </button>
-            <button class="btn btn-ghost" onclick="cancelCheckout()">
-              Cancel
-            </button>
-          </div>
-        </div>
-
-        <!-- PURCHASE HISTORY -->
-        <div style="margin-top: 40px">
-          <h2 style="font-size: 1rem; margin-bottom: 16px">Purchase history</h2>
-          <div id="history-feed"></div>
-        </div>
+    <!-- PACKAGES -->
+    <div class="packages-grid" id="packages-grid">
+      <div class="package-card" data-pkg="starter" data-pts="500" data-usd="2.00" onclick="selectPackage(this)">
+        <div class="pkg-badge">Starter</div>
+        <div class="pkg-pts">500 <span>pts</span></div>
+        <div class="pkg-price">$2.00</div>
+        <div class="pkg-rate">$0.004 per point</div>
+        <ul class="pkg-features">
+          <li>✓ Post 2–3 tasks</li>
+          <li>✓ Instant after approval</li>
+        </ul>
+        <button class="btn btn-ghost btn-full pkg-btn">Select</button>
+      </div>
+      <div class="package-card popular" data-pkg="boost" data-pts="1500" data-usd="5.00" onclick="selectPackage(this)">
+        <div class="pkg-popular-badge">Most Popular</div>
+        <div class="pkg-badge">Boost</div>
+        <div class="pkg-pts">1,500 <span>pts</span></div>
+        <div class="pkg-price">$5.00</div>
+        <div class="pkg-rate">$0.0033 per point</div>
+        <ul class="pkg-features">
+          <li>✓ Post 5–7 tasks</li>
+          <li>✓ Boost 1 task</li>
+          <li>✓ Best starter value</li>
+        </ul>
+        <button class="btn btn-primary btn-full pkg-btn">Select</button>
+      </div>
+      <div class="package-card" data-pkg="pro" data-pts="3500" data-usd="10.00" onclick="selectPackage(this)">
+        <div class="pkg-badge">Pro</div>
+        <div class="pkg-pts">3,500 <span>pts</span></div>
+        <div class="pkg-price">$10.00</div>
+        <div class="pkg-rate">$0.0029 per point</div>
+        <ul class="pkg-features">
+          <li>✓ Post 10+ tasks</li>
+          <li>✓ Boost multiple tasks</li>
+          <li>✓ Great for creators</li>
+        </ul>
+        <button class="btn btn-ghost btn-full pkg-btn">Select</button>
+      </div>
+      <div class="package-card" data-pkg="elite" data-pts="8000" data-usd="20.00" onclick="selectPackage(this)">
+        <div class="pkg-badge">Elite</div>
+        <div class="pkg-pts">8,000 <span>pts</span></div>
+        <div class="pkg-price">$20.00</div>
+        <div class="pkg-rate">$0.0025 per point — best value</div>
+        <ul class="pkg-features">
+          <li>✓ Maximum growth</li>
+          <li>✓ Unlimited boosts</li>
+          <li>✓ Best value per point</li>
+        </ul>
+        <button class="btn btn-ghost btn-full pkg-btn">Select</button>
       </div>
     </div>
-    <nav class="mobile-nav-bar" id="mobile-nav"></nav>
-    <script type="module">
-      import { supabase, esc } from "/assets/js/shared.js";
-      import { initApp } from "/assets/js/app.js";
 
-      // ── CONFIG: Your PayPal Me link ──────────────────────────────
-      const PAYPAL_ME = "https://paypal.me/nxrealm08";
-      // ────────────────────────────────────────────────────────────
+    <!-- CHECKOUT PANEL -->
+    <div class="checkout-panel card card-pad" id="checkout-panel" style="display:none;max-width:540px;margin-top:32px">
+      <h3 style="font-size:1rem;margin-bottom:4px">Complete your purchase</h3>
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:20px">Selected: <strong id="co-summary">—</strong></p>
 
-      let profile,
-        selectedPkg = null;
+      <div class="checkout-step">
+        <div class="cs-num">1</div>
+        <div class="cs-body">
+          <strong>Send payment via PayPal</strong>
+          <p>Click the button below to open PayPal Me and send exactly <strong id="co-amount" style="color:var(--orange)">$0.00</strong>.</p>
+          <p style="font-size:0.8rem;color:var(--muted);margin-top:4px">Include your username <strong id="co-username" style="color:var(--text)"></strong> in the PayPal note so we can match your payment.</p>
+          <a id="paypal-btn" href="#" target="_blank" class="btn btn-paypal" style="margin-top:12px;display:inline-flex;align-items:center;gap:8px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.59 3.025-2.566 6.243-8.558 6.243H9.82l-1.35 8.543h4.927l.97-6.148h1.763c4.754 0 7.445-2.498 8.325-7.45a5.06 5.06 0 0 0-.233-1.701z"/></svg>
+            Pay with PayPal
+          </a>
+        </div>
+      </div>
 
-      async function main() {
-        const ctx = await initApp("store");
-        if (!ctx) return;
-        profile = ctx.profile;
-        document.getElementById("co-username").textContent =
-          "@" + profile.username;
-        loadHistory();
-      }
+      <div class="checkout-step" style="margin-top:20px">
+        <div class="cs-num">2</div>
+        <div class="cs-body">
+          <strong>Enter your PayPal transaction reference</strong>
+          <p>After paying, copy the transaction ID from your PayPal receipt email (looks like: 1AB23456CD789012E).</p>
+          <div class="form-group" style="margin-top:12px">
+            <label for="paypal-ref">Transaction ID or note reference</label>
+            <input type="text" id="paypal-ref" placeholder="e.g. 1AB23456CD789012E" maxlength="100"/>
+          </div>
+        </div>
+      </div>
 
-      window.selectPackage = (card) => {
-        document
-          .querySelectorAll(".package-card")
-          .forEach((c) => c.classList.remove("selected"));
-        card.classList.add("selected");
-        selectedPkg = {
-          id: card.dataset.pkg,
-          pts: parseInt(card.dataset.pts),
-          usd: parseFloat(card.dataset.usd),
-        };
+      <div class="alert alert-info" style="font-size:0.83rem;margin-bottom:16px">
+        ⏱️ Purchases are reviewed manually within 24 hours. You'll get a notification when approved. Do not submit multiple purchase requests for the same payment.
+      </div>
 
-        const panel = document.getElementById("checkout-panel");
-        panel.style.display = "block";
-        panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      <div class="error-msg" id="co-err"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" id="submit-btn" onclick="submitPurchase()">Submit for review</button>
+        <button class="btn btn-ghost" onclick="cancelCheckout()">Cancel</button>
+      </div>
+    </div>
 
-        document.getElementById("co-summary").textContent =
-          `${selectedPkg.pts.toLocaleString()} points for $${selectedPkg.usd.toFixed(2)}`;
-        document.getElementById("co-amount").textContent =
-          `$${selectedPkg.usd.toFixed(2)}`;
+    <!-- PURCHASE HISTORY -->
+    <div style="margin-top:40px">
+      <h2 style="font-size:1rem;margin-bottom:16px">Purchase history</h2>
+      <div id="history-feed"></div>
+    </div>
+  </div>
+</div>
+<nav class="mobile-nav-bar" id="mobile-nav"></nav>
+<script type="module">
+import { supabase, esc } from '/assets/js/shared.js';
+import { initApp } from '/assets/js/app.js';
 
-        // Update PayPal Me link with amount and note
-        const note = encodeURIComponent(
-          `NextBoost ${profile.username} ${selectedPkg.id}`,
-        );
-        document.getElementById("paypal-btn").href =
-          `${PAYPAL_ME}/${selectedPkg.usd.toFixed(2)}?currencyCode=USD`;
-      };
+// ── CONFIG: Your PayPal Me link ──────────────────────────────
+const PAYPAL_ME = 'https://paypal.me/YourPayPalUsername';
+// ────────────────────────────────────────────────────────────
 
-      window.cancelCheckout = () => {
-        document.getElementById("checkout-panel").style.display = "none";
-        document
-          .querySelectorAll(".package-card")
-          .forEach((c) => c.classList.remove("selected"));
-        selectedPkg = null;
-      };
+let profile, selectedPkg = null;
 
-      window.submitPurchase = async () => {
-        const ref = document.getElementById("paypal-ref").value.trim();
-        const errEl = document.getElementById("co-err");
-        const btn = document.getElementById("submit-btn");
-        errEl.textContent = "";
+async function main() {
+  const ctx = await initApp('store');
+  if (!ctx) return;
+  profile = ctx.profile;
+  document.getElementById('co-username').textContent = '@' + profile.username;
+  loadHistory();
+}
 
-        if (!selectedPkg) {
-          errEl.textContent = "Please select a package.";
-          return;
-        }
-        if (!ref || ref.length < 6) {
-          errEl.textContent = "Please enter a valid transaction reference.";
-          return;
-        }
+window.selectPackage = (card) => {
+  document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedPkg = {
+    id: card.dataset.pkg,
+    pts: parseInt(card.dataset.pts),
+    usd: parseFloat(card.dataset.usd),
+  };
 
-        // Get fingerprint for fraud prevention
-        let fp = null;
-        try {
-          const FP =
-            await import("https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@4/+esm");
-          const fpAgent = await FP.load();
-          const result = await fpAgent.get();
-          fp = result.visitorId;
-        } catch {}
+  const panel = document.getElementById('checkout-panel');
+  panel.style.display = 'block';
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-        btn.disabled = true;
-        btn.textContent = "Submitting…";
+  document.getElementById('co-summary').textContent =
+    `${selectedPkg.pts.toLocaleString()} points for $${selectedPkg.usd.toFixed(2)}`;
+  document.getElementById('co-amount').textContent = `$${selectedPkg.usd.toFixed(2)}`;
 
-        const { data, error } = await supabase.rpc("submit_purchase", {
-          p_package_id: selectedPkg.id,
-          p_paypal_ref: ref,
-          p_fingerprint: fp,
-        });
+  // Update PayPal Me link with amount and note
+  const note = encodeURIComponent(`NextBoost ${profile.username} ${selectedPkg.id}`);
+  document.getElementById('paypal-btn').href =
+    `${PAYPAL_ME}/${selectedPkg.usd.toFixed(2)}?currencyCode=USD`;
+};
 
-        btn.disabled = false;
-        btn.textContent = "Submit for review";
+window.cancelCheckout = () => {
+  document.getElementById('checkout-panel').style.display = 'none';
+  document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
+  selectedPkg = null;
+};
 
-        if (error || data?.error) {
-          errEl.textContent = data?.error || error.message;
-          return;
-        }
+window.submitPurchase = async () => {
+  const ref = document.getElementById('paypal-ref').value.trim();
+  const errEl = document.getElementById('co-err');
+  const btn = document.getElementById('submit-btn');
+  errEl.textContent = '';
 
-        document.getElementById("checkout-panel").style.display = "none";
-        document
-          .querySelectorAll(".package-card")
-          .forEach((c) => c.classList.remove("selected"));
-        selectedPkg = null;
+  if (!selectedPkg) { errEl.textContent = 'Please select a package.'; return; }
+  if (!ref || ref.length < 6) { errEl.textContent = 'Please enter a valid transaction reference.'; return; }
 
-        // Show success
-        const success = document.createElement("div");
-        success.className = "alert alert-success";
-        success.style.maxWidth = "540px";
-        success.innerHTML = `<strong>Purchase submitted!</strong> Your ${data.points} points will be added within 24 hours after we verify your payment. You'll get a notification.`;
-        document
-          .querySelector(".page-content")
-          .insertBefore(
-            success,
-            document.getElementById("history-feed").parentElement,
-          );
-        setTimeout(() => success.remove(), 8000);
+  // Get fingerprint for fraud prevention
+  let fp = null;
+  try {
+    const FP = await import('https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@4/+esm');
+    const fpAgent = await FP.load();
+    const result = await fpAgent.get();
+    fp = result.visitorId;
+  } catch {}
 
-        loadHistory();
-      };
+  btn.disabled = true; btn.textContent = 'Submitting…';
 
-      async function loadHistory() {
-        const feed = document.getElementById("history-feed");
-        const { data, error } = await supabase
-          .from("point_purchases")
-          .select("*")
-          .eq("user_id", profile.id)
-          .order("submitted_at", { ascending: false });
+  const { data, error } = await supabase.rpc('submit_purchase', {
+    p_package_id: selectedPkg.id,
+    p_paypal_ref: ref,
+    p_fingerprint: fp,
+  });
 
-        if (!data || !data.length) {
-          feed.innerHTML =
-            '<p style="color:var(--muted);font-size:0.85rem">No purchases yet.</p>';
-          return;
-        }
+  btn.disabled = false; btn.textContent = 'Submit for review';
 
-        const statusIcon = { pending: "⏳", approved: "✅", rejected: "❌" };
-        const statusClass = {
-          pending: "chip-pending",
-          approved: "chip-approved",
-          rejected: "chip-rejected",
-        };
+  if (error || data?.error) { errEl.textContent = data?.error || error.message; return; }
 
-        feed.innerHTML = data
-          .map(
-            (p) => `
+  document.getElementById('checkout-panel').style.display = 'none';
+  document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
+  selectedPkg = null;
+
+  // Show success
+  const success = document.createElement('div');
+  success.className = 'alert alert-success';
+  success.style.maxWidth = '540px';
+  success.innerHTML = `<strong>Purchase submitted!</strong> Your ${data.points} points will be added within 24 hours after we verify your payment. You'll get a notification.`;
+  document.querySelector('.page-content').insertBefore(success, document.getElementById('history-feed').parentElement);
+  setTimeout(() => success.remove(), 8000);
+
+  loadHistory();
+};
+
+async function loadHistory() {
+  const feed = document.getElementById('history-feed');
+  const { data, error } = await supabase
+    .from('point_purchases')
+    .select('*')
+    .eq('user_id', profile.id)
+    .order('submitted_at', { ascending: false });
+
+  if (!data || !data.length) {
+    feed.innerHTML = '<p style="color:var(--muted);font-size:0.85rem">No purchases yet.</p>';
+    return;
+  }
+
+  const statusIcon = { pending: '⏳', approved: '✅', rejected: '❌' };
+  const statusClass = { pending: 'chip-pending', approved: 'chip-approved', rejected: 'chip-rejected' };
+
+  feed.innerHTML = data.map(p => `
     <div class="purchase-row">
       <div class="purchase-info">
         <strong>${p.points.toLocaleString()} pts</strong>
         <span style="color:var(--muted);font-size:0.82rem">$${parseFloat(p.usd_amount).toFixed(2)} · Ref: ${esc(p.paypal_ref)} · ${new Date(p.submitted_at).toLocaleDateString()}</span>
-        ${p.rejection_reason ? `<span style="color:var(--red);font-size:0.8rem">Rejected: ${esc(p.rejection_reason)}</span>` : ""}
+        ${p.rejection_reason ? `<span style="color:var(--red);font-size:0.8rem">Rejected: ${esc(p.rejection_reason)}</span>` : ''}
       </div>
       <span class="status-chip ${statusClass[p.status]}">${statusIcon[p.status]} ${p.status}</span>
-    </div>`,
-          )
-          .join("");
-      }
+    </div>`).join('');
+}
 
-      main();
-    </script>
-  </body>
+main();
+</script>
+</body>
 </html>

@@ -455,3 +455,13 @@ body.has-custom-bg { background-attachment: fixed; background-size: cover; backg
 .lb-user-card-stat { text-align: center; }
 .lb-user-card-stat .val { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--orange); }
 .lb-user-card-stat .lbl { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* ---- POINTS PILL HOVER (clickable to store) ---- */
+.pts-pill {
+  transition: all 0.18s;
+}
+.pts-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(232,98,26,0.45);
+  opacity: 0.92;
+}

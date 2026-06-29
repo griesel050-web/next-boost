@@ -75,7 +75,7 @@ function renderShell(profile,currentPage){
           </div>
           <span class="dp-streak" id="dp-streak" style="display:none"></span>
         </button>
-        <div class="pts-pill">⚡ <span id="nav-pts">${profile.points}</span> pts</div>
+        <a href="/store/" class="pts-pill" id="nav-pts-pill" title="Buy more points +" style="text-decoration:none;cursor:pointer">⚡ <span id="nav-pts">${profile.points}</span> pts <span style="font-size:0.7rem;opacity:0.7">+</span></a>
         <button class="notif-btn" id="notif-btn" onclick="toggleNotifs()" title="Notifications">
           🔔<span class="notif-dot" id="notif-dot" style="display:none"></span>
         </button>
@@ -108,7 +108,7 @@ function renderShell(profile,currentPage){
         <div style="width:32px;height:32px;border-radius:50%;background:${profile.avatar_color||'#E8621A'};display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:0.85rem;flex-shrink:0">${ini}</div>
         <div class="sidebar-user-info">
           <div class="sidebar-user-name">${esc(profile.display_name||profile.username)}</div>
-          <div class="sidebar-user-pts">⚡ ${profile.points} pts</div>
+          <div class="sidebar-user-pts">⚡ ${profile.points} pts · <span style="color:var(--orange)">Buy more →</span></div>
         </div>
       </a>`;
   }
