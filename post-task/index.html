@@ -106,6 +106,16 @@
         </div>
       </div>
       <div class="error-msg" id="post-err"></div>
+
+      <!-- Boost upsell -->
+      <div class="form-group" style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:flex-start;gap:12px;cursor:pointer" onclick="document.getElementById('boost-check').click()">
+        <input type="checkbox" id="boost-check" style="margin-top:3px;width:18px;height:18px;accent-color:var(--orange);flex-shrink:0" onclick="event.stopPropagation()" onchange="updateCost()"/>
+        <div>
+          <div style="font-weight:700;font-size:0.92rem;display:flex;align-items:center;gap:6px">⚡ Boost this task <span style="font-size:0.72rem;background:rgba(232,98,26,0.15);color:var(--orange);padding:1px 8px;border-radius:999px;font-weight:600">+1,000 pts</span></div>
+          <div style="font-size:0.8rem;color:var(--muted);margin-top:2px">Pin to the top of the earn feed for 12 hours — get completions much faster.</div>
+        </div>
+      </div>
+
       <button class="btn btn-primary" id="post-btn" onclick="postTask()">Post task</button>
     </div>
   </div>
@@ -127,6 +137,7 @@ const RULES = {
 const TLABELS = { follow:'Follow', like:'Like', view:'View', join:'Join Server', website:'Visit Website', retweet:'Retweet' };
 
 const DURATION_SURCHARGE = { 10000:0, 20000:2, 30000:5, 45000:10, 60000:20, 120000:50 };
+const BOOST_COST = 1000;
 
 let profile;
 
@@ -167,7 +178,8 @@ window.updateCost = () => {
   const slots = parseInt(document.getElementById('p-slots').value) || 0;
   const durMs = parseInt(document.getElementById('p-duration').value) || 10000;
   const surcharge = DURATION_SURCHARGE[durMs] || 0;
-  const total = (reward + surcharge) * slots;
+  const boost = document.getElementById('boost-check')?.checked ? BOOST_COST : 0;
+  const total = (reward + surcharge) * slots + boost;
 
   document.getElementById('c-reward').textContent = reward;
   document.getElementById('c-slots').textContent = slots;
@@ -184,6 +196,7 @@ window.postTask = async () => {
   const reward = parseInt(document.getElementById('p-points').value);
   const slots = parseInt(document.getElementById('p-slots').value);
   const durMs = parseInt(document.getElementById('p-duration').value) || 10000;
+  const wantsBoost = document.getElementById('boost-check').checked;
   const errEl = document.getElementById('post-err');
   const btn = document.getElementById('post-btn');
   errEl.textContent = ''; errEl.style.color = '';
@@ -192,9 +205,9 @@ window.postTask = async () => {
   if (!validateUrl(url, platform)) { errEl.textContent = RULES[platform].hint; return; }
 
   const surcharge = DURATION_SURCHARGE[durMs] || 0;
-  const total = (reward + surcharge) * slots;
+  const total = (reward + surcharge) * slots + (wantsBoost ? BOOST_COST : 0);
   if (profile.points < total) {
-    errEl.textContent = `Not enough points. This costs ${total} pts, you have ${profile.points}.`;
+    errEl.textContent = `Not enough points. This costs ${total} pts${wantsBoost ? ' (incl. boost)' : ''}, you have ${profile.points}.`;
     return;
   }
 
@@ -204,9 +217,21 @@ window.postTask = async () => {
     p_description: desc || null, p_points_reward: reward,
     p_max_completions: slots, p_required_duration_ms: durMs
   });
-  btn.disabled = false; btn.textContent = 'Post task';
 
-  if (error || data?.error) { errEl.textContent = data?.error || error.message; return; }
+  if (error || data?.error) {
+    btn.disabled = false; btn.textContent = 'Post task';
+    errEl.textContent = data?.error || error.message;
+    return;
+  }
+
+  let boostMsg = '';
+  if (wantsBoost && data.task_id) {
+    const { data: bd, error: be } = await supabase.rpc('boost_task', { p_task_id: data.task_id, p_hours: 12 });
+    if (!be && !bd?.error) boostMsg = ' + boosted for 12h!';
+    else boostMsg = ` (boost failed: ${bd?.error || be?.message})`;
+  }
+
+  btn.disabled = false; btn.textContent = 'Post task';
 
   const { data: p } = await supabase.from('profiles').select('points,tasks_posted').eq('id', profile.id).single();
   if (p) { profile.points = p.points; updateNavPoints(p.points); updateCost(); }
@@ -214,10 +239,11 @@ window.postTask = async () => {
   document.getElementById('p-url').value = '';
   document.getElementById('p-desc').value = '';
   document.getElementById('url-hint').textContent = '';
+  document.getElementById('boost-check').checked = false;
   const durSecs = Math.round(durMs / 1000);
   const durLabel = durSecs >= 60 ? `${durSecs/60}min` : `${durSecs}s`;
   errEl.style.color = 'var(--green)';
-  errEl.textContent = `Task posted! ${data.total_cost} pts deducted. (${slots} slots x ${durLabel} timer)`;
+  errEl.textContent = `Task posted! ${data.total_cost} pts deducted. (${slots} slots x ${durLabel} timer)${boostMsg}`;
   setTimeout(() => { errEl.textContent = ''; errEl.style.color = ''; }, 5000);
 };
 

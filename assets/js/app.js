@@ -124,6 +124,7 @@ function renderShell(profile,currentPage){
   }
   checkDailyBonus();
   loadNotifCount();
+  subscribeNotifs(profile.id);
 }
 
 export function updateNavPoints(pts){
@@ -192,6 +193,30 @@ async function loadNotifCount(){
   const{count}=await supabase.from('notifications').select('id',{count:'exact',head:true}).eq('is_read',false);
   const dot=document.getElementById('notif-dot');
   if(dot)dot.style.display=count>0?'block':'none';
+}
+
+let _notifChannel=null;
+function subscribeNotifs(userId){
+  if(!userId||_notifChannel)return;
+  _notifChannel=supabase
+    .channel('notifications:'+userId)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:`user_id=eq.${userId}`},(payload)=>{
+      const n=payload.new;
+      const dot=document.getElementById('notif-dot');
+      if(dot)dot.style.display='block';
+      toast(`${n.title}`,'success');
+      const panel=document.getElementById('notif-panel');
+      const list=document.getElementById('notif-list');
+      if(panel&&panel.style.display==='block'&&list){
+        const empty=list.querySelector('.notif-empty');
+        if(empty)empty.remove();
+        const item=document.createElement('div');
+        item.className='notif-item notif-unread';
+        item.innerHTML=`<div class="notif-title">${esc(n.title)}</div><div class="notif-body">${esc(n.body)}</div>`;
+        list.prepend(item);
+      }
+    })
+    .subscribe();
 }
 window.toggleNotifs=async()=>{
   let panel=document.getElementById('notif-panel');
