@@ -23,9 +23,25 @@
 <script type="module">
 import { supabase, esc } from '/assets/js/shared.js';
 import { initApp, updateNavPoints } from '/assets/js/app.js';
-const PE={tiktok:'🎵',instagram:'📸',youtube:'▶️',discord:'💬',website:'🌐',twitch:'🟣'};
-const PC={tiktok:'plat-tiktok',instagram:'plat-instagram',youtube:'plat-youtube',discord:'plat-discord'};
-const TL={follow:'Follow',like:'Like',view:'View',join:'Join',website:'Visit',twitch:'Follow'};
+const PE={tiktok:'🎵',instagram:'📸',youtube:'▶️',discord:'💬',website:'🌐',twitch:'🟣',twitter:'🐦'};
+const PC={tiktok:'plat-tiktok',instagram:'plat-instagram',youtube:'plat-youtube',discord:'plat-discord',twitch:'plat-twitch',twitter:'plat-twitter'};
+const TL={follow:'Follow',like:'Like',view:'View',join:'Join',website:'Visit',twitch:'Follow',retweet:'Retweet'};
+function prettyTarget(url, platform) {
+  try {
+    const u = new URL(url);
+    const parts = u.pathname.replace(/\/+$/, '').split('/').filter(Boolean);
+    switch (platform) {
+      case 'tiktok':     return parts.find(p => p.startsWith('@')) || parts[parts.length-1] || url;
+      case 'instagram':  return (parts[0]==='p'||parts[0]==='reel') ? '📸 post' : '@'+(parts[0]||url);
+      case 'youtube':    return u.searchParams.get('v') ? '▶️ '+u.searchParams.get('v') : (parts.find(p=>p.startsWith('@'))||parts[parts.length-1]||url);
+      case 'twitter':    return parts[1]==='status' ? '🐦 @'+parts[0] : '@'+(parts[0]||url);
+      case 'twitch':     return parts[0] || url;
+      case 'discord':    return 'discord.gg/'+(parts[parts.length-1]||'');
+      case 'website':    return u.hostname.replace(/^www\./,'');
+      default:           return u.hostname.replace(/^www\./,'');
+    }
+  } catch { return url; }
+}
 let profile;
 
 async function main(){
@@ -53,7 +69,7 @@ async function loadTasks(){
       card.innerHTML=`
         <div class="task-plat-icon ${PC[t.platform]||''}">${PE[t.platform]||'🌐'}</div>
         <div class="task-info">
-          <h4 style="font-size:0.82rem;word-break:break-all">${esc(t.target)}</h4>
+          <h4>${esc(prettyTarget(t.target, t.platform))}</h4>
           <p>${t.completions_count}/${t.max_completions} done · ${t.points_reward} pts each · ${exp}d left</p>
           <div style="margin-top:6px;height:4px;background:var(--surface3);border-radius:4px;overflow:hidden">
             <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--orange),var(--amber));border-radius:4px"></div>

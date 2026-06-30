@@ -22,9 +22,25 @@
 <script type="module">
   import { supabase, esc } from '/assets/js/shared.js';
   import { initApp } from '/assets/js/app.js';
-  const PE={tiktok:'🎵',instagram:'📸',youtube:'▶️',discord:'💬',website:'🌐',twitch:'🟣'};
-  const PC={tiktok:'plat-tiktok',instagram:'plat-instagram',youtube:'plat-youtube',discord:'plat-discord'};
-  const TL={follow:'Follow',like:'Like',view:'View',join:'Join',website:'Visit',twitch:'Follow'};
+  const PE={tiktok:'🎵',instagram:'📸',youtube:'▶️',discord:'💬',website:'🌐',twitch:'🟣',twitter:'🐦'};
+  const PC={tiktok:'plat-tiktok',instagram:'plat-instagram',youtube:'plat-youtube',discord:'plat-discord',twitch:'plat-twitch',twitter:'plat-twitter'};
+  const TL={follow:'Follow',like:'Like',view:'View',join:'Join',website:'Visit',twitch:'Follow',retweet:'Retweet'};
+  function prettyTarget(url, platform) {
+    try {
+      const u = new URL(url);
+      const parts = u.pathname.replace(/\/+$/, '').split('/').filter(Boolean);
+      switch (platform) {
+        case 'tiktok':     return parts.find(p => p.startsWith('@')) || parts[parts.length-1] || url;
+        case 'instagram':  return (parts[0]==='p'||parts[0]==='reel') ? '📸 post' : '@'+(parts[0]||url);
+        case 'youtube':    return u.searchParams.get('v') ? '▶️ '+u.searchParams.get('v') : (parts.find(p=>p.startsWith('@'))||parts[parts.length-1]||url);
+        case 'twitter':    return parts[1]==='status' ? '🐦 @'+parts[0] : '@'+(parts[0]||url);
+        case 'twitch':     return parts[0] || url;
+        case 'discord':    return 'discord.gg/'+(parts[parts.length-1]||'');
+        case 'website':    return u.hostname.replace(/^www\./,'');
+        default:           return u.hostname.replace(/^www\./,'');
+      }
+    } catch { return url; }
+  }
 
   async function main() {
     const ctx = await initApp('completed');
@@ -53,7 +69,7 @@
         card.innerHTML = `
           <div class="task-plat-icon ${PC[t.platform]||''}">${PE[t.platform]||'🌐'}</div>
           <div class="task-info">
-            <h4>${esc(t.target)}</h4>
+            <h4>${esc(prettyTarget(t.target, t.platform))}</h4>
             <p>${esc(t.description || TL[t.type] + ' on ' + t.platform)}</p>
           </div>
           <div class="task-actions">

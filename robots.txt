@@ -3,6 +3,7 @@ Allow: /
 Allow: /signup/
 Allow: /earn/
 Allow: /leaderboard/
+Allow: /guides/
 Disallow: /dashboard/
 Disallow: /login/
 Disallow: /reset-password/

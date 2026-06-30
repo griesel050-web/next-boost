@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Free Social Media Growth Guides — Next Boost</title>
+  <meta name="description" content="Free guides on how to get more followers, likes and views on TikTok, Instagram, YouTube, Twitter/X and Discord — no payment required, just real engagement exchange."/>
+  <meta name="keywords" content="how to get free followers, social media growth guide, get followers without paying, free engagement exchange"/>
+  <link rel="canonical" href="https://boost.nexosites.xyz/guides/"/>
+  <meta property="og:title" content="Free Social Media Growth Guides — Next Boost"/>
+  <meta property="og:description" content="Free guides on how to get more followers, likes and views across TikTok, Instagram, YouTube, Twitter/X and Discord."/>
+  <meta property="og:url" content="https://boost.nexosites.xyz/guides/"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:image" content="https://boost.nexosites.xyz/assets/img/og-image.png"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Free Social Media Growth Guides — Next Boost"/>
+  <meta name="twitter:description" content="Free guides on how to get more followers, likes and views across TikTok, Instagram, YouTube, Twitter/X and Discord."/>
+  <meta name="twitter:image" content="https://boost.nexosites.xyz/assets/img/og-image.png"/>
+  <meta name="robots" content="index, follow"/>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#E8621A"/>
+  <link rel="stylesheet" href="/assets/css/main.css"/>
+  <link rel="stylesheet" href="/assets/css/landing.css"/>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Free Social Media Growth Guides","url":"https://boost.nexosites.xyz/guides/","description":"Free guides on how to get more followers, likes and views on TikTok, Instagram, YouTube, Twitter/X and Discord."}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://boost.nexosites.xyz/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://boost.nexosites.xyz/guides/"}]}</script>
+</head>
+<body>
+  <nav class="nav" id="main-nav">
+    <a class="nav-logo" href="/"><img src="/assets/img/logo.png" alt="Next Boost" style="height:36px"/></a>
+    <div class="nav-links" id="nav-links">
+      <a href="/login/" class="btn btn-ghost btn-sm">Log in</a>
+      <a href="/signup/" class="btn btn-primary btn-sm">Sign up free</a>
+    </div>
+  </nav>
+
+  <section class="guide-hero">
+    <div class="container">
+      <div class="breadcrumb"><a href="/">Home</a> / Guides</div>
+      <h1 class="hero-title" style="font-size:clamp(1.8rem,4vw,2.6rem)">Free social media<br><span class="hero-grad">growth guides</span></h1>
+      <p class="hero-sub">No paid followers, no bots — just real people on Next Boost trading engagement for engagement. Pick your platform below.</p>
+    </div>
+  </section>
+
+  <section class="container">
+    <div class="guide-grid">
+      <a class="guide-card" href="/guides/tiktok-followers/">
+        <div class="guide-card-icon">🎵</div>
+        <h3>How to Get Free TikTok Followers</h3>
+        <p>The real, no-bot way to grow your TikTok following by trading follows with other creators.</p>
+        <span class="guide-read">Read the guide →</span>
+      </a>
+      <a class="guide-card" href="/guides/instagram-followers/">
+        <div class="guide-card-icon">📸</div>
+        <h3>How to Get Free Instagram Followers</h3>
+        <p>Build real Instagram followers and likes without paying for fake engagement.</p>
+        <span class="guide-read">Read the guide →</span>
+      </a>
+      <a class="guide-card" href="/guides/youtube-views/">
+        <div class="guide-card-icon">▶️</div>
+        <h3>How to Get Free YouTube Views</h3>
+        <p>Get real watch time and subscribers from active creators, not view-bot farms.</p>
+        <span class="guide-read">Read the guide →</span>
+      </a>
+      <a class="guide-card" href="/guides/twitter-x-followers/">
+        <div class="guide-card-icon">🐦</div>
+        <h3>How to Get Free Twitter / X Followers</h3>
+        <p>Grow your X following and retweets the organic way, follower for follower.</p>
+        <span class="guide-read">Read the guide →</span>
+      </a>
+      <a class="guide-card" href="/guides/discord-members/">
+        <div class="guide-card-icon">💬</div>
+        <h3>How to Get Free Discord Members</h3>
+        <p>Fill your Discord server with real, active members instead of bot accounts.</p>
+        <span class="guide-read">Read the guide →</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="cta-banner">
+    <div class="container">
+      <h2>Ready to grow?</h2>
+      <p>Join free and start earning points today.</p>
+      <a href="/signup/" class="btn btn-primary btn-lg">Create your account</a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>© 2026 Next Boost &nbsp;·&nbsp; <a href="/login/">Log in</a> &nbsp;·&nbsp; <a href="/signup/">Sign up</a> &nbsp;·&nbsp; <a href="/guides/">Guides</a></p>
+  </footer>
+
+  <script type="module">
+    import { supabase, go } from '/assets/js/shared.js';
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) go('/earn/');
+  </script>
+</body>
+</html>

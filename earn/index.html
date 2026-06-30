@@ -116,7 +116,7 @@ function render(reset=true){
     card.innerHTML=`
       <div class="task-plat-icon ${PC[t.platform]||''}">${PE[t.platform]||'🌐'}</div>
       <div class="task-info">
-        <h4>${esc(t.target)}${t.is_boosted?' <span class="boost-badge">⚡ Boosted</span>':''}</h4>
+        <h4>${esc(prettyTarget(t.target, t.platform))}${t.is_boosted?' <span class="boost-badge">⚡ Boosted</span>':''}</h4>
         <p>${esc(t.description||TL[t.type]+' on '+t.platform)} · <span class="expiry-label">${exp}d left</span></p>
       </div>
       <div class="task-actions">
@@ -130,7 +130,44 @@ function render(reset=true){
   });
 }
 
-window.applyFilters=()=>{
+// Pretty-print a task target URL into a human-readable handle
+function prettyTarget(url, platform) {
+  try {
+    const u = new URL(url);
+    const path = u.pathname.replace(/\/+$/, ''); // strip trailing slashes
+    const parts = path.split('/').filter(Boolean);
+    switch (platform) {
+      case 'tiktok':
+        // https://www.tiktok.com/@username
+        return parts.find(p => p.startsWith('@')) || parts[parts.length - 1] || url;
+      case 'instagram':
+        // https://www.instagram.com/username/ or /p/postid/
+        if (parts[0] === 'p' || parts[0] === 'reel') return '📸 ' + (parts[1] || 'post');
+        return '@' + (parts[0] || url);
+      case 'youtube':
+        // https://www.youtube.com/@channel or /channel/id or /watch?v=
+        if (u.searchParams.get('v')) return '▶️ ' + u.searchParams.get('v');
+        return parts.find(p => p.startsWith('@')) || parts[parts.length - 1] || url;
+      case 'twitter':
+        // https://x.com/username or /username/status/id
+        if (parts[1] === 'status') return '🐦 @' + parts[0];
+        return '@' + (parts[0] || url);
+      case 'twitch':
+        // https://www.twitch.tv/username
+        return parts[0] || url;
+      case 'discord':
+        // https://discord.gg/invite or discord.com/invite/code
+        return 'discord.gg/' + (parts[parts.length - 1] || '');
+      case 'website':
+        return u.hostname.replace(/^www\./, '');
+      default:
+        return u.hostname.replace(/^www\./, '');
+    }
+  } catch {
+    // Not a valid URL — just return as-is (e.g. a username typed directly)
+    return url;
+  }
+}
   const plat=document.getElementById('filter-platform').value;
   const type=document.getElementById('filter-type').value;
   const sort=document.getElementById('filter-sort').value;

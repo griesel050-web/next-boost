@@ -128,3 +128,42 @@
 .cta-banner { padding: 90px 20px; text-align: center; }
 .cta-banner h2 { font-size: 2.2rem; margin-bottom: 12px; }
 .cta-banner p { color: var(--muted); margin-bottom: 30px; font-size: 1rem; }
+
+/* ---- Guide / article pages ---- */
+.guide-hero { padding: 70px 0 40px; text-align: center; }
+.guide-hero .container { max-width: 760px; }
+.breadcrumb { font-size: 0.8rem; color: var(--muted); margin-bottom: 18px; }
+.breadcrumb a { color: var(--muted); }
+.breadcrumb a:hover { color: var(--orange); }
+.guide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; padding: 0 0 80px; }
+.guide-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 26px; text-decoration: none; color: inherit; display: block; transition: .2s;
+}
+.guide-card:hover { border-color: var(--orange); transform: translateY(-2px); }
+.guide-card-icon { font-size: 1.8rem; margin-bottom: 12px; }
+.guide-card h3 { font-size: 1.05rem; margin-bottom: 8px; }
+.guide-card p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+.guide-card .guide-read { color: var(--orange); font-size: 0.8rem; font-weight: 600; margin-top: 14px; display: inline-block; }
+
+.article { max-width: 720px; margin: 0 auto; padding: 50px 20px 90px; }
+.article h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 700; margin-bottom: 16px; line-height: 1.2; }
+.article .article-sub { color: var(--muted); font-size: 1.02rem; margin-bottom: 32px; line-height: 1.6; }
+.article h2 { font-size: 1.4rem; font-weight: 700; margin: 42px 0 16px; }
+.article h3 { font-size: 1.1rem; font-weight: 700; margin: 28px 0 12px; }
+.article p { font-size: 0.97rem; line-height: 1.75; color: var(--text); margin-bottom: 16px; }
+.article ul, .article ol { margin: 0 0 18px 22px; }
+.article li { font-size: 0.96rem; line-height: 1.75; margin-bottom: 8px; color: var(--text); }
+.article a.inline-link { color: var(--orange); font-weight: 600; }
+.article-meta { display: flex; gap: 14px; align-items: center; font-size: 0.8rem; color: var(--muted); margin-bottom: 36px; }
+.article-cta {
+  background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius);
+  padding: 28px; text-align: center; margin: 40px 0;
+}
+.article-cta h3 { margin-top: 0; }
+.article-cta p { color: var(--muted); margin-bottom: 18px; }
+.faq-item { border-bottom: 1px solid var(--border); padding: 18px 0; }
+.faq-item:last-child { border-bottom: none; }
+.faq-item h3 { margin: 0 0 8px; font-size: 1rem; }
+.faq-item p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+.related-guides { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 16px; }
