@@ -99,7 +99,7 @@ function render(reset=true){
   else if(filterSort==='points_low') filtered.sort((a,b)=>a.points_reward-b.points_reward);
   else if(filterSort==='slots') filtered.sort((a,b)=>(b.max_completions-b.completions_count)-(a.max_completions-a.completions_count));
   if(reset) feed.innerHTML='';
-  if(!filtered.length&&reset){feed.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div><p>No tasks right now. <a href="/post-task/" style="color:var(--orange)">Post one first →</a></p></div>';return;}
+  if(!filtered.length&&reset){feed.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div><p>No tasks to complete right now.<br><span style="font-size:0.82rem;color:var(--muted)">Your own tasks don\'t appear here. Invite others to see tasks!</span><br><br><a href="/post-task/" style="color:var(--orange)">Post a task →</a></p></div>';return;}
   const slice=reset?filtered:filtered.slice(Math.max(0,filtered.length-PAGE));
   slice.forEach((t,i)=>{
     if(reset&&feed.querySelector(`[data-id="${t.id}"]`)) return;
@@ -168,6 +168,7 @@ function prettyTarget(url, platform) {
     return url;
   }
 }
+window.applyFilters=()=>{
   const plat=document.getElementById('filter-platform').value;
   const type=document.getElementById('filter-type').value;
   const sort=document.getElementById('filter-sort').value;
