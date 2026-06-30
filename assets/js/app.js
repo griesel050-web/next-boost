@@ -56,6 +56,12 @@ export async function initApp(currentPage=''){
   if(profile.compact_mode) document.body.classList.add('compact-mode');
   if(profile.custom_bg){document.body.style.backgroundImage=`url('${profile.custom_bg}')`;document.body.classList.add('has-custom-bg');}
   renderShell(profile,currentPage);
+  // Run these after shell is fully rendered, non-blocking
+  setTimeout(()=>{
+    try{ checkDailyBonus(); }catch(e){ console.warn('checkDailyBonus',e); }
+    try{ loadNotifCount(); }catch(e){ console.warn('loadNotifCount',e); }
+    try{ subscribeNotifs(profile.id); }catch(e){ console.warn('subscribeNotifs',e); }
+  }, 0);
   return{profile,email,session};
 }
 
@@ -122,9 +128,6 @@ function renderShell(profile,currentPage){
       <a href="/settings/"    class="mobile-nav-item ${currentPage==='settings'?'active':''}"><span class="mn-icon">⚙️</span>More</a>
     </div>`;
   }
-  checkDailyBonus();
-  loadNotifCount();
-  subscribeNotifs(profile.id);
 }
 
 export function updateNavPoints(pts){
