@@ -71,11 +71,13 @@ async function main(){
 async function load(reset=true){
   if(reset){offset=0;allLoaded=[];document.getElementById('earn-feed').innerHTML='<div class="spinner"></div>';}
   try{
-    const {data:tasks,error}=await supabase.from('tasks').select('*')
+    const {data:tasks,error}=await supabase.from('tasks').select('*, owner:profiles!owner_id(username,display_name)')
       .eq('is_active',true).neq('owner_id',profile.id)
       .order('is_boosted',{ascending:false}).order('created_at',{ascending:false})
       .range(offset,offset+PAGE-1);
     if(error) throw error;
+    // Flatten owner fields
+    (tasks||[]).forEach(t=>{t.owner_username=t.owner?.username;t.owner_display_name=t.owner?.display_name;});
     if(reset){
       const {data:myC}=await supabase.from('completions').select('task_id,status').eq('user_id',profile.id);
       myStatus=Object.fromEntries((myC||[]).map(c=>[c.task_id,c.status]));
@@ -117,7 +119,7 @@ function render(reset=true){
       <div class="task-plat-icon ${PC[t.platform]||'plat-website'}"></div>
       <div class="task-info">
         <h4>${esc(prettyTarget(t.target, t.platform))}${t.is_boosted?' <span class="boost-badge">⚡ Boosted</span>':''}</h4>
-        <p>${esc(t.description||TL[t.type]+' on '+t.platform)} · <span class="expiry-label">${exp}d left</span></p>
+        <p>${esc(TL[t.type]||t.type)} · by <span style="color:var(--text)">${esc(t.owner_display_name||t.owner_username||'Unknown')}</span> · <span class="expiry-label">${exp}d left</span></p>
       </div>
       <div class="task-actions">
         <span class="type-badge type-${t.type}">${TL[t.type]}</span>
@@ -131,42 +133,27 @@ function render(reset=true){
 }
 
 // Pretty-print a task target URL into a human-readable handle
-function prettyTarget(url, platform) {
+const PLAT_NAMES = { tiktok:'TikTok', instagram:'Instagram', youtube:'YouTube', twitter:'Twitter/X', twitch:'Twitch', discord:'Discord', website:'Website' };
+function prettyHandle(url, platform) {
   try {
     const u = new URL(url);
-    const path = u.pathname.replace(/\/+$/, ''); // strip trailing slashes
-    const parts = path.split('/').filter(Boolean);
+    const parts = u.pathname.replace(/\/+$/, '').split('/').filter(Boolean);
     switch (platform) {
-      case 'tiktok':
-        // https://www.tiktok.com/@username
-        return parts.find(p => p.startsWith('@')) || parts[parts.length - 1] || url;
-      case 'instagram':
-        // https://www.instagram.com/username/ or /p/postid/
-        if (parts[0] === 'p' || parts[0] === 'reel') return '📸 ' + (parts[1] || 'post');
-        return '@' + (parts[0] || url);
-      case 'youtube':
-        // https://www.youtube.com/@channel or /channel/id or /watch?v=
-        if (u.searchParams.get('v')) return '▶️ ' + u.searchParams.get('v');
-        return parts.find(p => p.startsWith('@')) || parts[parts.length - 1] || url;
-      case 'twitter':
-        // https://x.com/username or /username/status/id
-        if (parts[1] === 'status') return '🐦 @' + parts[0];
-        return '@' + (parts[0] || url);
-      case 'twitch':
-        // https://www.twitch.tv/username
-        return parts[0] || url;
-      case 'discord':
-        // https://discord.gg/invite or discord.com/invite/code
-        return 'discord.gg/' + (parts[parts.length - 1] || '');
-      case 'website':
-        return u.hostname.replace(/^www\./, '');
-      default:
-        return u.hostname.replace(/^www\./, '');
+      case 'tiktok':     return parts.find(p => p.startsWith('@')) || parts[parts.length-1] || url;
+      case 'instagram':  return (parts[0]==='p'||parts[0]==='reel') ? 'post/'+parts[1] : '@'+(parts[0]||url);
+      case 'youtube':    return u.searchParams.get('v') ? u.searchParams.get('v') : (parts.find(p=>p.startsWith('@'))||parts[parts.length-1]||url);
+      case 'twitter':    return parts[1]==='status' ? '@'+parts[0] : '@'+(parts[0]||url);
+      case 'twitch':     return parts[0] || url;
+      case 'discord':    return 'discord.gg/'+(parts[parts.length-1]||'');
+      case 'website':    return u.hostname.replace(/^www\./,'');
+      default:           return u.hostname.replace(/^www\./,'');
     }
-  } catch {
-    // Not a valid URL — just return as-is (e.g. a username typed directly)
-    return url;
-  }
+  } catch { return url; }
+}
+function prettyTarget(url, platform) {
+  const name = PLAT_NAMES[platform] || platform;
+  const handle = prettyHandle(url, platform);
+  return `${name} — ${handle}`;
 }
 window.applyFilters=()=>{
   const plat=document.getElementById('filter-platform').value;

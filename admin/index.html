@@ -292,21 +292,22 @@
       }
 
       const PLAT = { tiktok:'🎵', instagram:'📸', youtube:'▶️', discord:'💬', twitch:'🟣', twitter:'🐦', website:'🌐' };
-      function prettyTarget(url, platform) {
+      const PLAT_NAMES = { tiktok:'TikTok', instagram:'Instagram', youtube:'YouTube', twitter:'Twitter/X', twitch:'Twitch', discord:'Discord', website:'Website' };
+      function prettyHandle(url, platform) {
         try {
           const u = new URL(url);
           const parts = u.pathname.replace(/\/+$/, '').split('/').filter(Boolean);
-          switch (platform) {
-            case 'tiktok':     return parts.find(p => p.startsWith('@')) || parts[parts.length-1] || url;
-            case 'instagram':  return (parts[0]==='p'||parts[0]==='reel') ? '📸 post' : '@'+(parts[0]||url);
-            case 'youtube':    return u.searchParams.get('v') ? '▶️ '+u.searchParams.get('v') : (parts.find(p=>p.startsWith('@'))||parts[parts.length-1]||url);
-            case 'twitter':    return parts[1]==='status' ? '🐦 @'+parts[0] : '@'+(parts[0]||url);
-            case 'twitch':     return parts[0] || url;
-            case 'discord':    return 'discord.gg/'+(parts[parts.length-1]||'');
-            case 'website':    return u.hostname.replace(/^www\./,'');
-            default:           return u.hostname.replace(/^www\./,'');
-          }
-        } catch { return url; }
+          if(platform==='tiktok')    return parts.find(p => p.startsWith('@')) || parts[parts.length-1] || url;
+          if(platform==='instagram') return (parts[0]==='p'||parts[0]==='reel') ? 'post' : '@'+(parts[0]||url);
+          if(platform==='youtube')   return u.searchParams.get('v') || parts.find(p=>p.startsWith('@')) || parts[parts.length-1] || url;
+          if(platform==='twitter')   return '@'+(parts[0]||url);
+          if(platform==='twitch')    return parts[0] || url;
+          if(platform==='discord')   return 'discord.gg/'+(parts[parts.length-1]||'');
+          return u.hostname.replace(/^www\./, '');
+        } catch(e) { return url; }
+      }
+      function prettyTarget(url, platform) {
+        return (PLAT_NAMES[platform] || platform) + ' — ' + prettyHandle(url, platform);
       }
       const rows = document.getElementById('tasks-rows');
       tasks.forEach(t => {

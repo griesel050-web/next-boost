@@ -116,6 +116,17 @@
         </div>
       </div>
 
+      <!-- Admin only: infinite task -->
+      <div id="infinite-wrap" style="display:none;background:rgba(232,98,26,0.08);border:1px solid var(--orange);border-radius:var(--radius);padding:14px 16px;cursor:pointer" onclick="document.getElementById('infinite-check').click()">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <input type="checkbox" id="infinite-check" style="margin-top:3px;width:18px;height:18px;accent-color:var(--orange);flex-shrink:0" onclick="event.stopPropagation()"/>
+          <div>
+            <div style="font-weight:700;font-size:0.92rem;display:flex;align-items:center;gap:6px">∞ Infinite task <span style="font-size:0.72rem;background:rgba(232,98,26,0.15);color:var(--orange);padding:1px 8px;border-radius:999px;font-weight:600">Admin only</span></div>
+            <div style="font-size:0.8rem;color:var(--muted);margin-top:2px">Task never closes — unlimited completions. No point cost charged.</div>
+          </div>
+        </div>
+      </div>
+
       <button class="btn btn-primary" id="post-btn" onclick="postTask()">Post task</button>
     </div>
   </div>
@@ -162,6 +173,7 @@ window.onPlatformChange = () => {
   document.getElementById('c-duration-row').style.display = 'flex';
   onUrlInput();
   updateCost();
+  if(profile.is_admin) document.getElementById('infinite-wrap').style.display='block';
 };
 
 window.onUrlInput = () => {
@@ -197,6 +209,7 @@ window.postTask = async () => {
   const slots = parseInt(document.getElementById('p-slots').value);
   const durMs = parseInt(document.getElementById('p-duration').value) || 10000;
   const wantsBoost = document.getElementById('boost-check').checked;
+  const isInfinite = profile.is_admin && document.getElementById('infinite-check').checked;
   const errEl = document.getElementById('post-err');
   const btn = document.getElementById('post-btn');
   errEl.textContent = ''; errEl.style.color = '';
@@ -215,7 +228,8 @@ window.postTask = async () => {
   const { data, error } = await supabase.rpc('post_task', {
     p_platform: platform, p_type: type, p_target: url,
     p_description: desc || null, p_points_reward: reward,
-    p_max_completions: slots, p_required_duration_ms: durMs
+    p_max_completions: slots, p_required_duration_ms: durMs,
+    p_is_infinite: isInfinite
   });
 
   if (error || data?.error) {

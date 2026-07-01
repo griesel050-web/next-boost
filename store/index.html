@@ -121,6 +121,50 @@
       </div>
     </div>
 
+    <!-- SLOT PACKS -->
+    <div style="margin-top:48px">
+      <h2 style="font-size:1.1rem;margin-bottom:6px">Task slot packs</h2>
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:20px">Add more completion slots to an active task you've already posted. Uses your existing points.</p>
+      <div id="slot-task-picker" style="display:none;margin-bottom:20px">
+        <label style="font-size:0.85rem;color:var(--muted);display:block;margin-bottom:8px">Pick a task to add slots to:</label>
+        <select id="slot-task-select" style="width:100%;max-width:400px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-family:inherit;font-size:0.9rem">
+          <option value="">— Select a task —</option>
+        </select>
+      </div>
+      <div class="packages-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));max-width:700px">
+        <div class="package-card" onclick="buySlotPack(50)">
+          <div class="pkg-badge">Mini</div>
+          <div class="pkg-pts">50 <span>slots</span></div>
+          <div class="pkg-price" id="slot-cost-50">— pts</div>
+          <div class="pkg-rate">+50 completions</div>
+          <button class="btn btn-ghost btn-full pkg-btn">Add slots</button>
+        </div>
+        <div class="package-card popular" onclick="buySlotPack(100)">
+          <div class="pkg-popular-badge">Best value</div>
+          <div class="pkg-badge">Standard</div>
+          <div class="pkg-pts">100 <span>slots</span></div>
+          <div class="pkg-price" id="slot-cost-100">— pts</div>
+          <div class="pkg-rate">+100 completions</div>
+          <button class="btn btn-ghost btn-full pkg-btn">Add slots</button>
+        </div>
+        <div class="package-card" onclick="buySlotPack(250)">
+          <div class="pkg-badge">Pro</div>
+          <div class="pkg-pts">250 <span>slots</span></div>
+          <div class="pkg-price" id="slot-cost-250">— pts</div>
+          <div class="pkg-rate">+250 completions</div>
+          <button class="btn btn-ghost btn-full pkg-btn">Add slots</button>
+        </div>
+        <div class="package-card" onclick="buySlotPack(500)">
+          <div class="pkg-badge">Max</div>
+          <div class="pkg-pts">500 <span>slots</span></div>
+          <div class="pkg-price" id="slot-cost-500">— pts</div>
+          <div class="pkg-rate">+500 completions</div>
+          <button class="btn btn-ghost btn-full pkg-btn">Add slots</button>
+        </div>
+      </div>
+      <div class="error-msg" id="slot-err" style="margin-top:12px"></div>
+    </div>
+
     <!-- PURCHASE HISTORY -->
     <div style="margin-top:40px">
       <h2 style="font-size:1rem;margin-bottom:16px">Purchase history</h2>
@@ -131,7 +175,7 @@
 <nav class="mobile-nav-bar" id="mobile-nav"></nav>
 <script type="module">
 import { supabase, esc } from '/assets/js/shared.js';
-import { initApp } from '/assets/js/app.js';
+import { initApp, updateNavPoints } from '/assets/js/app.js';
 
 // ── CONFIG: Your PayPal Me link ──────────────────────────────
 const PAYPAL_ME = 'https://paypal.me/YourPayPalUsername';
@@ -145,6 +189,7 @@ async function main() {
   profile = ctx.profile;
   document.getElementById('co-username').textContent = '@' + profile.username;
   loadHistory();
+  loadMyTasks();
 }
 
 window.selectPackage = (card) => {
@@ -249,6 +294,60 @@ async function loadHistory() {
 }
 
 main();
+
+// ---- SLOT PACKS ----
+async function loadMyTasks() {
+  const { data } = await supabase.from('tasks')
+    .select('id,platform,target,points_reward,max_completions,completions_count')
+    .eq('owner_id', profile.id).eq('is_active', true);
+  if (!data || !data.length) return;
+  const sel = document.getElementById('slot-task-select');
+  const PLAT_NAMES = { tiktok:'TikTok', instagram:'Instagram', youtube:'YouTube', twitter:'Twitter/X', twitch:'Twitch', discord:'Discord', website:'Website' };
+  data.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t.id;
+    opt.dataset.pts = t.points_reward;
+    try {
+      const u = new URL(t.target);
+      const parts = u.pathname.replace(/\/+$/,'').split('/').filter(Boolean);
+      const handle = parts.find(p=>p.startsWith('@')) || parts[parts.length-1] || u.hostname;
+      opt.textContent = `${PLAT_NAMES[t.platform]||t.platform} — ${handle} (${t.completions_count}/${t.max_completions} done)`;
+    } catch { opt.textContent = t.target; }
+    sel.appendChild(opt);
+  });
+  document.getElementById('slot-task-picker').style.display = 'block';
+  sel.onchange = updateSlotCosts;
+  updateSlotCosts();
+}
+
+function updateSlotCosts() {
+  const sel = document.getElementById('slot-task-select');
+  const opt = sel.options[sel.selectedIndex];
+  const ptsPerSlot = opt ? parseInt(opt.dataset.pts)||20 : 20;
+  [50,100,250,500].forEach(n => {
+    const el = document.getElementById(`slot-cost-${n}`);
+    if(el) el.textContent = Math.ceil(n * ptsPerSlot * 1.05) + ' pts';
+  });
+}
+
+window.buySlotPack = async (slots) => {
+  const sel = document.getElementById('slot-task-select');
+  const taskId = sel.value;
+  const errEl = document.getElementById('slot-err');
+  errEl.textContent = '';
+  if (!taskId) { errEl.textContent = 'Please select a task first.'; return; }
+  const opt = sel.options[sel.selectedIndex];
+  const ptsPerSlot = parseInt(opt.dataset.pts) || 20;
+  const cost = Math.ceil(slots * ptsPerSlot * 1.05);
+  if (!confirm(`Add ${slots} slots to "${opt.textContent}" for ${cost} pts?`)) return;
+  const { data, error } = await supabase.rpc('buy_task_slots', { p_task_id: taskId, p_slots: slots });
+  if (error || data?.error) { errEl.textContent = data?.error || error.message; return; }
+  errEl.style.color = 'var(--green)';
+  errEl.textContent = `✓ Added ${data.slots_added} slots! New total: ${data.new_max} completions.`;
+  const { data: p } = await supabase.from('profiles').select('points').eq('id', profile.id).single();
+  if (p) { profile.points = p.points; updateNavPoints(p.points); }
+  setTimeout(() => { errEl.textContent = ''; errEl.style.color = ''; }, 5000);
+};
 </script>
 </body>
 </html>

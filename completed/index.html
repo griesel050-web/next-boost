@@ -25,22 +25,23 @@
   const PE={tiktok:'🎵',instagram:'📸',youtube:'▶️',discord:'💬',website:'🌐',twitch:'🟣',twitter:'🐦'};
   const PC={tiktok:'plat-tiktok',instagram:'plat-instagram',youtube:'plat-youtube',discord:'plat-discord',twitch:'plat-twitch',twitter:'plat-twitter'};
   const TL={follow:'Follow',like:'Like',view:'View',join:'Join',website:'Visit',twitch:'Follow',retweet:'Retweet'};
-  function prettyTarget(url, platform) {
-    try {
-      const u = new URL(url);
-      const parts = u.pathname.replace(/\/+$/, '').split('/').filter(Boolean);
-      switch (platform) {
-        case 'tiktok':     return parts.find(p => p.startsWith('@')) || parts[parts.length-1] || url;
-        case 'instagram':  return (parts[0]==='p'||parts[0]==='reel') ? '📸 post' : '@'+(parts[0]||url);
-        case 'youtube':    return u.searchParams.get('v') ? '▶️ '+u.searchParams.get('v') : (parts.find(p=>p.startsWith('@'))||parts[parts.length-1]||url);
-        case 'twitter':    return parts[1]==='status' ? '🐦 @'+parts[0] : '@'+(parts[0]||url);
-        case 'twitch':     return parts[0] || url;
-        case 'discord':    return 'discord.gg/'+(parts[parts.length-1]||'');
-        case 'website':    return u.hostname.replace(/^www\./,'');
-        default:           return u.hostname.replace(/^www\./,'');
-      }
-    } catch { return url; }
-  }
+  const PLAT_NAMES = { tiktok:'TikTok', instagram:'Instagram', youtube:'YouTube', twitter:'Twitter/X', twitch:'Twitch', discord:'Discord', website:'Website' };
+function prettyHandle(url, platform) {
+  try {
+    const u = new URL(url);
+    const parts = u.pathname.replace(/\/+$/, '').split('/').filter(Boolean);
+    if(platform==='tiktok')    return parts.find(p => p.startsWith('@')) || parts[parts.length-1] || url;
+    if(platform==='instagram') return (parts[0]==='p'||parts[0]==='reel') ? 'post' : '@'+(parts[0]||url);
+    if(platform==='youtube')   return u.searchParams.get('v') || parts.find(p=>p.startsWith('@')) || parts[parts.length-1] || url;
+    if(platform==='twitter')   return '@'+(parts[0]||url);
+    if(platform==='twitch')    return parts[0] || url;
+    if(platform==='discord')   return 'discord.gg/'+(parts[parts.length-1]||'');
+    return u.hostname.replace(/^www\./, '');
+  } catch(e) { return url; }
+}
+function prettyTarget(url, platform) {
+  return (PLAT_NAMES[platform] || platform) + ' — ' + prettyHandle(url, platform);
+}
 
   async function main() {
     const ctx = await initApp('completed');

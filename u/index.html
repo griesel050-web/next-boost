@@ -138,11 +138,26 @@
           <div class="task-feed" style="margin-bottom:32px">
             ${data.active_tasks.map(t => {
               const slotsLeft = t.max_completions - t.completions_count;
+              const PLAT_NAMES = { tiktok:'TikTok', instagram:'Instagram', youtube:'YouTube', twitter:'Twitter/X', twitch:'Twitch', discord:'Discord', website:'Website' };
+              function prettyHandle(url, platform) {
+                try {
+                  const u = new URL(url);
+                  const parts = u.pathname.replace(/\/+$/,'').split('/').filter(Boolean);
+                  if(platform==='tiktok') return parts.find(p=>p.startsWith('@'))||parts[parts.length-1]||url;
+                  if(platform==='instagram') return (parts[0]==='p'||parts[0]==='reel')?'post':'@'+(parts[0]||url);
+                  if(platform==='youtube') return u.searchParams.get('v')||parts.find(p=>p.startsWith('@'))||parts[parts.length-1]||url;
+                  if(platform==='twitter') return '@'+(parts[0]||url);
+                  if(platform==='twitch') return parts[0]||url;
+                  if(platform==='discord') return 'discord.gg/'+(parts[parts.length-1]||'');
+                  return u.hostname.replace(/^www\./,'');
+                } catch(e) { return url; }
+              }
+              const platLabel = (PLAT_NAMES[t.platform]||t.platform) + ' — ' + prettyHandle(t.target, t.platform);
               return `<div class="task-card">
-                <div class="task-plat-icon ${platClass(t.platform)}">${PLAT_EMOJI[t.platform]||'🌐'}</div>
+                <div class="task-plat-icon ${platClass(t.platform)}"></div>
                 <div class="task-info">
-                  <h4>${esc(t.target)}</h4>
-                  <p>${esc(t.description || TYPE_LABEL[t.type] + ' on ' + t.platform)}</p>
+                  <h4>${esc(platLabel)}</h4>
+                  <p>${esc(t.description || TYPE_LABEL[t.type])}</p>
                 </div>
                 <div class="task-actions">
                   <span class="type-badge type-${t.type}">${TYPE_LABEL[t.type]}</span>
@@ -161,8 +176,8 @@
     }
 
     function platClass(p) {
-      const m = { tiktok:'plat-tiktok', instagram:'plat-instagram', youtube:'plat-youtube', discord:'plat-discord', website:'plat-website', twitch:'plat-twitch' };
-      return m[p] || '';
+      const m = { tiktok:'plat-tiktok', instagram:'plat-instagram', youtube:'plat-youtube', discord:'plat-discord', website:'plat-website', twitch:'plat-twitch', twitter:'plat-twitter' };
+      return m[p] || 'plat-website';
     }
   </script>
 </body>

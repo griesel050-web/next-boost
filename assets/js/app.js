@@ -19,6 +19,13 @@ export const THEMES={
   'dark-blue':  {accent:'#0ea5e9',accentDk:'#0369a1',accentLt:'#38bdf8',bg:'#090d14',surface:'#0d1320',surface2:'#131c2e',surface3:'#1a2840',border:'#1e3050',border2:'#243860'},
   'dark-green': {accent:'#22c55e',accentDk:'#15803d',accentLt:'#4ade80',bg:'#090e0b',surface:'#0d1510',surface2:'#121f17',surface3:'#172a1e',border:'#1e3826',border2:'#264830'},
   'midnight':   {accent:'#94a3b8',accentDk:'#64748b',accentLt:'#cbd5e1',bg:'#06070a',surface:'#0c0e14',surface2:'#111420',surface3:'#16192c',border:'#1e2238',border2:'#262b44'},
+  'dark-red':   {accent:'#ef4444',accentDk:'#b91c1c',accentLt:'#f87171',bg:'#110a0a',surface:'#1a0f0f',surface2:'#241515',surface3:'#2e1c1c',border:'#3d2020',border2:'#4d2828'},
+  'dark-pink':  {accent:'#ec4899',accentDk:'#be185d',accentLt:'#f472b6',bg:'#110a0f',surface:'#1a0f17',surface2:'#241523',surface3:'#2e1c2f',border:'#3d2040',border2:'#4d2850'},
+  'dark-amber': {accent:'#f59e0b',accentDk:'#b45309',accentLt:'#fbbf24',bg:'#0f0d08',surface:'#181408',surface2:'#221c0f',surface3:'#2c2414',border:'#3d3010',border2:'#4d3c14'},
+  'dark-teal':  {accent:'#14b8a6',accentDk:'#0f766e',accentLt:'#2dd4bf',bg:'#080f0e',surface:'#0c1714',surface2:'#111f1e',surface3:'#162826',border:'#1a3534',border2:'#204040'},
+  'dracula':    {accent:'#bd93f9',accentDk:'#9d6ce9',accentLt:'#cfa8ff',bg:'#0d0d14',surface:'#161622',surface2:'#1e1e2e',surface3:'#282840',border:'#44475a',border2:'#555770'},
+  'cyberpunk':  {accent:'#f0e040',accentDk:'#c8b800',accentLt:'#f8ee60',bg:'#080810',surface:'#0e0e1a',surface2:'#141424',surface3:'#1a1a30',border:'#2a2040',border2:'#302850'},
+  'ocean':      {accent:'#38bdf8',accentDk:'#0284c7',accentLt:'#7dd3fc',bg:'#060d12',surface:'#0a1520',surface2:'#0f1e2e',surface3:'#14273c',border:'#1a3050',border2:'#203860'},
 };
 
 export function applyTheme(themeKey,customAccent=null){
@@ -100,6 +107,7 @@ function renderShell(profile,currentPage){
       {href:'/achievements/',icon:'🎖️',label:'Achievements',page:'achievements'},
       {href:'/referral/',icon:'🤝',label:'Referral',page:'referral'},
       {href:'/share/',icon:'🎉',label:'Share your win',page:'share'},
+      {href:'https://discord.gg/3dknk9P5Nb',icon:'💬',label:'Community Discord',page:''},
     ];
     const L3=[
       {href:'/profile/',icon:'👤',label:'Profile',page:'profile'},
