@@ -67,7 +67,7 @@
         card.className = 'task-card card-animate';
         card.style.setProperty('--delay', `${i * 0.04}s`);
         card.innerHTML = `
-          <div class="task-plat-icon ${PC[t.platform]||''}">${PE[t.platform]||'🌐'}</div>
+          <div class="task-plat-icon ${PC[t.platform]||'plat-website'}"></div>
           <div class="task-info">
             <h4>${esc(prettyTarget(t.target, t.platform))}</h4>
             <p>${esc(t.description || TL[t.type] + ' on ' + t.platform)}</p>

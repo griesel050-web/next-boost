@@ -99,6 +99,7 @@ function renderShell(profile,currentPage){
       {href:'/leaderboard/',icon:'🏆',label:'Leaderboard',page:'leaderboard'},
       {href:'/achievements/',icon:'🎖️',label:'Achievements',page:'achievements'},
       {href:'/referral/',icon:'🤝',label:'Referral',page:'referral'},
+      {href:'/share/',icon:'🎉',label:'Share your win',page:'share'},
     ];
     const L3=[
       {href:'/profile/',icon:'👤',label:'Profile',page:'profile'},
@@ -485,8 +486,12 @@ export function initTaskModal(onComplete){
     unregisterAbandon();window.closeTaskModal();
     const msg=(data.reputation_multiplier&&data.reputation_multiplier<1.0)
       ?`+${data.points_earned} pts! Build reputation to earn full rewards.`
-      :`+${data.points_earned} points earned!`;
+      :`+${data.points_earned} points earned! 🎉`;
     toast(msg,'success');
+    // Every 5th completion, nudge them to share
+    const tc = (parseInt(localStorage.getItem('nb_tc')||'0'))+1;
+    localStorage.setItem('nb_tc', tc);
+    if(tc % 5 === 0) setTimeout(()=>toast('🎉 Share your progress! <a href="/share/" style="color:#fff;font-weight:700;text-decoration:underline">Make a card →</a>','info',8000),1500);
     if(onComplete)onComplete(data.points_earned);
   };
 

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Share your win — Next Boost</title>
+  <meta name="robots" content="noindex"/>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
+  <link rel="stylesheet" href="/assets/css/main.css"/>
+  <link rel="stylesheet" href="/assets/css/app.css"/>
+  <style>
+    .share-wrap { max-width: 520px; margin: 0 auto; padding: 28px 16px 80px; }
+    .share-canvas-wrap { border-radius: 16px; overflow: hidden; border: 2px solid var(--border2); margin-bottom: 20px; cursor: pointer; }
+    canvas { display: block; width: 100%; }
+    .share-controls { display: flex; flex-direction: column; gap: 12px; }
+    .share-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .share-stat-btn { flex: 1; min-width: 80px; background: var(--surface2); border: 2px solid var(--border2); border-radius: var(--radius-sm); padding: 10px; text-align: center; cursor: pointer; transition: .15s; font-family: inherit; color: var(--text); }
+    .share-stat-btn.active { border-color: var(--orange); background: rgba(232,98,26,.12); }
+    .share-stat-btn .ssb-val { font-size: 1.3rem; font-weight: 700; color: var(--orange); display: block; }
+    .share-stat-btn .ssb-lbl { font-size: 0.72rem; color: var(--muted); }
+    .share-dl-row { display: flex; gap: 10px; }
+  </style>
+</head>
+<body>
+<nav class="nav" id="main-nav"></nav>
+<div class="app-shell">
+  <aside class="app-sidebar" id="app-sidebar"></aside>
+  <div class="page-content">
+    <h1 class="page-title">Share your win</h1>
+    <p class="page-sub">Pick a stat, generate your card, and share it to flex on your followers.</p>
+    <div class="share-wrap">
+      <div class="share-canvas-wrap" onclick="downloadCard()" title="Click to download">
+        <canvas id="share-canvas" width="1080" height="566"></canvas>
+      </div>
+      <div class="share-controls">
+        <p style="font-size:0.8rem;color:var(--muted);margin:0">Choose what to highlight:</p>
+        <div class="share-row" id="stat-btns"></div>
+        <div class="share-dl-row">
+          <button class="btn btn-primary" style="flex:1" onclick="downloadCard()">⬇ Download card</button>
+          <button class="btn btn-ghost" onclick="copyCard()">📋 Copy image</button>
+        </div>
+        <p style="font-size:0.75rem;color:var(--muted);margin:0;text-align:center">Click the card or Download to save as PNG</p>
+      </div>
+    </div>
+  </div>
+</div>
+<nav class="mobile-nav-bar" id="mobile-nav"></nav>
+<script type="module">
+import { supabase, esc } from '/assets/js/shared.js';
+import { initApp } from '/assets/js/app.js';
+
+const canvas = document.getElementById('share-canvas');
+const ctx = canvas.getContext('2d');
+const W = 1080, H = 566;
+let profile, selected = 'points';
+
+const STATS = [
+  { key: 'points',         label: 'Total points',       icon: '⚡', val: p => p.points?.toLocaleString() },
+  { key: 'tasks',          label: 'Tasks completed',    icon: '✅', val: p => p.tasks_completed || 0 },
+  { key: 'streak',         label: 'Day streak',         icon: '🔥', val: p => p.streak || 0 },
+  { key: 'tasks_posted',   label: 'Tasks posted',       icon: '📤', val: p => p.tasks_posted || 0 },
+  { key: 'referral_count', label: 'Referrals',          icon: '🤝', val: p => p.referral_count || 0 },
+];
+
+function drawCard() {
+  if (!profile) return;
+  const stat = STATS.find(s => s.key === selected) || STATS[0];
+  const val = stat.val(profile);
+  const name = profile.display_name || profile.username || 'User';
+
+  // Background
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#0f0f0f');
+  bg.addColorStop(1, '#1a1207');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Orange accent bar top
+  const bar = ctx.createLinearGradient(0, 0, W, 0);
+  bar.addColorStop(0, '#E8621A');
+  bar.addColorStop(1, '#f59e0b');
+  ctx.fillStyle = bar;
+  ctx.fillRect(0, 0, W, 6);
+
+  // Subtle grid pattern
+  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  for (let y = 0; y < H; y += 60) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+  // Glow circle
+  const glow = ctx.createRadialGradient(200, H/2, 0, 200, H/2, 350);
+  glow.addColorStop(0, 'rgba(232,98,26,0.12)');
+  glow.addColorStop(1, 'rgba(232,98,26,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, W, H);
+
+  // Avatar circle
+  const avatarColor = profile.avatar_color || '#E8621A';
+  const ax = 100, ay = H/2;
+  ctx.beginPath();
+  ctx.arc(ax, ay, 56, 0, Math.PI * 2);
+  ctx.fillStyle = avatarColor;
+  ctx.fill();
+  ctx.font = 'bold 44px "Space Grotesk", Arial';
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(name[0].toUpperCase(), ax, ay + 2);
+
+  // Username
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+  ctx.font = 'bold 36px "Space Grotesk", Arial';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText('@' + (profile.username || name), 178, H/2 - 30);
+
+  ctx.font = '24px "Space Grotesk", Arial';
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.fillText('just earned on Next Boost', 178, H/2 + 12);
+
+  // Big stat
+  ctx.textAlign = 'right';
+  ctx.font = 'bold 110px "Space Grotesk", Arial';
+  const grad = ctx.createLinearGradient(W - 400, 0, W - 60, 0);
+  grad.addColorStop(0, '#E8621A');
+  grad.addColorStop(1, '#f59e0b');
+  ctx.fillStyle = grad;
+  ctx.fillText(String(val), W - 60, H/2 + 30);
+
+  ctx.font = 'bold 28px "Space Grotesk", Arial';
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.fillText(stat.icon + ' ' + stat.label, W - 60, H/2 + 70);
+
+  // Bottom brand
+  ctx.textAlign = 'left';
+  ctx.font = 'bold 22px "Space Grotesk", Arial';
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.fillText('boost.nexosites.xyz', 60, H - 28);
+
+  ctx.textAlign = 'right';
+  ctx.fillStyle = '#E8621A';
+  ctx.fillText('Next Boost', W - 60, H - 28);
+}
+
+function buildStatBtns() {
+  const wrap = document.getElementById('stat-btns');
+  wrap.innerHTML = '';
+  STATS.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'share-stat-btn' + (s.key === selected ? ' active' : '');
+    btn.innerHTML = `<span class="ssb-val">${s.icon} ${s.val(profile)}</span><span class="ssb-lbl">${s.label}</span>`;
+    btn.onclick = () => { selected = s.key; buildStatBtns(); drawCard(); };
+    wrap.appendChild(btn);
+  });
+}
+
+window.downloadCard = () => {
+  const a = document.createElement('a');
+  a.download = 'nextboost-win.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+};
+
+window.copyCard = async () => {
+  try {
+    canvas.toBlob(async blob => {
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      const btn = event.currentTarget;
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => btn.textContent = '📋 Copy image', 2000);
+    });
+  } catch { alert('Copy not supported — use Download instead.'); }
+};
+
+async function main() {
+  const ctx2 = await initApp('share');
+  if (!ctx2) return;
+  profile = ctx2.profile;
+  buildStatBtns();
+  drawCard();
+}
+main();
+</script>
+</body>
+</html>

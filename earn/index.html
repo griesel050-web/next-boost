@@ -114,7 +114,7 @@ function render(reset=true){
     card.className='task-card card-animate'; card.dataset.id=t.id;
     card.style.setProperty('--delay',`${i*0.04}s`);
     card.innerHTML=`
-      <div class="task-plat-icon ${PC[t.platform]||''}">${PE[t.platform]||'🌐'}</div>
+      <div class="task-plat-icon ${PC[t.platform]||'plat-website'}"></div>
       <div class="task-info">
         <h4>${esc(prettyTarget(t.target, t.platform))}${t.is_boosted?' <span class="boost-badge">⚡ Boosted</span>':''}</h4>
         <p>${esc(t.description||TL[t.type]+' on '+t.platform)} · <span class="expiry-label">${exp}d left</span></p>

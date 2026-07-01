@@ -232,11 +232,17 @@ h1, h2, h3, h4, h5 { font-family: 'Space Grotesk', sans-serif; line-height: 1.2;
   justify-content: center;
   font-size: 1.3rem;
   flex-shrink: 0;
+  background-size: 58% 58%;
+  background-repeat: no-repeat;
+  background-position: center;
 }
-.plat-tiktok    { background: rgba(255,0,80,0.12); }
-.plat-instagram { background: rgba(225,48,108,0.12); }
-.plat-youtube   { background: rgba(255,0,0,0.10); }
-.plat-discord   { background: rgba(88,101,242,0.12); }
+.plat-tiktok    { background-color: rgba(255,0,80,0.15); background-image: url('/assets/img/platforms/tiktok.svg'); }
+.plat-instagram { background-color: rgba(225,48,108,0.15); background-image: url('/assets/img/platforms/instagram.svg'); }
+.plat-youtube   { background-color: rgba(255,0,0,0.15); background-image: url('/assets/img/platforms/youtube.svg'); }
+.plat-discord   { background-color: rgba(88,101,242,0.15); background-image: url('/assets/img/platforms/discord.svg'); }
+.plat-twitch    { background-color: rgba(145,70,255,0.15); background-image: url('/assets/img/platforms/twitch.svg'); }
+.plat-twitter   { background-color: rgba(29,161,242,0.15); background-image: url('/assets/img/platforms/twitter.svg'); }
+.plat-website   { background-color: rgba(100,180,100,0.15); background-image: url('/assets/img/platforms/website.svg'); }
 .task-info { flex: 1; min-width: 0; }
 .task-info h4 { font-size: 0.95rem; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .task-info p { font-size: 0.82rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -456,4 +462,3 @@ h1, h2, h3, h4, h5 { font-family: 'Space Grotesk', sans-serif; line-height: 1.2;
 
 /* ---- Twitter/X platform ---- */
 :root { --twitter: #1DA1F2; }
-.plat-twitter { background: rgba(29,161,242,0.15); color: var(--twitter); }
