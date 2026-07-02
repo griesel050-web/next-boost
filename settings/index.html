@@ -237,59 +237,7 @@
         <span id="settings-msg" style="font-size:0.85rem"></span>
       </div>
 
-      <!-- PROFILE EDITING -->
-      <div class="settings-section">
-        <div class="settings-section-header">
-          <h3>👤 Profile</h3>
-          <p>Update your display name, bio and avatar colour</p>
-        </div>
-        <div class="settings-section-body">
-          <div class="form-group">
-            <label class="form-label">Display name</label>
-            <input type="text" id="edit-display-name" maxlength="32" placeholder="Your display name" style="width:100%;max-width:340px"/>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Bio <span style="color:var(--muted);font-size:0.78rem">(shown on public profile)</span></label>
-            <textarea id="edit-bio" maxlength="160" rows="3" placeholder="Tell the community a bit about yourself..." style="width:100%;max-width:500px;resize:vertical;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-family:inherit;font-size:0.9rem"></textarea>
-            <div style="font-size:0.75rem;color:var(--muted);margin-top:4px"><span id="bio-count">0</span>/160</div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Profile picture</label>
-            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-              <div id="avatar-img-preview" style="width:72px;height:72px;border-radius:50%;background:var(--surface2);border:2px solid var(--border2);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:700;color:#fff;flex-shrink:0"></div>
-              <div style="display:flex;flex-direction:column;gap:8px">
-                <label class="btn btn-ghost btn-sm" style="cursor:pointer">
-                  📷 Upload photo
-                  <input type="file" id="avatar-file-input" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" onchange="handleAvatarFile(this)"/>
-                </label>
-                <button class="btn btn-ghost btn-sm" id="remove-avatar-btn" onclick="removeAvatar()" style="display:none">🗑 Remove photo</button>
-                <div style="font-size:0.75rem;color:var(--muted)">JPG, PNG, WebP or GIF · max 2MB</div>
-                <div id="avatar-upload-progress" style="display:none;font-size:0.8rem;color:var(--orange)"></div>
-              </div>
-            </div>
-          </div>
-            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-              <div id="avatar-preview" style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;color:#fff;font-family:'Space Grotesk',sans-serif">A</div>
-              <div style="display:flex;gap:8px;flex-wrap:wrap" id="avatar-colors">
-                <button class="color-swatch" data-color="#E8621A" style="background:#E8621A" onclick="pickAvatarColor('#E8621A')"></button>
-                <button class="color-swatch" data-color="#7c3aed" style="background:#7c3aed" onclick="pickAvatarColor('#7c3aed')"></button>
-                <button class="color-swatch" data-color="#0ea5e9" style="background:#0ea5e9" onclick="pickAvatarColor('#0ea5e9')"></button>
-                <button class="color-swatch" data-color="#22c55e" style="background:#22c55e" onclick="pickAvatarColor('#22c55e')"></button>
-                <button class="color-swatch" data-color="#ec4899" style="background:#ec4899" onclick="pickAvatarColor('#ec4899')"></button>
-                <button class="color-swatch" data-color="#f59e0b" style="background:#f59e0b" onclick="pickAvatarColor('#f59e0b')"></button>
-                <button class="color-swatch" data-color="#14b8a6" style="background:#14b8a6" onclick="pickAvatarColor('#14b8a6')"></button>
-                <button class="color-swatch" data-color="#ef4444" style="background:#ef4444" onclick="pickAvatarColor('#ef4444')"></button>
-                <button class="color-swatch" data-color="#64748b" style="background:#64748b" onclick="pickAvatarColor('#64748b')"></button>
-                <input type="color" id="avatar-custom-color" value="#E8621A" title="Custom colour" style="width:32px;height:32px;border-radius:50%;border:2px solid var(--border2);cursor:pointer;padding:0" onchange="pickAvatarColor(this.value)"/>
-              </div>
-            </div>
-          </div>
-          <button class="btn btn-primary btn-sm" onclick="saveProfile()">Save profile</button>
-          <span id="profile-msg" style="font-size:0.85rem;margin-left:12px"></span>
-        </div>
-      </div>
-
-      <!-- ACCESSIBILITY & BEHAVIOUR -->
+            <!-- ACCESSIBILITY & BEHAVIOUR -->
       <div class="settings-section">
         <div class="settings-section-header">
           <h3>♿ Accessibility &amp; Behaviour</h3>
@@ -430,36 +378,7 @@ async function main() {
     document.body.classList.toggle('compact-mode', e.target.checked);
   });
 
-  // Avatar upload preview
-  initAvatarPreview();
-
-  // Profile fields
-  if (profile.display_name) document.getElementById('edit-display-name').value = profile.display_name;
-  if (profile.bio) document.getElementById('edit-bio').value = profile.bio;
-  const bioEl = document.getElementById('edit-bio');
-  const bioCount = document.getElementById('bio-count');
-  if (bioEl && bioCount) {
-    bioCount.textContent = bioEl.value.length;
-    bioEl.addEventListener('input', () => bioCount.textContent = bioEl.value.length);
-  }
-
-  // Avatar colour picker preview
-  const avatarColor = profile.avatar_color || '#E8621A';
-  pendingAvatarColor = avatarColor;
-  const preview = document.getElementById('avatar-preview');
-  if (preview) {
-    if (profile.avatar_url) {
-      preview.innerHTML = `<img src="${profile.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;
-    } else {
-      preview.style.background = avatarColor;
-      preview.textContent = (profile.display_name || profile.username || '?')[0].toUpperCase();
-    }
-  }
-  document.querySelectorAll('.color-swatch').forEach(s => {
-    s.classList.toggle('swatch-active', s.dataset.color === avatarColor);
-  });
-
-  // Accessibility toggles
+    // Accessibility toggles
   const reduceMotion = localStorage.getItem('nb_reduce_motion') === '1';
   const soundOn = localStorage.getItem('nb_sound') !== '0';
   const ptsAnim = localStorage.getItem('nb_pts_anim') !== '0';
@@ -557,110 +476,6 @@ window.saveSettings = async () => {
 
   msg.textContent = '✓ All settings saved!';
   msg.style.color = 'var(--green)';
-  setTimeout(() => msg.textContent = '', 3000);
-};
-
-// ---- AVATAR UPLOAD ----
-function initAvatarPreview() {
-  const preview = document.getElementById('avatar-img-preview');
-  const removeBtn = document.getElementById('remove-avatar-btn');
-  if (!preview) return;
-  if (profile.avatar_url) {
-    preview.innerHTML = `<img src="${profile.avatar_url}" style="width:100%;height:100%;object-fit:cover"/>`;
-    if (removeBtn) removeBtn.style.display = 'block';
-  } else {
-    const ini = (profile.display_name || profile.username || '?')[0].toUpperCase();
-    preview.style.background = profile.avatar_color || '#E8621A';
-    preview.textContent = ini;
-  }
-}
-
-window.handleAvatarFile = async (input) => {
-  const file = input.files[0];
-  if (!file) return;
-  const prog = document.getElementById('avatar-upload-progress');
-  const preview = document.getElementById('avatar-img-preview');
-  const removeBtn = document.getElementById('remove-avatar-btn');
-  const msg = document.getElementById('profile-msg');
-
-  if (file.size > 2 * 1024 * 1024) {
-    msg.textContent = 'File too large — max 2MB.'; msg.style.color = 'var(--red)'; return;
-  }
-
-  prog.style.display = 'block'; prog.textContent = 'Uploading…';
-  msg.textContent = '';
-
-  // Show local preview immediately
-  const localUrl = URL.createObjectURL(file);
-  preview.innerHTML = `<img src="${localUrl}" style="width:100%;height:100%;object-fit:cover"/>`;
-
-  const ext = file.name.split('.').pop().toLowerCase();
-  const filePath = `${profile.id}/avatar.${ext}`;
-
-  const { error: upErr } = await supabase.storage.from('avatars').upload(filePath, file, { upsert: true, contentType: file.type });
-  if (upErr) { prog.textContent = 'Upload failed: ' + upErr.message; return; }
-
-  const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
-  // Add cache-bust so old image doesn't linger
-  const avatarUrl = publicUrl + '?t=' + Date.now();
-
-  const { error: dbErr } = await supabase.from('profiles').update({ avatar_url: avatarUrl }).eq('id', profile.id);
-  if (dbErr) { prog.textContent = 'Save failed: ' + dbErr.message; return; }
-
-  profile.avatar_url = avatarUrl;
-  prog.style.display = 'none';
-  msg.textContent = '✓ Profile picture updated!'; msg.style.color = 'var(--green)';
-  if (removeBtn) removeBtn.style.display = 'block';
-  setTimeout(() => msg.textContent = '', 3000);
-  input.value = '';
-};
-
-window.removeAvatar = async () => {
-  if (!confirm('Remove your profile picture?')) return;
-  const msg = document.getElementById('profile-msg');
-  const removeBtn = document.getElementById('remove-avatar-btn');
-  const preview = document.getElementById('avatar-img-preview');
-
-  const { error } = await supabase.from('profiles').update({ avatar_url: null }).eq('id', profile.id);
-  if (error) { msg.textContent = error.message; msg.style.color = 'var(--red)'; return; }
-
-  profile.avatar_url = null;
-  const ini = (profile.display_name || profile.username || '?')[0].toUpperCase();
-  preview.innerHTML = '';
-  preview.style.background = profile.avatar_color || '#E8621A';
-  preview.textContent = ini;
-  if (removeBtn) removeBtn.style.display = 'none';
-  msg.textContent = '✓ Profile picture removed.'; msg.style.color = 'var(--green)';
-  setTimeout(() => msg.textContent = '', 3000);
-};
-
-// ---- PROFILE EDITING ----
-let pendingAvatarColor = null;
-
-window.pickAvatarColor = (color) => {
-  pendingAvatarColor = color;
-  // Only update colour preview if no photo uploaded
-  if (!profile.avatar_url) {
-    const preview = document.getElementById('avatar-preview');
-    if (preview) { preview.style.background = color; }
-  }
-  document.querySelectorAll('.color-swatch').forEach(s => s.classList.toggle('swatch-active', s.dataset.color === color));
-};
-
-window.saveProfile = async () => {
-  const msg = document.getElementById('profile-msg');
-  const displayName = document.getElementById('edit-display-name').value.trim();
-  const bio = document.getElementById('edit-bio').value.trim();
-  msg.textContent = 'Saving…'; msg.style.color = 'var(--muted)';
-
-  const updates = {};
-  if (displayName) updates.display_name = displayName;
-  updates.bio = bio || null;
-  if (pendingAvatarColor) updates.avatar_color = pendingAvatarColor;
-
-  const { error } = await supabase.from('profiles').update(updates).eq('id', profile.id);
-  if (error) { msg.textContent = error.message; msg.style.color = 'var(--red)'; return; }
-  msg.textContent = '✓ Profile saved!'; msg.style.color = 'var(--green)';
   setTimeout(() => msg.textContent = '', 3000);
 };
 
