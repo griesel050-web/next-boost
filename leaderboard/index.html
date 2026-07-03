@@ -160,7 +160,6 @@ window.showUser = (id, name, color, points, done, username, topBadge, topBadgeTi
       <div class="stat-box"><div class="stat-val">${done}</div><div class="stat-lbl">Done</div></div>
       ${streakHtml}${achHtml}
     </div>
-    <a href="/u/${esc(username)}" class="btn btn-ghost btn-full" style="margin-bottom:8px">View profile</a>
     <button class="btn btn-ghost btn-full" onclick="closeUserModal()">Close</button>`;
   modal.style.display = 'flex';
   modal.classList.add('open');

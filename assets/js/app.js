@@ -35,9 +35,14 @@ export function applyTheme(themeKey,customAccent=null){
   r.style.setProperty('--surface2',t.surface2);r.style.setProperty('--surface3',t.surface3);
   r.style.setProperty('--border',t.border);r.style.setProperty('--border2',t.border2);
   const acc=(customAccent&&/^#[0-9A-Fa-f]{6}$/.test(customAccent))?customAccent:null;
-  r.style.setProperty('--orange',acc||t.accent);
+  const accentColor = acc||t.accent;
+  r.style.setProperty('--orange',accentColor);
   r.style.setProperty('--orange-dk',acc||t.accentDk);
   r.style.setProperty('--orange-lt',acc||t.accentLt);
+  // Update glow + button shadow to match accent
+  r.style.setProperty('--glow',`0 0 32px ${accentColor}26`);
+  r.style.setProperty('--btn-shadow',`0 4px 20px ${accentColor}72`);
+  r.style.setProperty('--btn-shadow-sm',`0 2px 10px ${accentColor}50`);
 }
 
 // ---- AUTH GUARD ----
@@ -52,6 +57,14 @@ export async function initApp(currentPage=''){
   const profile=pRes.data;
   const email=uRes.data?.user?.email||'';
   applyTheme(profile.theme||'dark-orange',profile.accent_color||null);
+  // Restore glow color from localStorage
+  const savedGlow = localStorage.getItem('nb_glow_color');
+  if (savedGlow && /^#[0-9A-Fa-f]{6}$/.test(savedGlow)) {
+    const r = document.documentElement;
+    r.style.setProperty('--glow', `0 0 32px ${savedGlow}26`);
+    r.style.setProperty('--btn-shadow', `0 4px 20px ${savedGlow}72`);
+    r.style.setProperty('--btn-shadow-sm', `0 2px 10px ${savedGlow}50`);
+  }
   const fontMap={space:'font-space',mono:'font-mono',rounded:'font-rounded'};
   const fc=fontMap[profile.font_choice];
   if(fc) document.body.classList.add(fc);
