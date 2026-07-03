@@ -44,6 +44,12 @@
     <option value="slots">Most slots left</option>
   </select>
 </div>
+<!-- Bonus event banner -->
+<div id="bonus-banner" style="display:none;background:linear-gradient(135deg,var(--orange),var(--orange-lt));border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;align-items:center;gap:12px">
+  <div style="font-size:1.8rem">🎉</div>
+  <div style="flex:1"><div style="font-weight:700;font-size:0.95rem;color:#fff" id="bonus-name"></div><div style="font-size:0.8rem;color:rgba(255,255,255,0.85)" id="bonus-desc"></div></div>
+  <div style="text-align:right;flex-shrink:0"><div style="font-size:1.5rem;font-weight:900;color:#fff" id="bonus-mult"></div><div style="font-size:0.72rem;color:rgba(255,255,255,0.8)" id="bonus-ends"></div></div>
+</div>
 <div id="earn-feed" class="task-feed"><div class="spinner"></div></div>
 <div class="load-more-row" id="load-more" style="display:none">
   <button class="btn btn-ghost" onclick="loadMore()">Load more tasks</button>
@@ -65,7 +71,24 @@ async function main(){
   profile=ctx.profile;
   checkOnboarding(profile);
   initTaskModal(onComplete);
+  checkBonusEvent();
   await load(true);
+}
+
+async function checkBonusEvent(){
+  const { data } = await supabase.rpc('get_active_bonus');
+  if (!data) return;
+  const banner = document.getElementById('bonus-banner');
+  if (!banner) return;
+  banner.style.display = 'flex';
+  document.getElementById('bonus-name').textContent = data.name;
+  document.getElementById('bonus-desc').textContent = data.description || '';
+  document.getElementById('bonus-mult').textContent = `${data.multiplier}x pts`;
+  const ends = new Date(data.ends_at);
+  const diff = Math.ceil((ends - Date.now()) / 3600000);
+  document.getElementById('bonus-ends').textContent = diff > 24
+    ? `Ends in ${Math.ceil(diff/24)}d`
+    : `Ends in ${diff}h`;
 }
 
 async function load(reset=true){

@@ -121,45 +121,36 @@
       </div>
     </div>
 
-    <!-- SLOT PACKS -->
+    <!-- TASK POSTING SLOTS -->
     <div style="margin-top:48px">
-      <h2 style="font-size:1.1rem;margin-bottom:6px">Task slot packs</h2>
-      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:20px">Add more completion slots to an active task you've already posted. Uses your existing points.</p>
-      <div id="slot-task-picker" style="display:none;margin-bottom:20px">
-        <label style="font-size:0.85rem;color:var(--muted);display:block;margin-bottom:8px">Pick a task to add slots to:</label>
-        <select id="slot-task-select" style="width:100%;max-width:400px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-family:inherit;font-size:0.9rem">
-          <option value="">— Select a task —</option>
-        </select>
-      </div>
-      <div class="packages-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));max-width:700px">
-        <div class="package-card" onclick="buySlotPack(50)">
-          <div class="pkg-badge">Mini</div>
-          <div class="pkg-pts">50 <span>slots</span></div>
-          <div class="pkg-price" id="slot-cost-50">— pts</div>
-          <div class="pkg-rate">+50 completions</div>
-          <button class="btn btn-ghost btn-full pkg-btn">Add slots</button>
+      <h2 style="font-size:1.1rem;margin-bottom:6px">Extra task posting slots</h2>
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:6px">By default you can run <strong>5 active tasks</strong> at once. Buy extra slots to post more simultaneously.</p>
+      <p id="current-slot-limit" style="font-size:0.82rem;color:var(--orange);margin-bottom:20px"></p>
+      <div class="packages-grid" style="max-width:700px">
+        <div class="package-card" onclick="buySlotPack(1)">
+          <div class="pkg-badge">Starter</div>
+          <div class="pkg-pts">+3 <span>slots</span></div>
+          <div style="font-size:0.8rem;color:var(--muted);margin-bottom:8px">Run up to 8 tasks at once</div>
+          <div class="pkg-price">500 pts</div>
+          <div class="pkg-rate">~167 pts/slot</div>
+          <button class="btn btn-ghost btn-full pkg-btn">Buy slots</button>
         </div>
-        <div class="package-card popular" onclick="buySlotPack(100)">
+        <div class="package-card popular" onclick="buySlotPack(2)">
           <div class="pkg-popular-badge">Best value</div>
-          <div class="pkg-badge">Standard</div>
-          <div class="pkg-pts">100 <span>slots</span></div>
-          <div class="pkg-price" id="slot-cost-100">— pts</div>
-          <div class="pkg-rate">+100 completions</div>
-          <button class="btn btn-ghost btn-full pkg-btn">Add slots</button>
-        </div>
-        <div class="package-card" onclick="buySlotPack(250)">
           <div class="pkg-badge">Pro</div>
-          <div class="pkg-pts">250 <span>slots</span></div>
-          <div class="pkg-price" id="slot-cost-250">— pts</div>
-          <div class="pkg-rate">+250 completions</div>
-          <button class="btn btn-ghost btn-full pkg-btn">Add slots</button>
+          <div class="pkg-pts">+5 <span>slots</span></div>
+          <div style="font-size:0.8rem;color:var(--muted);margin-bottom:8px">Run up to 10 tasks at once</div>
+          <div class="pkg-price">750 pts</div>
+          <div class="pkg-rate">150 pts/slot</div>
+          <button class="btn btn-ghost btn-full pkg-btn">Buy slots</button>
         </div>
-        <div class="package-card" onclick="buySlotPack(500)">
+        <div class="package-card" onclick="buySlotPack(3)">
           <div class="pkg-badge">Max</div>
-          <div class="pkg-pts">500 <span>slots</span></div>
-          <div class="pkg-price" id="slot-cost-500">— pts</div>
-          <div class="pkg-rate">+500 completions</div>
-          <button class="btn btn-ghost btn-full pkg-btn">Add slots</button>
+          <div class="pkg-pts">+10 <span>slots</span></div>
+          <div style="font-size:0.8rem;color:var(--muted);margin-bottom:8px">Run up to 15 tasks at once</div>
+          <div class="pkg-price">1,200 pts</div>
+          <div class="pkg-rate">120 pts/slot</div>
+          <button class="btn btn-ghost btn-full pkg-btn">Buy slots</button>
         </div>
       </div>
       <div class="error-msg" id="slot-err" style="margin-top:12px"></div>
@@ -189,7 +180,7 @@ async function main() {
   profile = ctx.profile;
   document.getElementById('co-username').textContent = '@' + profile.username;
   loadHistory();
-  loadMyTasks();
+  initSlotPacks();
 }
 
 window.selectPackage = (card) => {
@@ -293,61 +284,30 @@ async function loadHistory() {
     </div>`).join('');
 }
 
-main();
-
-// ---- SLOT PACKS ----
-async function loadMyTasks() {
-  const { data } = await supabase.from('tasks')
-    .select('id,platform,target,points_reward,max_completions,completions_count')
-    .eq('owner_id', profile.id).eq('is_active', true);
-  if (!data || !data.length) return;
-  const sel = document.getElementById('slot-task-select');
-  const PLAT_NAMES = { tiktok:'TikTok', instagram:'Instagram', youtube:'YouTube', twitter:'Twitter/X', twitch:'Twitch', discord:'Discord', website:'Website' };
-  data.forEach(t => {
-    const opt = document.createElement('option');
-    opt.value = t.id;
-    opt.dataset.pts = t.points_reward;
-    try {
-      const u = new URL(t.target);
-      const parts = u.pathname.replace(/\/+$/,'').split('/').filter(Boolean);
-      const handle = parts.find(p=>p.startsWith('@')) || parts[parts.length-1] || u.hostname;
-      opt.textContent = `${PLAT_NAMES[t.platform]||t.platform} — ${handle} (${t.completions_count}/${t.max_completions} done)`;
-    } catch { opt.textContent = t.target; }
-    sel.appendChild(opt);
-  });
-  document.getElementById('slot-task-picker').style.display = 'block';
-  sel.onchange = updateSlotCosts;
-  updateSlotCosts();
+// ---- TASK SLOT PACKS ----
+function initSlotPacks() {
+  const extra = profile.extra_task_slots || 0;
+  const current = 5 + extra;
+  const el = document.getElementById('current-slot-limit');
+  if (el) el.textContent = `Your current limit: ${current} active tasks (base 5 + ${extra} purchased)`;
 }
 
-function updateSlotCosts() {
-  const sel = document.getElementById('slot-task-select');
-  const opt = sel.options[sel.selectedIndex];
-  const ptsPerSlot = opt ? parseInt(opt.dataset.pts)||20 : 20;
-  [50,100,250,500].forEach(n => {
-    const el = document.getElementById(`slot-cost-${n}`);
-    if(el) el.textContent = Math.ceil(n * ptsPerSlot * 1.05) + ' pts';
-  });
-}
-
-window.buySlotPack = async (slots) => {
-  const sel = document.getElementById('slot-task-select');
-  const taskId = sel.value;
+window.buySlotPack = async (pack) => {
+  const PACKS = { 1: {slots:3,cost:500}, 2: {slots:5,cost:750}, 3: {slots:10,cost:1200} };
+  const p = PACKS[pack];
   const errEl = document.getElementById('slot-err');
-  errEl.textContent = '';
-  if (!taskId) { errEl.textContent = 'Please select a task first.'; return; }
-  const opt = sel.options[sel.selectedIndex];
-  const ptsPerSlot = parseInt(opt.dataset.pts) || 20;
-  const cost = Math.ceil(slots * ptsPerSlot * 1.05);
-  if (!confirm(`Add ${slots} slots to "${opt.textContent}" for ${cost} pts?`)) return;
-  const { data, error } = await supabase.rpc('buy_task_slots', { p_task_id: taskId, p_slots: slots });
+  errEl.textContent = ''; errEl.style.color = '';
+  if (!confirm(`Buy +${p.slots} task slots for ${p.cost} pts?\nYour new limit will be ${5 + (profile.extra_task_slots||0) + p.slots} active tasks.`)) return;
+  const { data, error } = await supabase.rpc('buy_extra_task_slots', { p_pack: pack });
   if (error || data?.error) { errEl.textContent = data?.error || error.message; return; }
   errEl.style.color = 'var(--green)';
-  errEl.textContent = `✓ Added ${data.slots_added} slots! New total: ${data.new_max} completions.`;
-  const { data: p } = await supabase.from('profiles').select('points').eq('id', profile.id).single();
-  if (p) { profile.points = p.points; updateNavPoints(p.points); }
+  errEl.textContent = `✓ +${data.slots_added} slots added! New limit: ${data.new_limit} active tasks.`;
+  profile.extra_task_slots = (profile.extra_task_slots || 0) + data.slots_added;
+  profile.points -= data.cost;
+  updateNavPoints(profile.points);
+  initSlotPacks();
   setTimeout(() => { errEl.textContent = ''; errEl.style.color = ''; }, 5000);
 };
-</script>
-</body>
-</html>
+
+main();
+

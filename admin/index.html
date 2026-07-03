@@ -34,6 +34,8 @@
           <button class="sidebar-btn" onclick="adminTab('reports')">🚩 Reports <span class="reports-count" id="reports-count" style="display:none">0</span></button>
           <button class="sidebar-btn" onclick="adminTab('suspicious')">🤖 Suspicious</button>
           <button class="sidebar-btn" onclick="adminTab('purchases')">💳 Purchases <span class="reports-count" id="purchase-count" style="display:none">0</span></button>
+          <button class="sidebar-btn" onclick="adminTab('broadcast')">📢 Broadcast</button>
+          <button class="sidebar-btn" onclick="adminTab('bonus')">🎉 Bonus Events</button>
         </nav>
       </aside>
 
@@ -43,6 +45,22 @@
         <!-- OVERVIEW -->
         <div id="panel-overview" class="admin-panel active">
           <h1 class="admin-title">Overview</h1>
+
+          <!-- LIVE USER COUNT -->
+          <div style="display:flex;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:16px 20px;margin-bottom:20px;max-width:360px">
+            <div style="position:relative;flex-shrink:0">
+              <div style="width:12px;height:12px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e"></div>
+              <div id="live-pulse" style="position:absolute;inset:0;border-radius:50%;background:#22c55e;opacity:0.4;animation:livePulse 1.8s ease-out infinite"></div>
+            </div>
+            <div>
+              <div style="font-size:1.5rem;font-weight:700;font-family:'Space Grotesk',sans-serif"><span id="live-count">—</span> <span style="font-size:0.85rem;font-weight:400;color:var(--muted)">online now</span></div>
+              <div style="font-size:0.75rem;color:var(--muted)">Active in the last 5 minutes · updates every 30s</div>
+            </div>
+          </div>
+          <style>
+            @keyframes livePulse { 0%{transform:scale(1);opacity:.4} 70%{transform:scale(2.5);opacity:0} 100%{transform:scale(2.5);opacity:0} }
+          </style>
+
           <div class="stats-grid" id="stats-grid">
             <div class="spinner"></div>
           </div>
@@ -103,6 +121,93 @@
           <h1 class="admin-title">Point Purchases</h1>
           <p style="color:var(--muted);font-size:0.85rem;margin-bottom:20px">Review PayPal purchase requests. Verify payment in your PayPal account before approving.</p>
           <div id="purchases-wrap"><div class="spinner"></div></div>
+        </div>
+
+        <!-- BROADCAST -->
+        <div id="panel-broadcast" class="admin-panel">
+          <h1 class="admin-title">📢 Broadcast Message</h1>
+          <p style="color:var(--muted);font-size:0.88rem;margin-bottom:24px">Send a notification to every user on the platform.</p>
+          <div class="card card-pad" style="max-width:560px">
+            <div class="form-group">
+              <label class="form-label">Title</label>
+              <input type="text" id="bc-title" placeholder="e.g. 🎉 Weekend bonus is live!" style="width:100%"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Message</label>
+              <textarea id="bc-body" rows="4" placeholder="Write your message here..." style="width:100%;resize:vertical;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-family:inherit;font-size:0.9rem"></textarea>
+            </div>
+            <div class="error-msg" id="bc-err" style="margin-bottom:12px"></div>
+            <div style="display:flex;gap:10px;align-items:center">
+              <button class="btn btn-primary" onclick="sendBroadcast()">📢 Send to all users</button>
+              <span id="bc-result" style="font-size:0.85rem"></span>
+            </div>
+            <p style="font-size:0.75rem;color:var(--muted);margin-top:12px">⚠️ This sends an in-app notification to every non-banned user immediately.</p>
+          </div>
+        </div>
+
+        <!-- BONUS EVENTS -->
+        <div id="panel-bonus" class="admin-panel">
+          <h1 class="admin-title">🎉 Bonus Events</h1>
+          <p style="color:var(--muted);font-size:0.88rem;margin-bottom:24px">Create weekend bonus events that multiply points for all completions.</p>
+
+          <div class="card card-pad" style="max-width:560px;margin-bottom:24px">
+            <h3 style="font-size:0.95rem;margin-bottom:16px">Create new bonus event</h3>
+            <div class="form-group">
+              <label class="form-label">Event name</label>
+              <input type="text" id="bn-name" placeholder="e.g. Weekend Warrior" style="width:100%"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Description</label>
+              <input type="text" id="bn-desc" placeholder="e.g. 2x points on all tasks this weekend!" style="width:100%"/>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div class="form-group">
+                <label class="form-label">Platform (optional)</label>
+                <select id="bn-platform" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-family:inherit">
+                  <option value="">All platforms</option>
+                  <option value="tiktok">TikTok</option>
+                  <option value="instagram">Instagram</option>
+                  <option value="youtube">YouTube</option>
+                  <option value="discord">Discord</option>
+                  <option value="twitter">Twitter/X</option>
+                  <option value="twitch">Twitch</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Multiplier</label>
+                <select id="bn-mult" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-family:inherit">
+                  <option value="1.5">1.5x</option>
+                  <option value="2" selected>2x</option>
+                  <option value="2.5">2.5x</option>
+                  <option value="3">3x</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div class="form-group">
+                <label class="form-label">Starts at</label>
+                <input type="datetime-local" id="bn-start" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-family:inherit"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Ends at</label>
+                <input type="datetime-local" id="bn-end" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-family:inherit"/>
+              </div>
+            </div>
+            <!-- Quick preset buttons -->
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+              <span style="font-size:0.78rem;color:var(--muted);align-self:center">Quick:</span>
+              <button class="btn btn-ghost btn-sm" onclick="setWeekendBonus()">This weekend</button>
+              <button class="btn btn-ghost btn-sm" onclick="setNext24h()">Next 24 hours</button>
+              <button class="btn btn-ghost btn-sm" onclick="setNext48h()">Next 48 hours</button>
+            </div>
+            <div class="error-msg" id="bn-err" style="margin-bottom:12px"></div>
+            <button class="btn btn-primary" onclick="createBonus()">🎉 Launch bonus event</button>
+          </div>
+
+          <div class="card card-pad" style="max-width:560px">
+            <h3 style="font-size:0.95rem;margin-bottom:12px">Active &amp; recent events</h3>
+            <div id="bonus-list"><div class="spinner"></div></div>
+          </div>
         </div>
       </main>
     </div>
@@ -165,6 +270,14 @@
     document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     loadOverview();
+
+    // Poll live count every 30 seconds
+    async function refreshLiveCount() {
+      const { data } = await supabase.rpc('get_live_user_count');
+      const el = document.getElementById('live-count');
+      if (el && data !== null) el.textContent = Number(data).toLocaleString();
+    }
+    setInterval(refreshLiveCount, 30000);
     loadPurchaseCount();
 
     // ---- TABS ----
@@ -179,6 +292,104 @@
       if (tab === 'reports') { reportsOffset = 0; loadReports(true); }
       if (tab === 'suspicious') loadSuspicious();
       if (tab === 'purchases') loadPurchases();
+      if (tab === 'broadcast') { /* ready */ }
+      if (tab === 'bonus') loadBonusEvents();
+    };
+
+    // ---- BROADCAST ----
+    window.sendBroadcast = async () => {
+      const title = document.getElementById('bc-title').value.trim();
+      const body = document.getElementById('bc-body').value.trim();
+      const errEl = document.getElementById('bc-err');
+      const result = document.getElementById('bc-result');
+      errEl.textContent = ''; result.textContent = '';
+      if (!title || !body) { errEl.textContent = 'Title and message are required.'; return; }
+      if (!confirm(`Send "${title}" to ALL users?`)) return;
+      const { data, error } = await supabase.rpc('admin_broadcast', { p_title: title, p_body: body });
+      if (error || data?.error) { errEl.textContent = data?.error || error.message; return; }
+      result.style.color = 'var(--green)';
+      result.textContent = `✓ Sent to ${data.sent_to} users`;
+      document.getElementById('bc-title').value = '';
+      document.getElementById('bc-body').value = '';
+    };
+
+    // ---- BONUS EVENTS ----
+    window.setWeekendBonus = () => {
+      const now = new Date();
+      const day = now.getDay(); // 0=Sun,6=Sat
+      const daysToFri = day <= 5 ? 5 - day : 6;
+      const fri = new Date(now); fri.setDate(now.getDate() + daysToFri); fri.setHours(18,0,0,0);
+      const sun = new Date(fri); sun.setDate(fri.getDate() + 2); sun.setHours(23,59,0,0);
+      document.getElementById('bn-start').value = fri.toISOString().slice(0,16);
+      document.getElementById('bn-end').value = sun.toISOString().slice(0,16);
+      document.getElementById('bn-name').value = document.getElementById('bn-name').value || 'Weekend Warrior';
+      document.getElementById('bn-desc').value = document.getElementById('bn-desc').value || 'Double points on all tasks this weekend!';
+    };
+    window.setNext24h = () => {
+      const s = new Date(); const e = new Date(s.getTime() + 86400000);
+      document.getElementById('bn-start').value = s.toISOString().slice(0,16);
+      document.getElementById('bn-end').value = e.toISOString().slice(0,16);
+    };
+    window.setNext48h = () => {
+      const s = new Date(); const e = new Date(s.getTime() + 172800000);
+      document.getElementById('bn-start').value = s.toISOString().slice(0,16);
+      document.getElementById('bn-end').value = e.toISOString().slice(0,16);
+    };
+
+    window.createBonus = async () => {
+      const name = document.getElementById('bn-name').value.trim();
+      const desc = document.getElementById('bn-desc').value.trim();
+      const plat = document.getElementById('bn-platform').value;
+      const mult = parseFloat(document.getElementById('bn-mult').value);
+      const start = document.getElementById('bn-start').value;
+      const end = document.getElementById('bn-end').value;
+      const errEl = document.getElementById('bn-err');
+      errEl.textContent = '';
+      if (!name || !start || !end) { errEl.textContent = 'Name, start and end are required.'; return; }
+      if (new Date(end) <= new Date(start)) { errEl.textContent = 'End must be after start.'; return; }
+      const { data, error } = await supabase.rpc('admin_create_bonus_event', {
+        p_name: name, p_description: desc, p_platform: plat,
+        p_multiplier: mult, p_starts_at: new Date(start).toISOString(), p_ends_at: new Date(end).toISOString()
+      });
+      if (error || data?.error) { errEl.textContent = data?.error || error.message; return; }
+      errEl.style.color = 'var(--green)';
+      errEl.textContent = '✓ Bonus event launched! Users notified.';
+      setTimeout(() => { errEl.textContent = ''; errEl.style.color = ''; }, 3000);
+      loadBonusEvents();
+    };
+
+    async function loadBonusEvents() {
+      const list = document.getElementById('bonus-list');
+      if (!list) return;
+      const { data } = await supabase.from('bonus_events')
+        .select('*').order('created_at', { ascending: false }).limit(20);
+      if (!data?.length) { list.innerHTML = '<p style="color:var(--muted);font-size:0.85rem">No events yet.</p>'; return; }
+      const now = new Date();
+      list.innerHTML = data.map(e => {
+        const active = new Date(e.starts_at) <= now && new Date(e.ends_at) >= now;
+        const start = new Date(e.starts_at).toLocaleString();
+        const end = new Date(e.ends_at).toLocaleString();
+        return `<div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:10px;${active ? 'border-color:var(--orange)' : ''}">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+            <div>
+              <div style="font-weight:700;font-size:0.9rem">${esc(e.name)} ${active ? '<span style="color:var(--orange);font-size:0.75rem">● LIVE</span>' : ''}</div>
+              <div style="font-size:0.78rem;color:var(--muted)">${esc(e.description||'')} ${e.platform ? '· '+e.platform : '· all platforms'}</div>
+              <div style="font-size:0.75rem;color:var(--muted);margin-top:2px">${start} → ${end}</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+              <span style="font-size:1.1rem;font-weight:700;color:var(--orange)">${e.multiplier}x</span>
+              ${active ? `<button class="btn btn-danger btn-sm" onclick="endBonus('${e.id}')">End now</button>` : ''}
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    window.endBonus = async (id) => {
+      if (!confirm('End this bonus event now?')) return;
+      const { error } = await supabase.rpc('admin_end_bonus_event', { p_event_id: id });
+      if (error) { alert(error.message); return; }
+      loadBonusEvents();
     };
 
     // ---- OVERVIEW ----
@@ -188,14 +399,21 @@
       const { data, error } = await supabase.rpc('admin_get_stats');
       if (error) { grid.innerHTML = `<p style="color:var(--red)">${esc(error.message)}</p>`; return; }
       const s = data;
+
+      // Update live count pill
+      const liveEl = document.getElementById('live-count');
+      if (liveEl) liveEl.textContent = (s.live_users || 0).toLocaleString();
+
       const cards = [
         { icon:'👥', label:'Total users',       val: s.total_users,       color:'var(--orange)' },
+        { icon:'🆕', label:'New today',          val: s.users_today,       color:'var(--orange-lt)' },
         { icon:'🚫', label:'Banned users',       val: s.banned_users,      color:'var(--red)' },
         { icon:'📋', label:'Active tasks',       val: s.active_tasks,      color:'var(--green)' },
         { icon:'✅', label:'Total completions',  val: s.total_completions, color:'var(--amber)' },
+        { icon:'🎯', label:'Completions today',  val: s.tasks_today,       color:'var(--amber)' },
         { icon:'🚩', label:'Open reports',       val: s.open_reports,      color: s.open_reports > 0 ? 'var(--red)' : 'var(--muted)' },
-        { icon:'💳', label:'Pending purchases',   val: s.pending_purchases,  color: s.pending_purchases > 0 ? 'var(--amber)' : 'var(--muted)' },
-        { icon:'💵', label:'Total revenue',        val: '$'+parseFloat(s.total_revenue_usd||0).toFixed(2), color:'var(--green)' },
+        { icon:'💳', label:'Pending purchases',  val: s.pending_purchases, color: s.pending_purchases > 0 ? 'var(--amber)' : 'var(--muted)' },
+        { icon:'💵', label:'Total revenue',      val: '$'+parseFloat(s.total_revenue_usd||0).toFixed(2), color:'var(--green)' },
         { icon:'⚡', label:'Points in system',   val: s.points_in_system,  color:'var(--orange)' },
       ];
       grid.innerHTML = cards.map(c => `

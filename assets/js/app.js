@@ -56,15 +56,10 @@ export async function initApp(currentPage=''){
   if(pRes.error){window.location.replace('/login/');return null;}
   const profile=pRes.data;
   const email=uRes.data?.user?.email||'';
+  // Update last_seen for live user count (fire and forget)
+  supabase.from('profiles').update({ last_seen: new Date().toISOString() }).eq('id', profile.id).then(() => {});
+
   applyTheme(profile.theme||'dark-orange',profile.accent_color||null);
-  // Restore glow color from localStorage
-  const savedGlow = localStorage.getItem('nb_glow_color');
-  if (savedGlow && /^#[0-9A-Fa-f]{6}$/.test(savedGlow)) {
-    const r = document.documentElement;
-    r.style.setProperty('--glow', `0 0 32px ${savedGlow}26`);
-    r.style.setProperty('--btn-shadow', `0 4px 20px ${savedGlow}72`);
-    r.style.setProperty('--btn-shadow-sm', `0 2px 10px ${savedGlow}50`);
-  }
   const fontMap={space:'font-space',mono:'font-mono',rounded:'font-rounded'};
   const fc=fontMap[profile.font_choice];
   if(fc) document.body.classList.add(fc);
@@ -509,6 +504,8 @@ export function initTaskModal(onComplete){
     unregisterAbandon();window.closeTaskModal();
     const msg=(data.reputation_multiplier&&data.reputation_multiplier<1.0)
       ?`+${data.points_earned} pts! Build reputation to earn full rewards.`
+      :data.bonus_event
+      ?`+${data.points_earned} pts! 🎉 ${data.bonus_event} bonus applied!`
       :`+${data.points_earned} points earned! 🎉`;
     toast(msg,'success');
     // Every 5th completion, nudge them to share
