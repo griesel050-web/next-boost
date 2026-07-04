@@ -89,7 +89,7 @@ function renderShell(profile,currentPage){
   const nav=document.getElementById('main-nav');
   if(nav){
     nav.innerHTML=`
-      <a class="nav-logo" href="/"><img src="/assets/img/logo.png" alt="Next Boost" style="height:36px"/></a>
+      <a class="nav-logo" href="/"><img src="/assets/img/logo.png" alt="Next Boost" style="height:36px;width:auto;object-fit:contain"/></a>
       <div class="nav-links" style="gap:8px">
         <button class="daily-pill" id="daily-pill" onclick="claimBonus()">
           <span class="dp-icon">🎁</span>
@@ -112,6 +112,7 @@ function renderShell(profile,currentPage){
       {href:'/completed/',icon:'✅',label:'Completed',page:'completed'},
       {href:'/post-task/',icon:'📤',label:'Post a Task',page:'post-task'},
       {href:'/my-tasks/',icon:'📋',label:'My Tasks',page:'my-tasks'},
+      {href:'/store/',icon:'🛒',label:'Buy Points',page:'store'},
     ];
     const L2=[
       {href:'/leaderboard/',icon:'🏆',label:'Leaderboard',page:'leaderboard'},

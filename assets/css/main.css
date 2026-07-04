@@ -460,8 +460,6 @@ h1, h2, h3, h4, h5 { font-family: 'Space Grotesk', sans-serif; line-height: 1.2;
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ---- Twitter/X platform ---- */
-:root { --twitter: #1DA1F2; }
 
 /* Admin-only elements — hidden by default, JS reveals for admins */
 .admin-only-field { display: none; }

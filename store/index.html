@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Buy Points — Next Boost</title><meta name="robots" content="noindex"/>
+  
+  <link rel="preconnect" href="https://slufbzzfofzptwjefzmu.supabase.co"/>
+  <link rel="dns-prefetch" href="https://slufbzzfofzptwjefzmu.supabase.co"/>
   <link rel="manifest" href="/manifest.json"/><meta name="theme-color" content="#E8621A"/>
   <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
   <link rel="stylesheet" href="/assets/css/main.css"/>
@@ -124,39 +127,37 @@
     <!-- TASK POSTING SLOTS -->
     <div style="margin-top:48px">
       <h2 style="font-size:1.1rem;margin-bottom:6px">Extra task posting slots</h2>
-      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:6px">By default you can run <strong>5 active tasks</strong> at once. Buy extra slots to post more simultaneously.</p>
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:6px">By default you can run <strong>5 active tasks</strong> at once. Buy extra slots via PayPal — same process as buying points.</p>
       <p id="current-slot-limit" style="font-size:0.82rem;color:var(--orange);margin-bottom:20px"></p>
       <div class="packages-grid" style="max-width:700px">
-        <div class="package-card" onclick="buySlotPack(1)">
+        <div class="package-card" onclick="selectSlotPack(this,1,'3 Task Slots','$1.00')">
           <div class="pkg-badge">Starter</div>
           <div class="pkg-pts">+3 <span>slots</span></div>
           <div style="font-size:0.8rem;color:var(--muted);margin-bottom:8px">Run up to 8 tasks at once</div>
-          <div class="pkg-price">500 pts</div>
-          <div class="pkg-rate">~167 pts/slot</div>
-          <button class="btn btn-ghost btn-full pkg-btn">Buy slots</button>
+          <div class="pkg-price">$1.00</div>
+          <button class="btn btn-ghost btn-full pkg-btn">Select</button>
         </div>
-        <div class="package-card popular" onclick="buySlotPack(2)">
+        <div class="package-card popular" onclick="selectSlotPack(this,2,'5 Task Slots','$1.50')">
           <div class="pkg-popular-badge">Best value</div>
           <div class="pkg-badge">Pro</div>
           <div class="pkg-pts">+5 <span>slots</span></div>
           <div style="font-size:0.8rem;color:var(--muted);margin-bottom:8px">Run up to 10 tasks at once</div>
-          <div class="pkg-price">750 pts</div>
-          <div class="pkg-rate">150 pts/slot</div>
-          <button class="btn btn-ghost btn-full pkg-btn">Buy slots</button>
+          <div class="pkg-price">$1.50</div>
+          <button class="btn btn-ghost btn-full pkg-btn">Select</button>
         </div>
-        <div class="package-card" onclick="buySlotPack(3)">
+        <div class="package-card" onclick="selectSlotPack(this,3,'10 Task Slots','$2.50')">
           <div class="pkg-badge">Max</div>
           <div class="pkg-pts">+10 <span>slots</span></div>
           <div style="font-size:0.8rem;color:var(--muted);margin-bottom:8px">Run up to 15 tasks at once</div>
-          <div class="pkg-price">1,200 pts</div>
-          <div class="pkg-rate">120 pts/slot</div>
-          <button class="btn btn-ghost btn-full pkg-btn">Buy slots</button>
+          <div class="pkg-price">$2.50</div>
+          <button class="btn btn-ghost btn-full pkg-btn">Select</button>
         </div>
       </div>
-      <div class="error-msg" id="slot-err" style="margin-top:12px"></div>
+      <p style="font-size:0.78rem;color:var(--muted);margin-top:12px">⚠️ Slot purchases use the same PayPal review process as point packages. Slots are added manually within 24 hours.</p>
+      <div class="error-msg" id="slot-err" style="margin-top:8px"></div>
     </div>
 
-    <!-- PURCHASE HISTORY -->
+        <!-- PURCHASE HISTORY -->
     <div style="margin-top:40px">
       <h2 style="font-size:1rem;margin-bottom:16px">Purchase history</h2>
       <div id="history-feed"></div>
@@ -208,8 +209,10 @@ window.selectPackage = (card) => {
 
 window.cancelCheckout = () => {
   document.getElementById('checkout-panel').style.display = 'none';
+  const co = document.getElementById('checkout-card');
+  if (co) { co.dataset.isSlotPurchase = ''; co.dataset.slotPack = ''; }
   document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
-  selectedPkg = null;
+  selectedPkg = null; selectedSlotPack = null;
 };
 
 window.submitPurchase = async () => {
@@ -218,10 +221,13 @@ window.submitPurchase = async () => {
   const btn = document.getElementById('submit-btn');
   errEl.textContent = '';
 
-  if (!selectedPkg) { errEl.textContent = 'Please select a package.'; return; }
+  const co = document.getElementById('checkout-card');
+  const isSlotPurchase = co?.dataset?.isSlotPurchase === '1';
+  const slotPack = parseInt(co?.dataset?.slotPack || '0');
+
+  if (!isSlotPurchase && !selectedPkg) { errEl.textContent = 'Please select a package.'; return; }
   if (!ref || ref.length < 6) { errEl.textContent = 'Please enter a valid transaction reference.'; return; }
 
-  // Get fingerprint for fraud prevention
   let fp = null;
   try {
     const FP = await import('https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@4/+esm');
@@ -232,11 +238,16 @@ window.submitPurchase = async () => {
 
   btn.disabled = true; btn.textContent = 'Submitting…';
 
-  const { data, error } = await supabase.rpc('submit_purchase', {
-    p_package_id: selectedPkg.id,
-    p_paypal_ref: ref,
-    p_fingerprint: fp,
-  });
+  let data, error;
+  if (isSlotPurchase && slotPack) {
+    ({ data, error } = await supabase.rpc('submit_slot_purchase', {
+      p_slot_pack: slotPack, p_paypal_ref: ref, p_fingerprint: fp,
+    }));
+  } else {
+    ({ data, error } = await supabase.rpc('submit_purchase', {
+      p_package_id: selectedPkg.id, p_paypal_ref: ref, p_fingerprint: fp,
+    }));
+  }
 
   btn.disabled = false; btn.textContent = 'Submit for review';
 
@@ -289,24 +300,38 @@ function initSlotPacks() {
   const extra = profile.extra_task_slots || 0;
   const current = 5 + extra;
   const el = document.getElementById('current-slot-limit');
-  if (el) el.textContent = `Your current limit: ${current} active tasks (base 5 + ${extra} purchased)`;
+  if (el) el.textContent = `Your current limit: ${current} active tasks (base 5 + ${extra} purchased slots)`;
 }
 
-window.buySlotPack = async (pack) => {
-  const PACKS = { 1: {slots:3,cost:500}, 2: {slots:5,cost:750}, 3: {slots:10,cost:1200} };
-  const p = PACKS[pack];
-  const errEl = document.getElementById('slot-err');
-  errEl.textContent = ''; errEl.style.color = '';
-  if (!confirm(`Buy +${p.slots} task slots for ${p.cost} pts?\nYour new limit will be ${5 + (profile.extra_task_slots||0) + p.slots} active tasks.`)) return;
-  const { data, error } = await supabase.rpc('buy_extra_task_slots', { p_pack: pack });
-  if (error || data?.error) { errEl.textContent = data?.error || error.message; return; }
-  errEl.style.color = 'var(--green)';
-  errEl.textContent = `✓ +${data.slots_added} slots added! New limit: ${data.new_limit} active tasks.`;
-  profile.extra_task_slots = (profile.extra_task_slots || 0) + data.slots_added;
-  profile.points -= data.cost;
-  updateNavPoints(profile.points);
-  initSlotPacks();
-  setTimeout(() => { errEl.textContent = ''; errEl.style.color = ''; }, 5000);
+const SLOT_PACKS = {
+  1: { slots: 3,  label: '3 Task Slots', price: '$1.00',  amount_usd: 1.00  },
+  2: { slots: 5,  label: '5 Task Slots', price: '$1.50',  amount_usd: 1.50  },
+  3: { slots: 10, label: '10 Task Slots', price: '$2.50', amount_usd: 2.50  },
+};
+
+window.selectSlotPack = (card, pack, label, price) => {
+  document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedSlotPack = pack;
+  showSlotCheckout(pack);
+};
+
+let selectedSlotPack = null;
+
+function showSlotCheckout(pack) {
+  const p = SLOT_PACKS[pack];
+  const PAYPAL_ME = document.getElementById('paypal-btn')?.href?.split('?')[0] || 'https://paypal.me/YourPayPalUsername';
+  // Reuse the existing checkout card
+  const co = document.getElementById('checkout-card');
+  if (!co) return;
+  co.style.display = 'block';
+  document.getElementById('co-pkg').textContent = p.label;
+  document.getElementById('co-price').textContent = p.price;
+  const pb = document.getElementById('paypal-btn');
+  if (pb) pb.href = `${PAYPAL_ME}/${p.amount_usd}USD`;
+  // Store slot pack info for submission
+  co.dataset.slotPack = pack;
+  co.dataset.isSlotPurchase = '1';
 };
 
 main();

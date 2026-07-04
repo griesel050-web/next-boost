@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>My Tasks — Next Boost</title><meta name="robots" content="noindex"/>
+  
+  <link rel="preconnect" href="https://slufbzzfofzptwjefzmu.supabase.co"/>
+  <link rel="dns-prefetch" href="https://slufbzzfofzptwjefzmu.supabase.co"/>
   <link rel="manifest" href="/manifest.json"/><meta name="theme-color" content="#E8621A"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
@@ -81,7 +84,7 @@ async function loadTasks(){
           ${t.is_boosted?'<span class="boost-badge">⚡ Boosted</span>':''}
           ${t.is_active?'<span class="status-chip chip-active">Active</span>':'<span class="status-chip chip-closed">Closed</span>'}
           <span class="slots-badge">${sl} left</span>
-          ${t.is_active?`<button class="btn btn-ghost btn-sm" onclick="window.boostTask('${t.id}')" title="Pin to top for 12 hours — costs 1,000 pts">⚡ Boost (1,000 pts)</button><button class="btn btn-ghost btn-sm" onclick="window.buySlots('${t.id}',${t.points_reward})" title="Add more slots to this task">+ Add slots</button><button class="btn btn-ghost btn-sm" onclick="window.closeTask('${t.id}',${unused})" title="10% platform fee on early close">Close (+${Math.floor(unused*0.90)} pts after 10% fee)</button>`:''}\n          ${t.is_infinite?'<span class="boost-badge" style="background:rgba(232,98,26,0.2)">∞ Infinite</span>':''}
+          ${t.is_active?`<button class="btn btn-ghost btn-sm" onclick="window.boostTask('${t.id}')" title="Pin to top for 12 hours — costs 1,000 pts">⚡ Boost (1,000 pts)</button><button class="btn btn-ghost btn-sm" onclick="window.closeTask('${t.id}',${unused})" title="10% platform fee on early close">Close (+${Math.floor(unused*0.90)} pts after 10% fee)</button>`:''}\n          ${t.is_infinite?'<span class="boost-badge" style="background:rgba(232,98,26,0.2)">∞ Infinite</span>':''}
         </div>`;
       feed.appendChild(card);
     });
@@ -94,28 +97,6 @@ window.closeTask=async(id,refund)=>{
   if(!confirm(`Close this task?\nUnused slots: refunded minus 7% platform fee.\nYou will receive approximately ${Math.floor(refund * 0.90)} pts (10% platform fee applied).`)) return;
   const {data,error}=await supabase.rpc('close_task',{p_task_id:id});
   if(error||data?.error){alert(data?.error||error.message);return;}
-  const {data:p}=await supabase.from('profiles').select('points').eq('id',profile.id).single();
-  if(p){profile.points=p.points;updateNavPoints(p.points);}
-  loadTasks();
-};
-window.buySlots=async(taskId, ptsPerSlot)=>{
-  const opts = [
-    {slots:50,  label:`50 slots  — ${(50*ptsPerSlot*1.05).toFixed(0)} pts`},
-    {slots:100, label:`100 slots — ${(100*ptsPerSlot*1.05).toFixed(0)} pts`},
-    {slots:250, label:`250 slots — ${(250*ptsPerSlot*1.05).toFixed(0)} pts`},
-    {slots:500, label:`500 slots — ${(500*ptsPerSlot*1.05).toFixed(0)} pts`},
-  ];
-  const msg = 'Add slots to this task:\n\n' + opts.map((o,i)=>`${i+1}. ${o.label}`).join('\n') + '\n\nEnter 1-4:';
-  const pick = prompt(msg);
-  if(!pick) return;
-  const idx = parseInt(pick)-1;
-  if(idx<0||idx>3||isNaN(idx)){alert('Invalid choice.');return;}
-  const {slots} = opts[idx];
-  const cost = Math.ceil(slots*ptsPerSlot*1.05);
-  if(!confirm(`Add ${slots} slots for ${cost} pts?`)) return;
-  const {data,error} = await supabase.rpc('buy_task_slots',{p_task_id:taskId,p_slots:slots});
-  if(error||data?.error){alert(data?.error||error.message);return;}
-  alert(`✓ Added ${data.slots_added} slots! New total: ${data.new_max}`);
   const {data:p}=await supabase.from('profiles').select('points').eq('id',profile.id).single();
   if(p){profile.points=p.points;updateNavPoints(p.points);}
   loadTasks();
