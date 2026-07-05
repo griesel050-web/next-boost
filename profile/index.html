@@ -227,6 +227,8 @@ function renderProfile(email) {
         <div class="stat-box"><div class="stat-val">${profile.tasks_completed||0}</div><div class="stat-lbl">Completed</div></div>
         <div class="stat-box"><div class="stat-val">${profile.tasks_posted||0}</div><div class="stat-lbl">Posted</div></div>
         <div class="stat-box"><div class="stat-val">${profile.streak||0}🔥</div><div class="stat-lbl">Streak</div></div>
+        <div class="stat-box" id="followers-box"><div class="stat-val" id="followers-count">—</div><div class="stat-lbl">Followers</div></div>
+        <div class="stat-box" id="following-box"><div class="stat-val" id="following-count">—</div><div class="stat-lbl">Following</div></div>
         <div class="stat-box"><div class="stat-val" style="color:${repColor}">${rep}</div><div class="stat-lbl">Reputation</div></div>
       </div>
     </div>
@@ -245,6 +247,15 @@ function renderProfile(email) {
     </div>`;
 
   loadLedger();
+
+  // Load follow stats
+  supabase.rpc('get_follow_stats', { p_user_id: profile.id }).then(({ data }) => {
+    if (!data) return;
+    const fc = document.getElementById('followers-count');
+    const fgc = document.getElementById('following-count');
+    if (fc) fc.textContent = data.followers.toLocaleString();
+    if (fgc) fgc.textContent = data.following.toLocaleString();
+  });
 }
 
 async function loadLedger() {

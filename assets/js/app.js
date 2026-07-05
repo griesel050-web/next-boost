@@ -12,6 +12,40 @@ function toast(msg, type=''){
   window._toastTimer=setTimeout(()=>el.classList.remove('show'),3600);
 }
 
+// ---- SERVICE WORKER & PWA ----
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+
+// PWA install prompt — store event for later use
+let _deferredInstall = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _deferredInstall = e;
+  // Show install button in sidebar if not already installed
+  const btn = document.getElementById('pwa-install-btn');
+  if (btn) btn.style.display = 'flex';
+});
+
+window.promptPWAInstall = async () => {
+  if (!_deferredInstall) return;
+  _deferredInstall.prompt();
+  const { outcome } = await _deferredInstall.userChoice;
+  if (outcome === 'accepted') {
+    const btn = document.getElementById('pwa-install-btn');
+    if (btn) btn.style.display = 'none';
+  }
+  _deferredInstall = null;
+};
+
+window.addEventListener('appinstalled', () => {
+  const btn = document.getElementById('pwa-install-btn');
+  if (btn) btn.style.display = 'none';
+  _deferredInstall = null;
+});
+
 // ---- THEMES ----
 export const THEMES={
   'dark-orange':{accent:'#E8621A',accentDk:'#C4430A',accentLt:'#F5843A',bg:'#0e0b09',surface:'#171210',surface2:'#211a16',surface3:'#2c221c',border:'#3a2a22',border2:'#4a3628'},
@@ -136,7 +170,10 @@ function renderShell(profile,currentPage){
           <div class="sidebar-user-name">${esc(profile.display_name||profile.username)}</div>
           <div class="sidebar-user-pts">⚡ ${profile.points} pts · <span style="color:var(--orange)">Buy more →</span></div>
         </div>
-      </a>`;
+      </a>
+      <button id="pwa-install-btn" onclick="window.promptPWAInstall()" style="display:none;align-items:center;gap:10px;background:rgba(232,98,26,0.1);border:1px solid rgba(232,98,26,0.3);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-family:inherit;font-size:0.82rem;cursor:pointer;width:100%;margin-top:8px;font-weight:600">
+        📱 Install app
+      </button>`;
   }
   const mn=document.getElementById('mobile-nav');
   if(mn){

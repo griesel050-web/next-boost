@@ -100,7 +100,7 @@ function buildRow(u, ptField) {
     : `<div style="width:30px;height:30px;border-radius:50%;background:${u.avatar_color||'var(--orange)'};display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:700;color:#fff;flex-shrink:0;font-family:'Space Grotesk',sans-serif">${ini}</div>`;
   return `
     <div class="lb-row${isMe ? ' lb-me' : ''}"
-         onclick="showUser('${u.id}','${esc(u.display_name||u.username)}','${u.avatar_color||'var(--orange)'}',${u[ptField]||0},${u.tasks_completed||0},'${esc(u.username)}','${u.top_badge||''}','${esc(u.top_badge_title||'')}',${u.current_streak||0},${u.achievements_count||0},'${u.avatar_url||''}')"
+         onclick="showUser('${u.id}','${esc(u.display_name||u.username)}','${u.avatar_color||'var(--orange)'}',${u[ptField]||0},${u.tasks_completed||0},'${esc(u.username)}','${u.top_badge||''}','${esc(u.top_badge_title||'')}',${u.current_streak||0},${u.achievements_count||0},'${u.avatar_url||''}',${u.followers_count||0})""
          style="cursor:pointer">
       <span class="lb-rank">${medals[u.rank-1] || '#'+u.rank}</span>
       <span class="lb-user">
@@ -143,13 +143,15 @@ window.showBoard = (board, btn) => {
   loadBoard(board);
 };
 
-window.showUser = (id, name, color, points, done, username, topBadge, topBadgeTitle, streak, achCount, avatarUrl) => {
+window.showUser = (id, name, color, points, done, username, topBadge, topBadgeTitle, streak, achCount, avatarUrl, followersCount) => {
   const modal = document.getElementById('user-modal');
   const inner = document.getElementById('user-modal-inner');
   const ini = name[0].toUpperCase();
+  const isMe = id === profile.id;
   const badgeHtml = topBadge ? `<div style="font-size:2rem;margin-bottom:4px">${topBadge}</div><div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px">${esc(topBadgeTitle||'Badge')}</div>` : '';
   const streakHtml = streak>=3 ? `<div class="stat-box"><div class="stat-val">&#x1F525;${streak}</div><div class="stat-lbl">Streak</div></div>` : '';
   const achHtml = achCount>0 ? `<div class="stat-box"><div class="stat-val">&#x1F396;${achCount}</div><div class="stat-lbl">Achievements</div></div>` : '';
+  const followersHtml = `<div class="stat-box"><div class="stat-val">${followersCount||0}</div><div class="stat-lbl">Followers</div></div>`;
   const avatarInner = avatarUrl
     ? `<img src="${avatarUrl}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto 14px;display:block" alt="avatar"/>`
     : `<div style="width:80px;height:80px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;color:#fff;margin:0 auto 14px;font-family:'Space Grotesk',sans-serif">${ini}</div>`;
@@ -158,14 +160,38 @@ window.showUser = (id, name, color, points, done, username, topBadge, topBadgeTi
     ${badgeHtml}
     <div style="font-size:1.3rem;font-weight:700;font-family:'Space Grotesk',sans-serif">${esc(name)}</div>
     <div style="color:var(--muted);font-size:0.85rem;margin-bottom:16px">@${esc(username)}</div>
-    <div class="stat-grid" style="justify-content:center;margin-bottom:20px">
+    <div class="stat-grid" style="justify-content:center;margin-bottom:16px">
       <div class="stat-box"><div class="stat-val">${points.toLocaleString()}</div><div class="stat-lbl">Points</div></div>
       <div class="stat-box"><div class="stat-val">${done}</div><div class="stat-lbl">Done</div></div>
-      ${streakHtml}${achHtml}
+      ${followersHtml}${streakHtml}${achHtml}
     </div>
+    ${!isMe ? `<button class="btn btn-primary btn-full" id="follow-btn-modal" onclick="toggleFollow('${id}',this)" style="margin-bottom:8px">Loading…</button>` : ''}
     <button class="btn btn-ghost btn-full" onclick="closeUserModal()">Close</button>`;
   modal.style.display = 'flex';
   modal.classList.add('open');
+  if (!isMe) loadFollowState('${id}');
+};
+
+async function loadFollowState(userId) {
+  const btn = document.getElementById('follow-btn-modal');
+  if (!btn) return;
+  const { data } = await supabase.rpc('get_follow_stats', { p_user_id: userId });
+  if (!data) return;
+  btn.textContent = data.is_following ? '✓ Following' : '+ Follow';
+  btn.style.background = data.is_following ? 'var(--surface2)' : '';
+}
+
+window.toggleFollow = async (userId, btn) => {
+  const isFollowing = btn.textContent.includes('Following');
+  btn.disabled = true;
+  if (isFollowing) {
+    await supabase.rpc('unfollow_user', { p_target_id: userId });
+    btn.textContent = '+ Follow'; btn.style.background = '';
+  } else {
+    await supabase.rpc('follow_user', { p_target_id: userId });
+    btn.textContent = '✓ Following'; btn.style.background = 'var(--surface2)';
+  }
+  btn.disabled = false;
 };
 
 window.closeUserModal = () => {

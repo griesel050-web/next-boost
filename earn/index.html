@@ -21,7 +21,14 @@
 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:6px">
   <div><h1 class="page-title">Earn Points</h1><p class="page-sub">Complete tasks to earn points after the 30s timer.</p></div>
 </div>
-<div class="filter-dropdowns">
+
+<!-- Feed tabs -->
+<div style="display:flex;gap:4px;margin-bottom:16px;background:var(--surface2);border-radius:var(--radius);padding:4px;width:fit-content">
+  <button id="tab-all" onclick="switchFeedTab('all')" class="btn btn-primary btn-sm" style="border-radius:calc(var(--radius) - 4px)">🌐 All tasks</button>
+  <button id="tab-following" onclick="switchFeedTab('following')" class="btn btn-ghost btn-sm" style="border-radius:calc(var(--radius) - 4px)">👥 Following</button>
+</div>
+
+<div class="filter-dropdowns" id="filter-bar">
   <select class="filter-select" id="filter-platform" onchange="applyFilters()">
     <option value="all">All Platforms</option>
     <option value="tiktok">🎵 TikTok</option>
@@ -181,6 +188,46 @@ function prettyTarget(url, platform) {
   const handle = prettyHandle(url, platform);
   return `${name} — ${handle}`;
 }
+let currentFeedTab = 'all';
+
+window.switchFeedTab = async (tab) => {
+  currentFeedTab = tab;
+  document.getElementById('tab-all').className = tab==='all' ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm';
+  document.getElementById('tab-following').className = tab==='following' ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm';
+  document.getElementById('filter-bar').style.display = tab==='all' ? '' : 'none';
+
+  if (tab === 'following') {
+    const feed = document.getElementById('earn-feed');
+    feed.innerHTML = '<div class="spinner"></div>';
+    const { data, error } = await supabase.rpc('get_following_tasks', { p_limit: 50 });
+    if (error) { feed.innerHTML = `<div class="empty-state"><p>${error.message}</p></div>`; return; }
+    if (!data || !data.length) {
+      feed.innerHTML = `<div class="empty-state"><div class="empty-icon">👥</div><p>No tasks from people you follow yet.<br/><span style="font-size:0.82rem;color:var(--muted)">Follow creators on the <a href="/leaderboard/" style="color:var(--orange)">leaderboard</a> to see their tasks here.</span></p></div>`;
+      return;
+    }
+    feed.innerHTML = '';
+    data.forEach(t => {
+      const card = document.createElement('div');
+      card.className = 'task-card';
+      const platLabel = (PLAT_NAMES[t.platform]||t.platform) + ' — ' + prettyHandle(t.target, t.platform);
+      card.innerHTML = `
+        <div class="task-plat-icon ${PC[t.platform]||'plat-website'}"></div>
+        <div class="task-info">
+          <h4>${esc(platLabel)}</h4>
+          <p>${esc(TL[t.type]||t.type)} · by <span style="color:var(--text)">${esc(t.owner_display_name||t.owner_username||'Unknown')}</span></p>
+        </div>
+        <div class="task-actions">
+          <span class="type-badge">${esc(TL[t.type]||t.type)}</span>
+          <span class="pts-badge">+${t.points_reward} pts</span>
+          <button class="btn btn-primary btn-sm" onclick="window.openTask('${t.task_id}')">Start ↗</button>
+        </div>`;
+      feed.appendChild(card);
+    });
+  } else {
+    await load(true);
+  }
+};
+
 window.applyFilters=()=>{
   const plat=document.getElementById('filter-platform').value;
   const type=document.getElementById('filter-type').value;
