@@ -181,8 +181,62 @@ function buildTaskCard(t, i) {
         <div class="alert alert-error" style="font-size:0.8rem;margin-top:12px">
           ⚠️ High average cheat score. Some completions may be low-quality or automated.
         </div>` : ''}
+
+      <!-- AUTO-REFILL -->
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.82rem;color:var(--muted)">
+          <input type="checkbox" class="refill-toggle" data-task="${t.task_id}"
+            ${t.auto_refill ? 'checked' : ''}
+            onchange="toggleRefill('${t.task_id}', this)"
+            style="accent-color:var(--orange);width:15px;height:15px"/>
+          <span style="color:var(--text);font-weight:600">♻️ Auto-refill slots when full</span>
+        </label>
+        <div style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:var(--muted)">
+          <span>Refill</span>
+          <input type="number" class="refill-slots" data-task="${t.task_id}"
+            value="${t.auto_refill_slots || 10}" min="1" max="100"
+            onchange="updateRefillSlots('${t.task_id}', this)"
+            style="width:52px;padding:3px 6px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:0.82rem;text-align:center"/>
+          <span>slots (costs ${t.points_reward} pts each)</span>
+        </div>
+        <div class="refill-status" id="rs-${t.task_id}" style="font-size:0.78rem;color:var(--green);min-height:16px"></div>
+      </div>
     </div>`;
 }
+
+window.toggleRefill = async (taskId, checkbox) => {
+  const slots = parseInt(document.querySelector(`.refill-slots[data-task="${taskId}"]`)?.value || 10);
+  const statusEl = document.getElementById(`rs-${taskId}`);
+  const { data, error } = await supabase.rpc('toggle_auto_refill', {
+    p_task_id: taskId, p_enabled: checkbox.checked, p_slots: slots
+  });
+  if (error || data?.error) {
+    if (statusEl) { statusEl.style.color = 'var(--red,#f87171)'; statusEl.textContent = data?.error || error.message; }
+    checkbox.checked = !checkbox.checked;
+    return;
+  }
+  if (statusEl) {
+    statusEl.style.color = 'var(--green)';
+    statusEl.textContent = checkbox.checked ? `✅ Auto-refill on — will add ${slots} slots when full` : 'Auto-refill off';
+    setTimeout(() => { statusEl.textContent = ''; }, 4000);
+  }
+};
+
+window.updateRefillSlots = async (taskId, input) => {
+  const slots = Math.max(1, Math.min(100, parseInt(input.value) || 10));
+  input.value = slots;
+  const checkbox = document.querySelector(`.refill-toggle[data-task="${taskId}"]`);
+  if (!checkbox?.checked) return; // only save if already enabled
+  const statusEl = document.getElementById(`rs-${taskId}`);
+  const { data, error } = await supabase.rpc('toggle_auto_refill', {
+    p_task_id: taskId, p_enabled: true, p_slots: slots
+  });
+  if (!error && !data?.error && statusEl) {
+    statusEl.style.color = 'var(--green)';
+    statusEl.textContent = `✅ Saved — ${slots} slots on refill`;
+    setTimeout(() => { statusEl.textContent = ''; }, 3000);
+  }
+};
 
 // ---- COMMENTS ----
 window.openComments = async (taskId, target) => {

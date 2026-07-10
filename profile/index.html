@@ -231,6 +231,7 @@ function renderProfile(email) {
         <div class="stat-box"><div class="stat-val">${profile.streak||0}🔥</div><div class="stat-lbl">Streak</div></div>
         <div class="stat-box" id="followers-box"><div class="stat-val" id="followers-count">—</div><div class="stat-lbl">Followers</div></div>
         <div class="stat-box" id="following-box"><div class="stat-val" id="following-count">—</div><div class="stat-lbl">Following</div></div>
+        <div class="stat-box"><div class="stat-val" id="completion-rate-val">—</div><div class="stat-lbl">Completion rate</div></div>
         <div class="stat-box"><div class="stat-val" style="color:${repColor}">${rep}</div><div class="stat-lbl">Reputation</div></div>
       </div>
     </div>
@@ -257,6 +258,17 @@ function renderProfile(email) {
     const fgc = document.getElementById('following-count');
     if (fc) fc.textContent = data.followers.toLocaleString();
     if (fgc) fgc.textContent = data.following.toLocaleString();
+  });
+
+  // Load completion rate
+  supabase.rpc('get_completion_rate', { p_user_id: profile.id }).then(({ data }) => {
+    const el = document.getElementById('completion-rate-val');
+    if (!el) return;
+    if (!data || data.started === 0) { el.textContent = 'N/A'; return; }
+    const pct = data.rate_pct;
+    el.textContent = pct + '%';
+    el.style.color = pct >= 80 ? 'var(--green)' : pct >= 50 ? '#f59e0b' : 'var(--red, #f87171)';
+    el.title = `${data.completed} approved of ${data.started} started`;
   });
 }
 

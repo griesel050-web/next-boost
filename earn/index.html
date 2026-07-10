@@ -165,9 +165,27 @@ function render(reset=true){
         <span class="pts-badge">+${t.points_reward} pts</span>
         <span class="slots-badge">${sl}/${t.max_completions}</span>
         ${action}
+        <button class="btn btn-ghost btn-sm" title="Comments" onclick="window.openEarnComments('${t.id}','${esc(prettyTarget(t.target,t.platform))}')" style="padding:4px 8px;font-size:0.75rem;min-width:0">💬 <span id="cc-${t.id}">…</span></button>
         <button class="btn-report" title="Report" onclick="window.openReport('${t.id}')">⚑</button>
       </div>`;
     feed.appendChild(card);
+  });
+  // Load comment counts asynchronously
+  loadCommentCounts(slice.map(t => t.id));
+}
+
+async function loadCommentCounts(taskIds) {
+  if (!taskIds.length) return;
+  const { data } = await supabase
+    .from('task_comments')
+    .select('task_id')
+    .in('task_id', taskIds)
+    .eq('is_owner_note', false);
+  const counts = {};
+  (data||[]).forEach(r => { counts[r.task_id] = (counts[r.task_id]||0) + 1; });
+  taskIds.forEach(id => {
+    const el = document.getElementById(`cc-${id}`);
+    if (el) el.textContent = counts[id] || 0;
   });
 }
 

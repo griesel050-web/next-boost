@@ -252,50 +252,38 @@
     const { data: { session } } = await supabase.auth.getSession();
     if (session) { go('/earn/'); }
 
-    // Live stats
+    // Live stats via dedicated RPC
     async function loadLiveStats() {
       try {
-        const [{ count: members }, { count: tasks }] = await Promise.all([
-          supabase.from('profiles').select('*', { count: 'exact', head: true }),
-          supabase.from('completions').select('*', { count: 'exact', head: true }).eq('status','approved'),
-        ]);
+        const { data } = await supabase.rpc('get_live_stats');
+        if (!data) return;
         const fmt = n => n >= 1000 ? (n/1000).toFixed(1).replace(/\.0$/,'') + 'k' : String(n||0);
-        if (members != null) document.getElementById('live-members').textContent = fmt(members);
-        if (tasks != null) document.getElementById('live-tasks').textContent = fmt(tasks);
-      } catch(e) {
-        document.getElementById('live-members').textContent = '—';
-      }
+        document.getElementById('live-members').textContent = fmt(data.total_users);
+        document.getElementById('live-tasks').textContent   = fmt(data.tasks_completed);
+      } catch(e) {}
     }
 
-    // Social proof ticker
+    // Social proof ticker via dedicated RPC
     const PLAT_EMOJIS = { tiktok:'🎵', instagram:'📸', youtube:'▶️', discord:'💬', twitch:'🟣', twitter:'🐦', website:'🌐' };
-    const TYPE_VERBS = { follow:'followed', like:'liked', view:'watched', join:'joined', retweet:'retweeted', website:'visited' };
+    const TYPE_VERBS  = { follow:'followed', like:'liked', view:'watched', join:'joined', retweet:'retweeted', website:'visited' };
     async function loadSocialProof() {
       try {
-        const { data } = await supabase.from('completions')
-          .select('created_at, tasks(platform, type, target), profiles!completions_user_id_fkey(display_name, username)')
-          .eq('status','approved')
-          .order('created_at', { ascending: false })
-          .limit(20);
+        const { data } = await supabase.rpc('get_recent_activity', { p_limit: 20 });
         if (!data || !data.length) return;
-        const items = data.map(c => {
-          const plat = c.tasks?.platform || 'website';
-          const type = c.tasks?.type || 'follow';
-          const user = c.profiles?.display_name || c.profiles?.username || 'Someone';
-          const emoji = PLAT_EMOJIS[plat] || '✨';
-          const verb = TYPE_VERBS[type] || 'completed';
-          const ago = Math.max(1, Math.round((Date.now() - new Date(c.created_at)) / 60000));
+        const items = data.map(a => {
+          const user   = a.display_name || a.username || 'Someone';
+          const emoji  = a.type === 'joined' ? '🎉' : (PLAT_EMOJIS[a.platform] || '✨');
+          const action = a.type === 'joined' ? 'joined Next Boost' : `${TYPE_VERBS[a.type]||'completed a task'} +${a.pts}pts`;
+          const ago    = Math.max(1, Math.round((Date.now() - new Date(a.happened_at)) / 60000));
           const agoStr = ago < 60 ? `${ago}m ago` : `${Math.round(ago/60)}h ago`;
-          return `<span style="display:inline-flex;align-items:center;gap:6px;font-size:0.76rem;color:var(--muted);flex-shrink:0">${emoji} <strong style="color:var(--text)">${user}</strong> ${verb} · ${agoStr}</span>`;
+          return `<span style="display:inline-flex;align-items:center;gap:6px;font-size:0.76rem;color:var(--muted);flex-shrink:0">${emoji} <strong style="color:var(--text)">${user}</strong> ${action} · ${agoStr}</span>`;
         });
-        // Double for seamless loop
         const track = document.getElementById('proof-track');
-        const html = [...items,...items].join('<span style="color:var(--border2);margin:0 4px">·</span>');
+        const html  = [...items, ...items].join('<span style="color:var(--border2);margin:0 8px">·</span>');
         track.innerHTML = html;
-        // Adjust animation speed based on content width
         const tw = track.scrollWidth / 2;
         track.style.animationDuration = Math.max(20, tw / 40) + 's';
-      } catch(e) { /* silent */ }
+      } catch(e) {}
     }
 
     loadLiveStats();

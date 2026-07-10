@@ -43,8 +43,4 @@ include:
 plugins: []
 
 # Serve XML with correct content type
-defaults:
-  - scope:
-      path: "sitemap.xml"
-    values:
-      layout: null
+defaults: []
