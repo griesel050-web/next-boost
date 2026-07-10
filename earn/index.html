@@ -9,7 +9,8 @@
   <link rel="manifest" href="/manifest.json"/><meta name="theme-color" content="#E8621A"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
-  <link rel="icon" href="/assets/img/favicon.svg?v=2" type="image/svg+xml"/>
+  <link rel="icon" href="/assets/img/favicon.svg?v=3" type="image/svg+xml"/>
+  <link rel="shortcut icon" href="/assets/img/logo.png" type="image/png"/>
   <link rel="stylesheet" href="/assets/css/main.css"/>
   <link rel="stylesheet" href="/assets/css/app.css"/>
 </head>
@@ -230,23 +231,55 @@ window.switchFeedTab = async (tab) => {
       return;
     }
     feed.innerHTML = '';
+    const taskIds = [];
     data.forEach(t => {
+      // Remap to shape expected by shared card renderer
+      t.id = t.task_id;
+      t.owner_display_name = t.owner_display_name;
+      t.owner_username     = t.owner_username;
+      t.owner_trust_score  = t.owner_trust_score || 0;
+      t.owner_is_verified  = t.owner_is_verified || false;
+
+      // Build action button — same logic as main feed
+      const sl = t.completions_count || 0;
+      const exp = Math.max(0, Math.ceil((new Date(t.expires_at) - Date.now()) / 86400000));
+      let action;
+      if (t.already_completed) {
+        action = `<button class="btn btn-ghost btn-sm" disabled style="opacity:0.5;cursor:default">✓ Done</button>`;
+      } else if ((t.max_completions - sl) <= 0) {
+        action = `<button class="btn btn-ghost btn-sm" disabled style="opacity:0.5">Full</button>`;
+      } else {
+        action = `<button class="btn btn-primary btn-sm" onclick="window.openTask('${t.task_id}')">Start ↗</button>`;
+      }
+
+      // Trust + verified badges
+      const ts = t.owner_trust_score || 0;
+      const tsColor = ts >= 80 ? '#4ade80' : ts >= 50 ? '#f59e0b' : '#94a3b8';
+      const trustHtml = ts > 0 ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.7rem;color:${tsColor};background:${tsColor}1a;border:1px solid ${tsColor}33;border-radius:999px;padding:1px 6px;font-weight:600" title="Creator Trust Score">🛡 ${ts}</span>` : '';
+      const verifiedHtml = t.owner_is_verified ? `<span style="font-size:0.72rem;color:#60a5fa;background:#60a5fa1a;border:1px solid #60a5fa33;border-radius:999px;padding:1px 6px;font-weight:600">✓ Verified</span>` : '';
+
       const card = document.createElement('div');
-      card.className = 'task-card';
-      const platLabel = (PLAT_NAMES[t.platform]||t.platform) + ' — ' + prettyHandle(t.target, t.platform);
+      card.className = 'task-card card-animate';
+      card.dataset.id = t.task_id;
       card.innerHTML = `
         <div class="task-plat-icon ${PC[t.platform]||'plat-website'}"></div>
         <div class="task-info">
-          <h4>${esc(platLabel)}</h4>
-          <p>${esc(TL[t.type]||t.type)} · by <span style="color:var(--text)">${esc(t.owner_display_name||t.owner_username||'Unknown')}</span></p>
+          <h4>${esc(prettyTarget(t.target, t.platform))}${t.is_boosted ? ' <span class="boost-badge">⚡ Boosted</span>' : ''}</h4>
+          <p>${esc(TL[t.type]||t.type)} · by <span style="color:var(--text)">${esc(t.owner_display_name||t.owner_username||'Unknown')}</span>${verifiedHtml?' '+verifiedHtml:''} · <span class="expiry-label">${exp}d left</span></p>
+          ${trustHtml ? `<div style="margin-top:5px">${trustHtml}</div>` : ''}
         </div>
         <div class="task-actions">
-          <span class="type-badge">${esc(TL[t.type]||t.type)}</span>
+          <span class="type-badge type-${t.type}">${TL[t.type]||t.type}</span>
           <span class="pts-badge">+${t.points_reward} pts</span>
-          <button class="btn btn-primary btn-sm" onclick="window.openTask('${t.task_id}')">Start ↗</button>
+          <span class="slots-badge">${sl}/${t.max_completions}</span>
+          ${action}
+          <button class="btn btn-ghost btn-sm" title="Comments" onclick="window.openEarnComments('${t.task_id}','${esc(prettyTarget(t.target,t.platform))}')" style="padding:4px 8px;font-size:0.75rem;min-width:0">💬 <span id="cc-${t.task_id}">…</span></button>
+          <button class="btn-report" title="Report" onclick="window.openReport('${t.task_id}')">⚑</button>
         </div>`;
       feed.appendChild(card);
+      taskIds.push(t.task_id);
     });
+    loadCommentCounts(taskIds);
   } else {
     await load(true);
   }
