@@ -1,11 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <meta charset="UTF-8"/>
-  <meta http-equiv="refresh" content="0;url=/leaderboard/"/>
-  <title>Redirecting…</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Profile — Next Boost</title>
+  <meta name="description" content="View this creator's profile on Next Boost — their stats, badges, active tasks and more."/>
+  <link rel="icon" href="/assets/img/favicon-v3.svg" type="image/svg+xml"/>
+  <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
+  <link rel="stylesheet" href="/assets/css/main.css"/>
+  <link rel="stylesheet" href="/assets/css/app.css"/>
+  <style>
+    .pub-hero {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px 20px;
+      max-width: 580px;
+      margin-bottom: 20px;
+    }
+    .pub-avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; font-weight: 700; color: #fff;
+      font-family: 'Space Grotesk', sans-serif;
+      margin-bottom: 14px; flex-shrink: 0;
+      border: 3px solid var(--border2);
+    }
+    .pub-name { font-size: 1.4rem; font-weight: 700; font-family: 'Space Grotesk', sans-serif; margin-bottom: 2px; }
+    .pub-username { font-size: 0.85rem; color: var(--muted); margin-bottom: 10px; }
+    .pub-bio { font-size: 0.88rem; color: var(--muted2); line-height: 1.55; margin-bottom: 14px; }
+    .pub-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .pub-badge {
+      font-size: 0.72rem; border: 1px solid var(--border2);
+      border-radius: 999px; padding: 2px 10px; font-weight: 600; color: var(--muted);
+    }
+    .pub-stats {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1px; background: var(--border);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      overflow: hidden; margin-bottom: 18px;
+    }
+    .pub-stat {
+      background: var(--surface2); padding: 14px 10px; text-align: center;
+    }
+    .pub-stat-val { font-size: 1.15rem; font-weight: 700; color: var(--orange); font-family: 'Space Grotesk', sans-serif; }
+    .pub-stat-lbl { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 3px; }
+    .pub-task-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 16px;
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 10px; text-decoration: none; color: inherit;
+    }
+    .pub-task-card:hover { border-color: var(--orange); }
+    .pub-section-title { font-size: 0.92rem; font-weight: 700; margin-bottom: 12px; }
+    .pub-ach-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    .pub-ach {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 10px 14px;
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.82rem;
+    }
+    .pub-ach-icon { font-size: 1.4rem; line-height: 1; }
+    @media (max-width: 480px) {
+      .pub-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
 </head>
 <body>
-  <script>window.location.replace('/leaderboard/');</script>
+<nav class="nav" id="main-nav"></nav>
+
+<div class="app-shell" style="padding-top:16px">
+  <div class="page-content" style="max-width:620px;margin:0 auto;padding:0 16px 100px">
+    <div id="pub-root">
+      <!-- Skeleton -->
+      <div class="pub-hero">
+        <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:16px">
+          <div class="skeleton pub-avatar" style="flex-shrink:0"></div>
+          <div style="flex:1;padding-top:8px">
+            <div class="skeleton skeleton-line" style="width:55%;margin-bottom:10px"></div>
+            <div class="skeleton skeleton-line short" style="width:35%;margin-bottom:10px"></div>
+            <div class="skeleton skeleton-line" style="width:80%"></div>
+          </div>
+        </div>
+        <div class="pub-stats">
+          <div class="pub-stat"><div class="skeleton" style="height:20px;border-radius:4px;margin:0 auto;width:40px"></div><div class="skeleton skeleton-line xshort" style="margin:6px auto 0;width:36px"></div></div>
+          <div class="pub-stat"><div class="skeleton" style="height:20px;border-radius:4px;margin:0 auto;width:40px"></div><div class="skeleton skeleton-line xshort" style="margin:6px auto 0;width:36px"></div></div>
+          <div class="pub-stat"><div class="skeleton" style="height:20px;border-radius:4px;margin:0 auto;width:40px"></div><div class="skeleton skeleton-line xshort" style="margin:6px auto 0;width:36px"></div></div>
+          <div class="pub-stat"><div class="skeleton" style="height:20px;border-radius:4px;margin:0 auto;width:40px"></div><div class="skeleton skeleton-line xshort" style="margin:6px auto 0;width:36px"></div></div>
+        </div>
+        <div class="skeleton skeleton-action" style="width:100%;height:38px;border-radius:var(--radius)"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="mobile-nav-bar" id="mobile-nav"></nav>
+
+<script type="module">
+import { supabase, esc, go } from '/assets/js/shared.js';
+import { initApp } from '/assets/js/app.js';
+
+const PC = {
+  tiktok:'plat-tiktok', instagram:'plat-instagram', youtube:'plat-youtube',
+  discord:'plat-discord', twitch:'plat-twitch', twitter:'plat-twitter', website:'plat-website'
+};
+const TL = { follow:'Follow', like:'Like', view:'View', join:'Join', website:'Visit', retweet:'Retweet' };
+const PLAT = { tiktok:'TikTok', instagram:'Instagram', youtube:'YouTube', discord:'Discord', twitch:'Twitch', twitter:'Twitter/X', website:'Website' };
+
+// Get username from URL: /u/username or ?u=username
+function getUsernameFromUrl() {
+  const path = window.location.pathname; // /u/username
+  const parts = path.split('/').filter(Boolean);
+  if (parts[0] === 'u' && parts[1]) return decodeURIComponent(parts[1]);
+  return new URLSearchParams(location.search).get('u') || null;
+}
+
+async function main() {
+  // Init nav (works even for guests — initApp handles no-session gracefully)
+  const ctx = await initApp('u').catch(() => null);
+  const username = getUsernameFromUrl();
+
+  if (!username) {
+    document.getElementById('pub-root').innerHTML = `
+      <div class="empty-state"><div class="empty-icon">🔍</div>
+      <p>No username specified.</p>
+      <div class="empty-cta"><a href="/leaderboard/" class="btn btn-primary btn-sm">Browse creators</a></div></div>`;
+    return;
+  }
+
+  const { data: p, error } = await supabase.rpc('get_user_profile', { p_username: username });
+
+  if (error || !p) {
+    document.getElementById('pub-root').innerHTML = `
+      <div class="empty-state"><div class="empty-icon">👤</div>
+      <p>User <strong>@${esc(username)}</strong> not found.</p>
+      <div class="empty-cta"><a href="/leaderboard/" class="btn btn-primary btn-sm">Browse creators</a></div></div>`;
+    return;
+  }
+
+  // Update page title + OG
+  document.title = `${p.display_name || p.username} (@${p.username}) — Next Boost`;
+
+  // Avatar
+  const ini = (p.display_name || p.username || '?')[0].toUpperCase();
+  const avatarHtml = p.avatar_url
+    ? `<img src="${p.avatar_url}" loading="lazy" decoding="async" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--border2)" alt="${esc(p.display_name||p.username)}"/>`
+    : `<div class="pub-avatar" style="background:${p.avatar_color||'var(--orange)'}">${ini}</div>`;
+
+  // Badges
+  const badges = [];
+  if (p.is_verified) badges.push(`<span class="pub-badge" style="color:#60a5fa;border-color:#60a5fa44">✓ Verified Creator</span>`);
+  const ts = p.trust_score || 0;
+  if (ts > 0) {
+    const tc = ts >= 80 ? '#4ade80' : ts >= 50 ? '#f59e0b' : '#94a3b8';
+    badges.push(`<span class="pub-badge" style="color:${tc};border-color:${tc}44">🛡 Trust ${ts}/100</span>`);
+  }
+  if ((p.streak||0) >= 7) badges.push(`<span class="pub-badge">🔥 ${p.streak}d streak</span>`);
+  if (p.rank)            badges.push(`<span class="pub-badge">🏆 Rank #${p.rank}</span>`);
+
+  // Follow button state
+  const isOwn    = p.is_own_profile;
+  const isFollow = p.viewer_is_following;
+  let followBtn = '';
+  if (!isOwn) {
+    followBtn = `<button id="pub-follow-btn" class="btn ${isFollow ? 'btn-ghost' : 'btn-primary'} btn-full" onclick="toggleFollow('${p.id}',this)">
+      ${isFollow ? '✓ Following' : '+ Follow'}
+    </button>`;
+  } else {
+    followBtn = `<a href="/profile/" class="btn btn-ghost btn-full">Edit my profile →</a>`;
+  }
+
+  // Active tasks
+  const tasks = p.active_tasks || [];
+  const tasksHtml = tasks.length ? `
+    <div class="pub-section-title">Active tasks (${tasks.length})</div>
+    ${tasks.map(t => {
+      const slots = t.max_completions - t.completions_count;
+      return `<div class="pub-task-card">
+        <div class="task-plat-icon ${PC[t.platform]||'plat-website'}"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:0.88rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(PLAT[t.platform]||t.platform)}</div>
+          <div style="font-size:0.76rem;color:var(--muted)">${TL[t.type]||t.type} · ${slots} slots left</div>
+        </div>
+        <span class="pts-badge">+${t.points_reward} pts</span>
+        ${!isOwn ? `<a href="/earn/" class="btn btn-primary btn-sm" style="font-size:0.75rem;padding:4px 10px">Start ↗</a>` : ''}
+      </div>`;
+    }).join('')}` : '';
+
+  // Achievements
+  const achs = p.achievements || [];
+  const achsHtml = achs.length ? `
+    <div class="pub-section-title">Achievements (${achs.length})</div>
+    <div class="pub-ach-grid">
+      ${achs.map(a => `<div class="pub-ach" title="${esc(a.description||a.title)}">
+        <span class="pub-ach-icon">${a.icon||'🎖'}</span>
+        <span>${esc(a.title)}</span>
+      </div>`).join('')}
+    </div>` : '';
+
+  // Joined date
+  const joined = p.created_at ? new Date(p.created_at).toLocaleDateString('en-US',{month:'long',year:'numeric'}) : '';
+
+  document.getElementById('pub-root').innerHTML = `
+    <div class="pub-hero">
+      <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:4px">
+        ${avatarHtml}
+        <div style="flex:1;min-width:0">
+          <div class="pub-name">${esc(p.display_name||p.username)}</div>
+          <div class="pub-username">@${esc(p.username)}${joined ? ` · Joined ${joined}` : ''}</div>
+          ${p.bio ? `<div class="pub-bio">${esc(p.bio)}</div>` : ''}
+          ${badges.length ? `<div class="pub-badges">${badges.join('')}</div>` : ''}
+        </div>
+      </div>
+
+      <div class="pub-stats">
+        <div class="pub-stat"><div class="pub-stat-val">${(p.points||0).toLocaleString()}</div><div class="pub-stat-lbl">Points</div></div>
+        <div class="pub-stat"><div class="pub-stat-val">${p.tasks_completed||0}</div><div class="pub-stat-lbl">Done</div></div>
+        <div class="pub-stat"><div class="pub-stat-val">${p.followers_count||0}</div><div class="pub-stat-lbl">Followers</div></div>
+        <div class="pub-stat"><div class="pub-stat-val">${p.streak||0}🔥</div><div class="pub-stat-lbl">Streak</div></div>
+      </div>
+
+      ${followBtn}
+    </div>
+
+    ${tasksHtml ? `<div style="max-width:580px">${tasksHtml}</div>` : ''}
+    ${achsHtml  ? `<div style="max-width:580px">${achsHtml}</div>`  : ''}
+    ${!tasksHtml && !achsHtml ? `<div class="empty-state" style="margin-top:8px"><div class="empty-icon">🌱</div><p>This creator is just getting started.</p></div>` : ''}
+  `;
+}
+
+window.toggleFollow = async (userId, btn) => {
+  const isFollowing = btn.textContent.trim().startsWith('✓');
+  btn.disabled = true; btn.textContent = '…';
+  if (isFollowing) {
+    await supabase.rpc('unfollow_user', { p_target_id: userId });
+    btn.textContent = '+ Follow'; btn.className = 'btn btn-primary btn-full';
+  } else {
+    await supabase.rpc('follow_user', { p_target_id: userId });
+    btn.textContent = '✓ Following'; btn.className = 'btn btn-ghost btn-full';
+  }
+  btn.disabled = false;
+};
+
+main();
+</script>
 </body>
 </html>

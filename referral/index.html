@@ -2,15 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Referral — Next Boost</title><meta name="robots" content="noindex"/>
+  <title>Referral Program — Next Boost</title><meta name="robots" content="noindex"/>
   
   <link rel="preconnect" href="https://slufbzzfofzptwjefzmu.supabase.co"/>
   <link rel="dns-prefetch" href="https://slufbzzfofzptwjefzmu.supabase.co"/>
   <link rel="manifest" href="/manifest.json"/><meta name="theme-color" content="#E8621A"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
-  <link rel="icon" href="/assets/img/favicon.svg?v=3" type="image/svg+xml"/>
-  <link rel="shortcut icon" href="/assets/img/logo.png" type="image/png"/>
   <link rel="stylesheet" href="/assets/css/main.css"/>
   <link rel="stylesheet" href="/assets/css/app.css"/>
   <style>
@@ -33,6 +30,8 @@
     .progress-bar-wrap{background:var(--surface3);border-radius:999px;height:8px;margin:8px 0 4px;overflow:hidden}
     .progress-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--orange-lt));transition:width .4s}
   </style>
+  <link rel="icon" href="/assets/img/favicon-v3.svg" type="image/svg+xml"/>
+  <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
 </head>
 <body>
 <nav class="nav" id="main-nav"></nav>
@@ -92,16 +91,20 @@
       </div>
 
       <div style="display:flex;gap:16px;margin-top:20px;flex-wrap:wrap">
-        <div class="stat-box" style="flex:1;min-width:80px"><div class="stat-val" id="ref-l1">0</div><div class="stat-lbl">L1 referred</div></div>
-        <div class="stat-box" style="flex:1;min-width:80px"><div class="stat-val" id="ref-l2">0</div><div class="stat-lbl">L2 referred</div></div>
-        <div class="stat-box" style="flex:1;min-width:80px"><div class="stat-val" id="ref-earned">0</div><div class="stat-lbl">Pts earned</div></div>
+        <div class="stat-box" style="flex:1;min-width:80px"><div class="stat-val" id="ref-l1"><span class="skeleton" style="display:inline-block;width:24px;height:18px;border-radius:4px"></span></div><div class="stat-lbl">L1 referred</div></div>
+        <div class="stat-box" style="flex:1;min-width:80px"><div class="stat-val" id="ref-l2"><span class="skeleton" style="display:inline-block;width:24px;height:18px;border-radius:4px"></span></div><div class="stat-lbl">L2 referred</div></div>
+        <div class="stat-box" style="flex:1;min-width:80px"><div class="stat-val" id="ref-earned"><span class="skeleton" style="display:inline-block;width:32px;height:18px;border-radius:4px"></span></div><div class="stat-lbl">Pts earned</div></div>
       </div>
     </div>
 
     <!-- Referral tree -->
     <div class="card card-pad" style="max-width:540px;margin-bottom:20px">
       <h3 style="font-size:0.95rem;margin-bottom:12px">Your referral network</h3>
-      <div id="ref-tree-wrap"><div class="spinner"></div></div>
+      <div id="ref-tree-wrap"><div style="display:flex;flex-direction:column;gap:10px">
+  <div class="skeleton-row" style="border-radius:8px;border:1px solid var(--border)"><div class="skeleton skeleton-rank"></div><div class="skeleton-lines"><div class="skeleton skeleton-line short"></div></div><div class="skeleton skeleton-action" style="margin-left:auto;width:48px"></div></div>
+  <div class="skeleton-row" style="border-radius:8px;border:1px solid var(--border);padding-left:32px"><div class="skeleton skeleton-rank"></div><div class="skeleton-lines"><div class="skeleton skeleton-line short"></div></div><div class="skeleton skeleton-action" style="margin-left:auto;width:48px"></div></div>
+  <div class="skeleton-row" style="border-radius:8px;border:1px solid var(--border)"><div class="skeleton skeleton-rank"></div><div class="skeleton-lines"><div class="skeleton skeleton-line short"></div></div><div class="skeleton skeleton-action" style="margin-left:auto;width:48px"></div></div>
+</div></div>
     </div>
 
     <!-- Apply a code -->

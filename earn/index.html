@@ -8,11 +8,10 @@
   <link rel="dns-prefetch" href="https://slufbzzfofzptwjefzmu.supabase.co"/>
   <link rel="manifest" href="/manifest.json"/><meta name="theme-color" content="#E8621A"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
-  <link rel="icon" href="/assets/img/favicon.svg?v=3" type="image/svg+xml"/>
-  <link rel="shortcut icon" href="/assets/img/logo.png" type="image/png"/>
   <link rel="stylesheet" href="/assets/css/main.css"/>
   <link rel="stylesheet" href="/assets/css/app.css"/>
+  <link rel="icon" href="/assets/img/favicon-v3.svg" type="image/svg+xml"/>
+  <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
 </head>
 <body>
 <nav class="nav" id="main-nav"></nav>
@@ -223,7 +222,42 @@ window.switchFeedTab = async (tab) => {
 
   if (tab === 'following') {
     const feed = document.getElementById('earn-feed');
-    feed.innerHTML = '<div class="spinner"></div>';
+    feed.innerHTML = `<div class="skeleton-card">
+      <div class="skeleton skeleton-icon"></div>
+      <div class="skeleton-lines">
+        <div class="skeleton skeleton-line"></div>
+        <div class="skeleton skeleton-line short"></div>
+      </div>
+      <div class="skeleton skeleton-action"></div>
+    </div><div class="skeleton-card">
+      <div class="skeleton skeleton-icon"></div>
+      <div class="skeleton-lines">
+        <div class="skeleton skeleton-line"></div>
+        <div class="skeleton skeleton-line short"></div>
+      </div>
+      <div class="skeleton skeleton-action"></div>
+    </div><div class="skeleton-card">
+      <div class="skeleton skeleton-icon"></div>
+      <div class="skeleton-lines">
+        <div class="skeleton skeleton-line"></div>
+        <div class="skeleton skeleton-line short"></div>
+      </div>
+      <div class="skeleton skeleton-action"></div>
+    </div><div class="skeleton-card">
+      <div class="skeleton skeleton-icon"></div>
+      <div class="skeleton-lines">
+        <div class="skeleton skeleton-line"></div>
+        <div class="skeleton skeleton-line short"></div>
+      </div>
+      <div class="skeleton skeleton-action"></div>
+    </div><div class="skeleton-card">
+      <div class="skeleton skeleton-icon"></div>
+      <div class="skeleton-lines">
+        <div class="skeleton skeleton-line"></div>
+        <div class="skeleton skeleton-line short"></div>
+      </div>
+      <div class="skeleton skeleton-action"></div>
+    </div>`;
     const { data, error } = await supabase.rpc('get_following_tasks', { p_limit: 50 });
     if (error) { feed.innerHTML = `<div class="empty-state"><p>${error.message}</p></div>`; return; }
     if (!data || !data.length) {
@@ -265,7 +299,7 @@ window.switchFeedTab = async (tab) => {
         <div class="task-plat-icon ${PC[t.platform]||'plat-website'}"></div>
         <div class="task-info">
           <h4>${esc(prettyTarget(t.target, t.platform))}${t.is_boosted ? ' <span class="boost-badge">⚡ Boosted</span>' : ''}</h4>
-          <p>${esc(TL[t.type]||t.type)} · by <span style="color:var(--text)">${esc(t.owner_display_name||t.owner_username||'Unknown')}</span>${verifiedHtml?' '+verifiedHtml:''} · <span class="expiry-label">${exp}d left</span></p>
+          <p>${esc(TL[t.type]||t.type)} · by <a href="/u/${encodeURIComponent(t.owner_username||'')}" style="color:var(--text);text-decoration:none;font-weight:600" onmouseover="this.style.color='var(--orange)'" onmouseout="this.style.color='var(--text)'">${esc(t.owner_display_name||t.owner_username||'Unknown')}</a>${verifiedHtml?' '+verifiedHtml:''} · <span class="expiry-label">${exp}d left</span></p>
           ${trustHtml ? `<div style="margin-top:5px">${trustHtml}</div>` : ''}
         </div>
         <div class="task-actions">

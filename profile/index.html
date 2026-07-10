@@ -2,15 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Profile — Next Boost</title><meta name="robots" content="noindex"/>
+  <title>My Profile — Next Boost</title><meta name="robots" content="noindex"/>
   
   <link rel="preconnect" href="https://slufbzzfofzptwjefzmu.supabase.co"/>
   <link rel="dns-prefetch" href="https://slufbzzfofzptwjefzmu.supabase.co"/>
   <link rel="manifest" href="/manifest.json"/><meta name="theme-color" content="#E8621A"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
-  <link rel="icon" href="/assets/img/favicon.svg?v=3" type="image/svg+xml"/>
-  <link rel="shortcut icon" href="/assets/img/logo.png" type="image/png"/>
   <link rel="stylesheet" href="/assets/css/main.css"/>
   <link rel="stylesheet" href="/assets/css/app.css"/>
   <style>
@@ -106,6 +103,8 @@
       margin-top: 16px; display: inline-flex; align-items: center; gap: 6px;
     }
   </style>
+  <link rel="icon" href="/assets/img/favicon-v3.svg" type="image/svg+xml"/>
+  <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
 </head>
 <body>
 <nav class="nav" id="main-nav"></nav>
@@ -196,7 +195,7 @@ function renderProfile(email) {
   const wrap = document.getElementById('profile-content');
 
   const avatarHtml = profile.avatar_url
-    ? `<img src="${profile.avatar_url}" style="width:100%;height:100%;object-fit:cover" alt="avatar"/>`
+    ? `<img src="${profile.avatar_url}" style="width:100%;height:100%;object-fit:cover" alt="avatar" decoding="async"/>`
     : `<span>${ini}</span>`;
   const avatarBg = profile.avatar_url ? '#000' : (profile.avatar_color || '#E8621A');
 
@@ -235,6 +234,27 @@ function renderProfile(email) {
         <div class="stat-box"><div class="stat-val" id="completion-rate-val">—</div><div class="stat-lbl">Completion rate</div></div>
         <div class="stat-box"><div class="stat-val" style="color:${repColor}">${rep}</div><div class="stat-lbl">Reputation</div></div>
       </div>
+    </div>
+
+    <!-- STREAK FREEZE CARD -->
+    <div class="card card-pad" style="margin-bottom:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div>
+          <h3 style="font-size:0.95rem;margin:0 0 4px">🧊 Streak Freeze</h3>
+          <p style="font-size:0.8rem;color:var(--muted);margin:0">Miss a day without losing your streak. Uses automatically if you forget to complete a task.</p>
+        </div>
+        <div style="text-align:center;flex-shrink:0;margin-left:16px">
+          <div style="font-size:2rem;font-weight:700;font-family:'Space Grotesk',sans-serif;color:var(--orange)" id="freeze-count">${profile.streak_freezes||0}</div>
+          <div style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em">Freezes</div>
+        </div>
+      </div>
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div style="font-size:0.82rem;color:var(--muted)">Buy more:</div>
+        <button class="btn btn-ghost btn-sm" onclick="buyFreeze(1)" style="font-size:0.8rem">1 freeze — 150 pts</button>
+        <button class="btn btn-ghost btn-sm" onclick="buyFreeze(3)" style="font-size:0.8rem">3 freezes — 450 pts</button>
+        <button class="btn btn-ghost btn-sm" onclick="buyFreeze(5)" style="font-size:0.8rem">5 freezes — 750 pts</button>
+      </div>
+      <div id="freeze-msg" style="font-size:0.82rem;min-height:18px;margin-top:8px"></div>
     </div>
 
     <div class="card card-pad" style="margin-bottom:20px">
@@ -338,7 +358,7 @@ function updateModalAvatar() {
   const ini = (profile.display_name || profile.username || 'U')[0].toUpperCase();
   if (profile.avatar_url) {
     el.style.background = '#000';
-    el.innerHTML = `<img src="${profile.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/><div class="avatar-overlay">📷</div>`;
+    el.innerHTML = `<img loading="lazy" decoding="async" src="${profile.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/><div class="avatar-overlay">📷</div>`;
   } else {
     el.style.background = pendingColor;
     el.innerHTML = `<span style="font-size:2rem;font-weight:700;font-family:'Space Grotesk',sans-serif">${ini}</span><div class="avatar-overlay">📷</div>`;
@@ -401,7 +421,9 @@ window.saveProfile = async () => {
   const name = document.getElementById('modal-display-name').value.trim();
   const bio = document.getElementById('modal-bio').value.trim();
   const errEl = document.getElementById('modal-err');
+  const saveBtn = document.querySelector('[onclick="saveProfile()"]');
   errEl.textContent = ''; errEl.style.color = '';
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; }
 
   const { data, error } = await supabase.rpc('update_profile', {
     p_display_name: name || null,
@@ -411,6 +433,7 @@ window.saveProfile = async () => {
 
   if (error || data?.error) {
     errEl.textContent = data?.error || error.message;
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save changes'; }
     return;
   }
 
@@ -420,11 +443,39 @@ window.saveProfile = async () => {
 
   errEl.style.color = 'var(--green)';
   errEl.textContent = '✓ Saved!';
+  if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save changes'; }
   setTimeout(() => {
     errEl.textContent = '';
     closeEditModal();
     renderProfile(null);
   }, 800);
+};
+
+window.buyFreeze = async (qty) => {
+  const msg = document.getElementById('freeze-msg');
+  const btns = document.querySelectorAll('[onclick^="buyFreeze"]');
+  btns.forEach(b => b.disabled = true);
+  msg.style.color = 'var(--muted)';
+  msg.textContent = 'Processing…';
+
+  const { data, error } = await supabase.rpc('buy_streak_freeze', { p_quantity: qty });
+  btns.forEach(b => b.disabled = false);
+
+  if (error || data?.error) {
+    msg.style.color = 'var(--red,#f87171)';
+    msg.textContent = data?.error || error.message;
+    return;
+  }
+
+  profile.points = data.new_points;
+  updateNavPoints(data.new_points);
+
+  const countEl = document.getElementById('freeze-count');
+  if (countEl) countEl.textContent = data.total_freezes;
+
+  msg.style.color = 'var(--green)';
+  msg.textContent = `✅ ${qty} freeze${qty>1?'s':''} added! You now have ${data.total_freezes} — ${data.new_points.toLocaleString()} pts remaining.`;
+  setTimeout(() => { msg.textContent = ''; }, 5000);
 };
 
 window.doSignOut = async () => {

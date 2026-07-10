@@ -8,11 +8,16 @@
   <link rel="dns-prefetch" href="https://slufbzzfofzptwjefzmu.supabase.co"/>
   <link rel="manifest" href="/manifest.json"/><meta name="theme-color" content="#E8621A"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
-  <link rel="icon" href="/assets/img/favicon.svg?v=3" type="image/svg+xml"/>
-  <link rel="shortcut icon" href="/assets/img/logo.png" type="image/png"/>
   <link rel="stylesheet" href="/assets/css/main.css"/>
   <link rel="stylesheet" href="/assets/css/app.css"/>
+  <link rel="icon" href="/assets/img/favicon-v3.svg" type="image/svg+xml"/>
+  <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
+  <meta name="description" content="See the top earners on Next Boost. Climb the rankings by completing tasks and keeping your daily streak."/>
+  <meta property="og:title" content="Next Boost — Grow Your Social For Free"/>
+  <meta property="og:description" content="Earn points completing tasks. Spend them getting real followers, likes and views on TikTok, Instagram, YouTube and more."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://boost.nexosites.xyz/"/>
+  <meta name="twitter:card" content="summary"/>
 </head>
 <body>
 <nav class="nav" id="main-nav"></nav>
@@ -80,7 +85,47 @@ let currentBoard = 'all';
 async function loadBoard(board) {
   currentBoard = board;
   const wrap = document.getElementById('lb-wrap');
-  wrap.innerHTML = '<div class="spinner"></div>';
+  wrap.innerHTML = `<div class="skeleton-row">
+      <div class="skeleton skeleton-rank"></div>
+      <div class="skeleton skeleton-avatar"></div>
+      <div class="skeleton-lines"><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-line xshort"></div></div>
+      <div class="skeleton skeleton-action" style="margin-left:auto"></div>
+    </div><div class="skeleton-row">
+      <div class="skeleton skeleton-rank"></div>
+      <div class="skeleton skeleton-avatar"></div>
+      <div class="skeleton-lines"><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-line xshort"></div></div>
+      <div class="skeleton skeleton-action" style="margin-left:auto"></div>
+    </div><div class="skeleton-row">
+      <div class="skeleton skeleton-rank"></div>
+      <div class="skeleton skeleton-avatar"></div>
+      <div class="skeleton-lines"><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-line xshort"></div></div>
+      <div class="skeleton skeleton-action" style="margin-left:auto"></div>
+    </div><div class="skeleton-row">
+      <div class="skeleton skeleton-rank"></div>
+      <div class="skeleton skeleton-avatar"></div>
+      <div class="skeleton-lines"><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-line xshort"></div></div>
+      <div class="skeleton skeleton-action" style="margin-left:auto"></div>
+    </div><div class="skeleton-row">
+      <div class="skeleton skeleton-rank"></div>
+      <div class="skeleton skeleton-avatar"></div>
+      <div class="skeleton-lines"><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-line xshort"></div></div>
+      <div class="skeleton skeleton-action" style="margin-left:auto"></div>
+    </div><div class="skeleton-row">
+      <div class="skeleton skeleton-rank"></div>
+      <div class="skeleton skeleton-avatar"></div>
+      <div class="skeleton-lines"><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-line xshort"></div></div>
+      <div class="skeleton skeleton-action" style="margin-left:auto"></div>
+    </div><div class="skeleton-row">
+      <div class="skeleton skeleton-rank"></div>
+      <div class="skeleton skeleton-avatar"></div>
+      <div class="skeleton-lines"><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-line xshort"></div></div>
+      <div class="skeleton skeleton-action" style="margin-left:auto"></div>
+    </div><div class="skeleton-row">
+      <div class="skeleton skeleton-rank"></div>
+      <div class="skeleton skeleton-avatar"></div>
+      <div class="skeleton-lines"><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-line xshort"></div></div>
+      <div class="skeleton skeleton-action" style="margin-left:auto"></div>
+    </div>`;
   const { view, ptField, label } = VIEW_MAP[board];
   try {
     const { data, error } = await supabase.from(view).select('*');
@@ -109,7 +154,7 @@ function buildRow(u, ptField) {
   const streakBadge = (u.current_streak||0)>=7 ? `<span title="${u.current_streak}-day streak" style="font-size:0.72rem;background:rgba(255,100,0,0.15);color:#ff6400;padding:1px 6px;border-radius:999px;font-weight:700">🔥${u.current_streak}</span>` : '';
   const verifiedBadge = u.is_verified ? `<span title="Verified Creator" style="font-size:0.68rem;background:rgba(96,165,250,0.15);color:#60a5fa;padding:1px 6px;border-radius:999px;font-weight:700">✓ Verified</span>` : '';
   const avatarHtml = u.avatar_url
-    ? `<img src="${u.avatar_url}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0" alt="avatar"/>`
+    ? `<img src="${u.avatar_url}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0" alt="avatar" loading="lazy" decoding="async"/>`
     : `<div style="width:30px;height:30px;border-radius:50%;background:${u.avatar_color||'var(--orange)'};display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:700;color:#fff;flex-shrink:0;font-family:'Space Grotesk',sans-serif">${ini}</div>`;
   return `
     <div class="lb-row${isMe ? ' lb-me' : ''}"
@@ -165,7 +210,7 @@ window.showUser = (id, name, color, points, done, username, topBadge, topBadgeTi
 
   // ── Avatar
   document.getElementById('um-avatar').innerHTML = avatarUrl
-    ? `<img src="${avatarUrl}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid var(--border2)" alt=""/>`
+    ? `<img src="${avatarUrl}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid var(--border2)" alt="" loading="lazy" decoding="async"/>`
     : `<div style="width:72px;height:72px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:1.9rem;font-weight:700;color:#fff;font-family:Space Grotesk,sans-serif;border:3px solid var(--border2)">${ini}</div>`;
 
   // ── Badges row (top badge emoji + verified + trust)
@@ -205,9 +250,12 @@ window.showUser = (id, name, color, points, done, username, topBadge, topBadgeTi
         </label>
       </div>
       <div id="mutual-status" style="font-size:0.78rem;color:var(--muted);min-height:16px;text-align:center"></div>
+      <a href="/u/${encodeURIComponent(username)}" class="btn btn-ghost btn-full" style="text-align:center">View full profile →</a>
       <button class="btn btn-ghost btn-full" onclick="closeUserModal()">Close</button>`;
   } else {
-    actionsEl.innerHTML = `<button class="btn btn-ghost btn-full" onclick="closeUserModal()">Close</button>`;
+    actionsEl.innerHTML = `
+      <a href="/profile/" class="btn btn-primary btn-full">Edit my profile →</a>
+      <button class="btn btn-ghost btn-full" onclick="closeUserModal()">Close</button>`;
   }
 
   modal.style.display = 'flex';

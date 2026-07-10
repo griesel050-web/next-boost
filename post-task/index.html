@@ -8,11 +8,10 @@
   <link rel="dns-prefetch" href="https://slufbzzfofzptwjefzmu.supabase.co"/>
   <link rel="manifest" href="/manifest.json"/><meta name="theme-color" content="#E8621A"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
-  <link rel="icon" href="/assets/img/favicon.svg?v=3" type="image/svg+xml"/>
-  <link rel="shortcut icon" href="/assets/img/logo.png" type="image/png"/>
   <link rel="stylesheet" href="/assets/css/main.css"/>
   <link rel="stylesheet" href="/assets/css/app.css"/>
+  <link rel="icon" href="/assets/img/favicon-v3.svg" type="image/svg+xml"/>
+  <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
 </head>
 <body>
 <nav class="nav" id="main-nav"></nav>
@@ -192,16 +191,81 @@ import { supabase, esc } from '/assets/js/shared.js';
 import { initApp, updateNavPoints } from '/assets/js/app.js';
 
 const RULES = {
-  tiktok:    { hosts:['tiktok.com','vm.tiktok.com'], placeholder:'https://www.tiktok.com/@username', hint:'Must be a tiktok.com URL', types:['follow','like','view'] },
-  instagram: { hosts:['instagram.com','instagr.am'], placeholder:'https://www.instagram.com/username/', hint:'Must be an instagram.com URL', types:['follow','like','view'] },
-  youtube:   { hosts:['youtube.com','youtu.be'], placeholder:'https://www.youtube.com/@channel', hint:'Must be a youtube.com or youtu.be URL', types:['follow','like','view'] },
-  discord:   { hosts:['discord.gg','discord.com'], placeholder:'https://discord.gg/yourserver', hint:'Must be a discord.gg invite URL', types:['join'] },
-  twitch:    { hosts:['twitch.tv'], placeholder:'https://www.twitch.tv/channelname', hint:'Must be a twitch.tv URL', types:['follow','view'] },
-  website:   { hosts:[], placeholder:'https://yourwebsite.com', hint:'Must be a valid https:// URL', types:['website'] },
-  twitter:   { hosts:['twitter.com','x.com'], placeholder:'https://x.com/username', hint:'Must be a twitter.com or x.com URL', types:['follow','like','retweet'] },
+  tiktok:    {
+    hosts:['tiktok.com','vm.tiktok.com'],
+    placeholder:'https://www.tiktok.com/@username',
+    hint:'Must be a TikTok profile (tiktok.com/@username) or video URL',
+    types:['follow','like','view'],
+    patterns:[
+      { re: /tiktok\.com\/@[\w.]+$/i,           label: 'Profile ✓' },
+      { re: /tiktok\.com\/@[\w.]+\/video\/\d+/i, label: 'Video ✓' },
+      { re: /vm\.tiktok\.com\/\w+/i,             label: 'Short link ✓' },
+    ]
+  },
+  instagram: {
+    hosts:['instagram.com','instagr.am'],
+    placeholder:'https://www.instagram.com/username/',
+    hint:'Must be an Instagram profile or post URL',
+    types:['follow','like','view'],
+    patterns:[
+      { re: /instagram\.com\/[\w.]+\/?$/i,     label: 'Profile ✓' },
+      { re: /instagram\.com\/p\/[\w-]+/i,      label: 'Post ✓' },
+      { re: /instagram\.com\/reel\/[\w-]+/i,   label: 'Reel ✓' },
+      { re: /instagr\.am\//i,                  label: 'Short link ✓' },
+    ]
+  },
+  youtube: {
+    hosts:['youtube.com','youtu.be'],
+    placeholder:'https://www.youtube.com/@channel',
+    hint:'Must be a YouTube channel or video URL',
+    types:['follow','like','view'],
+    patterns:[
+      { re: /youtube\.com\/@[\w-]+/i,                label: 'Channel ✓' },
+      { re: /youtube\.com\/channel\/[\w-]+/i,        label: 'Channel ✓' },
+      { re: /youtube\.com\/watch\?v=[\w-]+/i,        label: 'Video ✓' },
+      { re: /youtube\.com\/shorts\/[\w-]+/i,         label: 'Short ✓' },
+      { re: /youtu\.be\/[\w-]+/i,                    label: 'Short link ✓' },
+    ]
+  },
+  discord: {
+    hosts:['discord.gg','discord.com'],
+    placeholder:'https://discord.gg/yourserver',
+    hint:'Must be a discord.gg invite link (e.g. discord.gg/abc123)',
+    types:['join'],
+    patterns:[
+      { re: /discord\.gg\/[\w-]+/i,                        label: 'Invite ✓' },
+      { re: /discord\.com\/invite\/[\w-]+/i,               label: 'Invite ✓' },
+    ]
+  },
+  twitch: {
+    hosts:['twitch.tv'],
+    placeholder:'https://www.twitch.tv/channelname',
+    hint:'Must be a twitch.tv channel URL',
+    types:['follow','view'],
+    patterns:[
+      { re: /twitch\.tv\/[\w]+\/?$/i,            label: 'Channel ✓' },
+      { re: /twitch\.tv\/videos\/\d+/i,          label: 'Video ✓' },
+    ]
+  },
+  twitter: {
+    hosts:['twitter.com','x.com'],
+    placeholder:'https://x.com/username',
+    hint:'Must be a Twitter/X profile or post URL',
+    types:['follow','like','retweet'],
+    patterns:[
+      { re: /(?:twitter|x)\.com\/[\w]+\/?$/i,              label: 'Profile ✓' },
+      { re: /(?:twitter|x)\.com\/[\w]+\/status\/\d+/i,     label: 'Post ✓' },
+    ]
+  },
+  website: {
+    hosts:[],
+    placeholder:'https://yourwebsite.com',
+    hint:'Must be a valid https:// URL',
+    types:['website'],
+    patterns:[]
+  },
 };
 const TLABELS = { follow:'Follow', like:'Like', view:'View', join:'Join Server', website:'Visit Website', retweet:'Retweet' };
-
 const DURATION_SURCHARGE = { 10000:0, 20000:2, 30000:5, 45000:10, 60000:20, 120000:50 };
 const BOOST_COST = 1000;
 
@@ -211,10 +275,19 @@ function validateUrl(url, plat) {
   try {
     const parsed = new URL(url);
     if (!parsed.protocol.startsWith('http')) return false;
-    if (plat === 'website') return true;
+    if (plat === 'website') return parsed.protocol === 'https:';
     const h = parsed.hostname.replace(/^www\./, '');
-    return RULES[plat].hosts.some(x => h === x || h.endsWith('.' + x));
+    const hostOk = RULES[plat].hosts.some(x => h === x || h.endsWith('.' + x));
+    return hostOk;
   } catch { return false; }
+}
+
+function getUrlLabel(url, plat) {
+  if (plat === 'website') return 'URL ✓';
+  const patterns = RULES[plat]?.patterns || [];
+  const match = patterns.find(p => p.re.test(url));
+  return match ? match.label : null;
+}  } catch { return false; }
 }
 
 window.onPlatformChange = () => {
@@ -235,12 +308,25 @@ window.onPlatformChange = () => {
 };
 
 window.onUrlInput = () => {
-  const url = document.getElementById('p-url').value.trim();
+  const url  = document.getElementById('p-url').value.trim();
   const plat = document.getElementById('p-platform').value;
   const hint = document.getElementById('url-hint');
   if (!url) { hint.textContent = ''; hint.className = 'url-hint'; return; }
-  if (validateUrl(url, plat)) { hint.textContent = '✓ Valid URL'; hint.className = 'url-hint url-valid'; }
-  else { hint.textContent = '✗ ' + RULES[plat].hint; hint.className = 'url-hint url-invalid'; }
+  if (!validateUrl(url, plat)) {
+    hint.textContent = '✗ ' + RULES[plat].hint;
+    hint.className = 'url-hint url-invalid';
+    return;
+  }
+  const label = getUrlLabel(url, plat);
+  if (label) {
+    hint.textContent = label;
+    hint.className = 'url-hint url-valid';
+  } else {
+    // Host matches but pattern doesn't — warn not block
+    hint.textContent = '⚠ URL looks valid but may not match expected format';
+    hint.className = 'url-hint';
+    hint.style.color = '#f59e0b';
+  }
 };
 
 window.updateCost = () => {

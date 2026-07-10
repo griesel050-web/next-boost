@@ -8,11 +8,10 @@
   <link rel="dns-prefetch" href="https://slufbzzfofzptwjefzmu.supabase.co"/>
   <link rel="manifest" href="/manifest.json"/><meta name="theme-color" content="#E8621A"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
-  <link rel="icon" href="/assets/img/favicon.svg?v=3" type="image/svg+xml"/>
-  <link rel="shortcut icon" href="/assets/img/logo.png" type="image/png"/>
   <link rel="stylesheet" href="/assets/css/main.css"/>
   <link rel="stylesheet" href="/assets/css/app.css"/>
+  <link rel="icon" href="/assets/img/favicon-v3.svg" type="image/svg+xml"/>
+  <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
 </head>
 <body>
 <nav class="nav" id="main-nav"></nav>
@@ -465,7 +464,9 @@ window.clearBg = () => {
 
 window.saveSettings = async () => {
   const msg = document.getElementById('settings-msg');
-  msg.textContent = 'Saving…'; msg.style.color = 'var(--muted)';
+  const btn = document.querySelector('[onclick="saveSettings()"]');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  msg.textContent = ''; msg.style.color = 'var(--muted)';
 
   const customBg = document.getElementById('custom-bg-input').value.trim() || null;
 
@@ -482,6 +483,7 @@ window.saveSettings = async () => {
   if (error || data?.error) {
     msg.textContent = data?.error || error.message;
     msg.style.color = 'var(--red)';
+    if (btn) { btn.disabled = false; btn.textContent = 'Save all settings'; }
     return;
   }
 
@@ -496,6 +498,7 @@ window.saveSettings = async () => {
 
   msg.textContent = '✓ All settings saved!';
   msg.style.color = 'var(--green)';
+  if (btn) { btn.disabled = false; btn.textContent = 'Save all settings'; }
   setTimeout(() => msg.textContent = '', 3000);
 };
 
