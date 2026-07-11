@@ -84,6 +84,17 @@ async function main(){
   initTaskModal(onComplete);
   checkBonusEvent();
   await load(true);
+
+  // Deep link: /earn/?task=TASK_ID — open a specific task directly (from public profiles)
+  const deepTaskId = new URLSearchParams(location.search).get('task');
+  if (deepTaskId) {
+    // Small delay so modal is initialised
+    setTimeout(() => {
+      window.openTaskModal && window.openTaskModal(deepTaskId);
+    }, 400);
+    // Clean URL without reloading
+    history.replaceState(null, '', '/earn/');
+  }
 }
 
 async function checkBonusEvent(){
