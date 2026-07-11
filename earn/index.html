@@ -10,8 +10,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <link rel="stylesheet" href="/assets/css/main.css"/>
   <link rel="stylesheet" href="/assets/css/app.css"/>
-  <link rel="icon" href="/assets/img/favicon-v3.svg" type="image/svg+xml"/>
-  <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
+  <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png"/>
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png"/>
 </head>
 <body>
 <nav class="nav" id="main-nav"></nav>
@@ -332,7 +333,45 @@ function onComplete(pts){
   supabase.from('profiles').select('points').eq('id',profile.id).single().then(({data})=>{
     if(data){profile.points=data.points;updateNavPoints(data.points);}
   });
+  launchConfetti();
   load(true);
+}
+
+function launchConfetti(){
+  const colors=['#E8621A','#ff9f43','#ffd32a','#fff','#ff6b6b','#48dbfb'];
+  const canvas=document.createElement('canvas');
+  canvas.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999';
+  document.body.appendChild(canvas);
+  const ctx=canvas.getContext('2d');
+  canvas.width=innerWidth; canvas.height=innerHeight;
+  const pieces=Array.from({length:80},()=>({
+    x:Math.random()*canvas.width, y:-10,
+    r:Math.random()*6+3,
+    d:Math.random()*80+60,
+    color:colors[Math.floor(Math.random()*colors.length)],
+    tilt:Math.random()*10-10,
+    tiltAngle:0, tiltAngleInc:Math.random()*0.07+0.05,
+    vx:(Math.random()-0.5)*4, vy:Math.random()*3+2
+  }));
+  let frame=0;
+  const draw=()=>{
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    pieces.forEach(p=>{
+      p.tiltAngle+=p.tiltAngleInc;
+      p.x+=p.vx; p.y+=p.vy;
+      p.tilt=Math.sin(p.tiltAngle)*12;
+      ctx.beginPath();
+      ctx.lineWidth=p.r;
+      ctx.strokeStyle=p.color;
+      ctx.moveTo(p.x+p.tilt+p.r/2,p.y);
+      ctx.lineTo(p.x+p.tilt,p.y+p.tilt+p.r/2);
+      ctx.stroke();
+    });
+    frame++;
+    if(frame<90) requestAnimationFrame(draw);
+    else { canvas.remove(); }
+  };
+  requestAnimationFrame(draw);
 }
 
 window.openEarnComments = async (taskId, target) => {

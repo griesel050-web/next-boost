@@ -103,8 +103,9 @@
       margin-top: 16px; display: inline-flex; align-items: center; gap: 6px;
     }
   </style>
-  <link rel="icon" href="/assets/img/favicon-v3.svg" type="image/svg+xml"/>
-  <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
+  <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png"/>
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png"/>
 </head>
 <body>
 <nav class="nav" id="main-nav"></nav>
@@ -234,6 +235,8 @@ function renderProfile(email) {
         <div class="stat-box"><div class="stat-val" id="completion-rate-val">—</div><div class="stat-lbl">Completion rate</div></div>
         <div class="stat-box"><div class="stat-val" style="color:${repColor}">${rep}</div><div class="stat-lbl">Reputation</div></div>
       </div>
+      <!-- Rank gap motivational bar -->
+      <div id="rank-gap-msg" style="font-size:0.82rem;color:var(--muted);margin-top:-12px;margin-bottom:20px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius)">⚡ Loading rank…</div>
     </div>
 
     <!-- STREAK FREEZE CARD -->
@@ -291,6 +294,22 @@ function renderProfile(email) {
     el.style.color = pct >= 80 ? 'var(--green)' : pct >= 50 ? '#f59e0b' : 'var(--red, #f87171)';
     el.title = `${data.completed} approved of ${data.started} started`;
   });
+
+  // Load rank gap — "X pts away from rank #N"
+  supabase.from('leaderboard')
+    .select('points,rank')
+    .gt('points', profile.points)
+    .order('points', { ascending: true })
+    .limit(1)
+    .maybeSingle()
+    .then(({ data: next }) => {
+      const rankEl = document.getElementById('rank-gap-msg');
+      if (!rankEl) return;
+      if (!next) { rankEl.textContent = '🏆 You\'re #1 on the leaderboard!'; rankEl.style.color = 'var(--orange)'; return; }
+      const gap = next.points - profile.points;
+      const nextRank = next.rank;
+      rankEl.innerHTML = `⚡ Earn <strong>${gap.toLocaleString()} more pts</strong> to reach rank <strong>#${nextRank}</strong>`;
+    });
 }
 
 async function loadLedger() {

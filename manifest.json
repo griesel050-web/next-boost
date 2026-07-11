@@ -1,25 +1,69 @@
 {
   "name": "Next Boost",
   "short_name": "Next Boost",
-  "description": "Grow your social media for free — earn points, get real followers.",
+  "description": "Grow your social media for free \u2014 earn points, get real followers.",
   "start_url": "/earn/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#080604",
   "theme_color": "#E8621A",
   "icons": [
-    { "src": "/assets/img/logo.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/assets/img/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    {
+      "src": "/assets/img/favicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/img/favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/img/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
   ],
-  "categories": ["social", "productivity", "utilities"],
+  "categories": [
+    "social",
+    "productivity",
+    "utilities"
+  ],
   "screenshots": [
-    { "src": "/assets/img/og-image.png", "sizes": "1200x630", "type": "image/png", "form_factor": "wide" }
+    {
+      "src": "/assets/img/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
   ],
   "prefer_related_applications": false,
   "shortcuts": [
-    { "name": "Earn Points", "short_name": "Earn", "url": "/earn/", "description": "Browse and complete tasks" },
-    { "name": "Post a Task", "short_name": "Post", "url": "/post-task/", "description": "Post a new task" },
-    { "name": "Leaderboard", "short_name": "Leaderboard", "url": "/leaderboard/", "description": "See top earners" },
-    { "name": "My Profile", "short_name": "Profile", "url": "/profile/", "description": "View your profile" }
+    {
+      "name": "Earn Points",
+      "short_name": "Earn",
+      "url": "/earn/",
+      "description": "Browse and complete tasks"
+    },
+    {
+      "name": "Post a Task",
+      "short_name": "Post",
+      "url": "/post-task/",
+      "description": "Post a new task"
+    },
+    {
+      "name": "Leaderboard",
+      "short_name": "Leaderboard",
+      "url": "/leaderboard/",
+      "description": "See top earners"
+    },
+    {
+      "name": "My Profile",
+      "short_name": "Profile",
+      "url": "/profile/",
+      "description": "View your profile"
+    }
   ]
 }

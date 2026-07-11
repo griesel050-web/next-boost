@@ -188,8 +188,21 @@ function renderShell(profile,currentPage){
 }
 
 export function updateNavPoints(pts){
-  const el=document.getElementById('nav-pts');if(el)el.textContent=pts;
-  const su=document.querySelector('.sidebar-user-pts');if(su)su.textContent=`⚡ ${pts} pts`;
+  const el=document.getElementById('nav-pts');
+  if(el){
+    const from=parseInt(el.textContent)||0;
+    const to=pts;
+    if(from===to){el.textContent=to;return;}
+    const dur=600, steps=30, step=(to-from)/steps;
+    let cur=from, i=0;
+    const tick=()=>{
+      i++; cur+=step;
+      el.textContent=Math.round(i===steps?to:cur).toLocaleString();
+      if(i<steps) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+  const su=document.querySelector('.sidebar-user-pts');if(su)su.textContent=`⚡ ${pts.toLocaleString()} pts`;
 }
 
 // ---- DAILY BONUS ----

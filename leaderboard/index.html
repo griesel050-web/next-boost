@@ -10,14 +10,17 @@
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <link rel="stylesheet" href="/assets/css/main.css"/>
   <link rel="stylesheet" href="/assets/css/app.css"/>
-  <link rel="icon" href="/assets/img/favicon-v3.svg" type="image/svg+xml"/>
-  <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
   <meta name="description" content="See the top earners on Next Boost. Climb the rankings by completing tasks and keeping your daily streak."/>
   <meta property="og:title" content="Next Boost — Grow Your Social For Free"/>
   <meta property="og:description" content="Earn points completing tasks. Spend them getting real followers, likes and views on TikTok, Instagram, YouTube and more."/>
   <meta property="og:type" content="website"/>
   <meta property="og:url" content="https://boost.nexosites.xyz/"/>
-  <meta name="twitter:card" content="summary"/>
+  <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png"/>
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png"/>
+  <meta property="og:image" content="https://boost.nexosites.xyz/assets/img/og-image.png"/>
+  <meta name="twitter:image" content="https://boost.nexosites.xyz/assets/img/og-image.png"/>
+  <meta name="twitter:card" content="summary_large_image"/>
 </head>
 <body>
 <nav class="nav" id="main-nav"></nav>
@@ -47,16 +50,104 @@
 <nav class="mobile-nav-bar" id="mobile-nav"></nav>
 
 <!-- User profile modal -->
-<div class="modal-overlay" id="user-modal" style="display:none" onclick="if(event.target===this)closeUserModal()">
-  <div class="modal" style="max-width:420px;padding:0;overflow:hidden" id="user-modal-outer">
-    <div id="um-header" style="padding:28px 24px 20px;text-align:center;border-bottom:1px solid var(--border)">
-      <div id="um-avatar" style="margin:0 auto 12px"></div>
-      <div id="um-badges" style="display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:6px"></div>
-      <div id="um-name" style="font-size:1.25rem;font-weight:700;font-family:Space Grotesk,sans-serif"></div>
-      <div id="um-user" style="color:var(--muted);font-size:0.83rem;margin-top:2px"></div>
+<style>
+#user-modal .um-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  max-width: 400px;
+  width: calc(100vw - 32px);
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+  animation: modalPop 0.2s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes modalPop { from { opacity:0; transform:scale(0.92) translateY(12px); } to { opacity:1; transform:none; } }
+#user-modal .um-banner {
+  height: 72px;
+  background: linear-gradient(135deg, #E8621A 0%, #C4430A 100%);
+  position: relative;
+  flex-shrink: 0;
+}
+#user-modal .um-avatar-wrap {
+  position: absolute;
+  bottom: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+#user-modal .um-body {
+  padding: 40px 24px 0;
+  text-align: center;
+}
+#user-modal .um-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-family: 'Space Grotesk', sans-serif;
+  margin-bottom: 2px;
+}
+#user-modal .um-handle {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+#user-modal .um-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  min-height: 20px;
+}
+#user-modal .um-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin: 0 -24px;
+}
+#user-modal .um-stat {
+  background: var(--surface2);
+  padding: 12px 6px;
+  text-align: center;
+}
+#user-modal .um-stat-val {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--orange);
+  font-family: 'Space Grotesk', sans-serif;
+}
+#user-modal .um-stat-lbl {
+  font-size: 0.6rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-top: 2px;
+}
+#user-modal .um-actions {
+  padding: 16px 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+</style>
+<div class="modal-overlay" id="user-modal" style="display:none;align-items:center;justify-content:center" onclick="if(event.target===this)closeUserModal()">
+  <div class="um-wrap" id="user-modal-outer">
+    <!-- Orange banner + floating avatar -->
+    <div class="um-banner">
+      <div class="um-avatar-wrap" id="um-avatar"></div>
     </div>
-    <div id="um-stats" style="display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--border)"></div>
-    <div id="um-actions" style="padding:16px 20px;display:flex;flex-direction:column;gap:8px"></div>
+    <!-- Body -->
+    <div class="um-body">
+      <div class="um-badge-row" id="um-badges"></div>
+      <div class="um-name"  id="um-name"></div>
+      <div class="um-handle" id="um-user"></div>
+      <!-- Stats strip -->
+      <div class="um-stats-row" id="um-stats"></div>
+    </div>
+    <!-- Actions -->
+    <div class="um-actions" id="um-actions"></div>
   </div>
 </div>
 
@@ -208,34 +299,33 @@ window.showUser = (id, name, color, points, done, username, topBadge, topBadgeTi
   const ts    = trustScore || 0;
   const tsColor = ts >= 80 ? '#4ade80' : ts >= 50 ? '#f59e0b' : '#94a3b8';
 
-  // ── Avatar
+  // ── Avatar (floating over orange banner)
   document.getElementById('um-avatar').innerHTML = avatarUrl
-    ? `<img src="${avatarUrl}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid var(--border2)" alt="" loading="lazy" decoding="async"/>`
-    : `<div style="width:72px;height:72px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:1.9rem;font-weight:700;color:#fff;font-family:Space Grotesk,sans-serif;border:3px solid var(--border2)">${ini}</div>`;
+    ? `<img src="${avatarUrl}" style="width:68px;height:68px;border-radius:50%;object-fit:cover;border:3px solid var(--surface);display:block" loading="lazy" alt=""/>`
+    : `<div style="width:68px;height:68px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:1.75rem;font-weight:700;color:#fff;font-family:Space Grotesk,sans-serif;border:3px solid var(--surface)">${ini}</div>`;
 
-  // ── Badges row (top badge emoji + verified + trust)
+  // ── Badges
   const badgeParts = [];
-  if (topBadge) badgeParts.push(`<span title="${esc(topBadgeTitle||'Badge')}" style="font-size:1.4rem;line-height:1">${topBadge}</span>`);
-  if (isVerified) badgeParts.push(`<span style="font-size:0.7rem;background:rgba(96,165,250,0.12);color:#60a5fa;border:1px solid rgba(96,165,250,0.3);border-radius:999px;padding:2px 9px;font-weight:700">✓ Verified</span>`);
-  if (ts > 0) badgeParts.push(`<span style="font-size:0.7rem;background:${tsColor}1a;color:${tsColor};border:1px solid ${tsColor}44;border-radius:999px;padding:2px 9px;font-weight:600">🛡 ${ts}/100</span>`);
+  if (topBadge) badgeParts.push(`<span title="${esc(topBadgeTitle||'Badge')}" style="font-size:1.2rem;line-height:1">${topBadge}</span>`);
+  if (isVerified) badgeParts.push(`<span style="font-size:0.68rem;background:rgba(96,165,250,0.12);color:#60a5fa;border:1px solid rgba(96,165,250,0.25);border-radius:999px;padding:2px 8px;font-weight:700">✓ Verified</span>`);
+  if (ts > 0) badgeParts.push(`<span style="font-size:0.68rem;background:${tsColor}18;color:${tsColor};border:1px solid ${tsColor}38;border-radius:999px;padding:2px 8px;font-weight:600">🛡 ${ts}/100</span>`);
   document.getElementById('um-badges').innerHTML = badgeParts.join('');
 
   document.getElementById('um-name').textContent = name;
-  document.getElementById('um-user').textContent = '@' + username;
+  document.getElementById('um-user').textContent  = '@' + username;
 
-  // ── Stats grid (always 3 columns)
+  // ── Stats strip
   const statItems = [
-    { val: points.toLocaleString(), lbl: 'Points' },
-    { val: done,                    lbl: 'Completed' },
-    { val: followersCount || 0,     lbl: 'Followers' },
+    { val: points.toLocaleString(), lbl: 'Points'    },
+    { val: done,                    lbl: 'Done'       },
+    { val: followersCount || 0,     lbl: 'Followers'  },
   ];
-  if (streak >= 3) statItems.push({ val: '🔥' + streak, lbl: 'Streak' });
-  if (achCount > 0) statItems.push({ val: '🎖' + achCount, lbl: 'Achievements' });
+  if (streak >= 3)  statItems.push({ val: '🔥' + streak,    lbl: 'Streak' });
+  if (achCount > 0) statItems.push({ val: '🎖' + achCount,  lbl: 'Badges' });
+  const cols = Math.min(statItems.length, 3);
+  document.getElementById('um-stats').style.gridTemplateColumns = `repeat(${cols},1fr)`;
   document.getElementById('um-stats').innerHTML = statItems.map(s =>
-    `<div style="padding:14px 8px;text-align:center;border-right:1px solid var(--border)">
-      <div style="font-size:1.1rem;font-weight:700;font-family:Space Grotesk,sans-serif;color:var(--orange)">${s.val}</div>
-      <div style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-top:2px">${s.lbl}</div>
-    </div>`
+    `<div class="um-stat"><div class="um-stat-val">${s.val}</div><div class="um-stat-lbl">${s.lbl}</div></div>`
   ).join('');
 
   // ── Actions

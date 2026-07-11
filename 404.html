@@ -11,8 +11,20 @@ permalink: /404.html
   <title>Page Not Found — Next Boost</title>
   <meta name="robots" content="noindex"/>
   <link rel="stylesheet" href="/assets/css/main.css"/>
-  <link rel="icon" href="/assets/img/favicon-v3.svg" type="image/svg+xml"/>
-  <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
+  <script>
+    // SPA routing — redirect /u/username → /u/?u=username
+    (function() {
+      const path = window.location.pathname;
+      const seg  = path.split('/').filter(Boolean);
+      if (seg[0] === 'u' && seg[1]) {
+        // e.g. /u/Clxxdy → /u/?u=Clxxdy
+        window.location.replace('/u/?u=' + encodeURIComponent(seg[1]));
+      }
+    })();
+  </script>
+  <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png"/>
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png"/>
 </head>
 <body>
   <nav class="nav">
