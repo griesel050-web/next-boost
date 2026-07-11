@@ -461,8 +461,116 @@ h1, h2, h3, h4, h5 { font-family: 'Space Grotesk', sans-serif; line-height: 1.2;
 }
 
 
-/* Admin-only elements — hidden by default, JS reveals for admins */
-.admin-only-field { display: none; }
+/* ============================================================
+   MICRO-INTERACTIONS & ANIMATIONS
+   ============================================================ */
+
+/* Modal — pop in instead of appearing instantly */
+.modal-overlay .modal { animation: modalPop 0.28s cubic-bezier(.2,.9,.25,1.15) both; }
+@keyframes modalPop {
+  from { opacity: 0; transform: translateY(14px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.modal-overlay { animation: overlayFade 0.18s ease both; }
+@keyframes overlayFade { from { opacity: 0; } to { opacity: 1; } }
+
+/* Toast — springier entrance */
+.toast {
+  transition: transform 0.32s cubic-bezier(.2,.9,.25,1.2), opacity 0.22s ease;
+}
+
+/* Cards & task rows — gentle lift on hover */
+.task-card, .stat-box, .step-card, .plat-card, .testimonial-card, .guide-card, .ach-card {
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.task-card:hover, .stat-box:hover, .step-card:hover, .plat-card:hover, .testimonial-card:hover, .guide-card:hover, .ach-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.28);
+}
+
+/* Buttons — soft press feedback */
+.btn { transform: translateZ(0); }
+.btn:active:not(:disabled) { transform: scale(0.97); }
+.btn-primary:active:not(:disabled) { transform: scale(0.97) translateY(0); }
+
+/* Sidebar links — sliding active indicator */
+.sidebar-link {
+  position: relative;
+  transition: color 0.18s ease, background 0.18s ease, padding-left 0.18s ease;
+}
+.sidebar-link:hover { padding-left: 4px; }
+.sidebar-link.active::before {
+  content: '';
+  position: absolute;
+  left: -12px; top: 50%;
+  width: 3px; height: 60%;
+  transform: translateY(-50%) scaleY(0.4);
+  background: var(--orange);
+  border-radius: 3px;
+  opacity: 0;
+  animation: indicatorIn 0.25s ease forwards;
+}
+@keyframes indicatorIn { to { opacity: 1; transform: translateY(-50%) scaleY(1); } }
+
+/* Points pill — subtle pulse whenever the number changes (JS toggles .pulse) */
+.pts-pill.pulse, .nav-pts.pulse { animation: ptsPulse 0.45s ease; }
+@keyframes ptsPulse {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.12); filter: brightness(1.25); }
+  100% { transform: scale(1); }
+}
+
+/* Daily bonus pill — gentle breathing glow when ready to claim */
+.daily-pill.ready { animation: readyGlow 2.2s ease-in-out infinite; }
+@keyframes readyGlow {
+  0%, 100% { box-shadow: 0 0 0 rgba(232,98,26,0); }
+  50%      { box-shadow: 0 0 16px rgba(232,98,26,0.45); }
+}
+
+/* Achievement / unlock pop */
+.achievement-unlocked, .ach-card.earned {
+  animation: unlockPop 0.5s cubic-bezier(.2,.9,.25,1.3) both;
+}
+@keyframes unlockPop {
+  0%   { opacity: 0; transform: scale(0.7) rotate(-4deg); }
+  60%  { opacity: 1; transform: scale(1.06) rotate(1deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+/* Staggered entrance for lists of cards — add class="stagger" to the container */
+.stagger > *:not(.spinner) {
+  animation: staggerIn 0.32s ease both;
+}
+.stagger > *:nth-child(1)  { animation-delay: 0.02s; }
+.stagger > *:nth-child(2)  { animation-delay: 0.06s; }
+.stagger > *:nth-child(3)  { animation-delay: 0.10s; }
+.stagger > *:nth-child(4)  { animation-delay: 0.14s; }
+.stagger > *:nth-child(5)  { animation-delay: 0.18s; }
+.stagger > *:nth-child(6)  { animation-delay: 0.22s; }
+.stagger > *:nth-child(7)  { animation-delay: 0.26s; }
+.stagger > *:nth-child(8)  { animation-delay: 0.30s; }
+.stagger > *:nth-child(n+9){ animation-delay: 0.34s; }
+@keyframes staggerIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Scroll reveal — add data-reveal to any element; JS adds .revealed on intersect */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(.2,.8,.2,1);
+}
+[data-reveal].revealed { opacity: 1; transform: translateY(0); }
+
+/* Logo — tiny friendly wiggle on hover */
+.nav-logo img { transition: transform 0.25s cubic-bezier(.3,.7,.3,1.5); }
+.nav-logo:hover img { transform: rotate(-4deg) scale(1.05); }
+
+@media (prefers-reduced-motion: reduce) {
+  .stagger > *, [data-reveal], .modal-overlay, .modal-overlay .modal,
+  .daily-pill.ready, .achievement-unlocked, .ach-card.earned { animation: none !important; transform: none !important; opacity: 1 !important; }
+}
 
 /* ---- Colour swatches (settings avatar picker) ---- */
 .color-swatch {

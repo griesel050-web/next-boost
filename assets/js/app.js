@@ -4,12 +4,13 @@
 import { supabase, esc } from './shared.js';
 export { supabase };
 
-function toast(msg, type=''){
+function toast(msg, type='', duration=3600, isHtml=false){
   let el=document.getElementById('nb-toast');
   if(!el){el=document.createElement('div');el.id='nb-toast';el.className='toast';document.body.appendChild(el);}
-  el.textContent=msg; el.className=`toast show${type?' toast-'+type:''}`;
+  if(isHtml) el.innerHTML=msg; else el.textContent=msg;
+  el.className=`toast show${type?' toast-'+type:''}`;
   clearTimeout(window._toastTimer);
-  window._toastTimer=setTimeout(()=>el.classList.remove('show'),3600);
+  window._toastTimer=setTimeout(()=>el.classList.remove('show'),duration);
 }
 
 // ---- SERVICE WORKER & PWA ----
@@ -45,6 +46,23 @@ window.addEventListener('appinstalled', () => {
   if (btn) btn.style.display = 'none';
   _deferredInstall = null;
 });
+
+// ---- SCROLL REVEAL ----
+// Any element with data-reveal fades/slides in once it enters the viewport.
+// Safe no-op on pages that don't use it.
+function initScrollReveal(){
+  const els = document.querySelectorAll('[data-reveal]');
+  if(!els.length) return;
+  if(!('IntersectionObserver' in window)){ els.forEach(e=>e.classList.add('revealed')); return; }
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){ entry.target.classList.add('revealed'); io.unobserve(entry.target); }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  els.forEach(e=>io.observe(e));
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initScrollReveal);
+else initScrollReveal();
 
 // ---- THEMES ----
 export const THEMES={
@@ -193,6 +211,8 @@ export function updateNavPoints(pts){
     const from=parseInt(el.textContent)||0;
     const to=pts;
     if(from===to){el.textContent=to;return;}
+    const pill=document.getElementById('nav-pts-pill');
+    if(pill){pill.classList.remove('pulse');void pill.offsetWidth;pill.classList.add('pulse');}
     const dur=600, steps=30, step=(to-from)/steps;
     let cur=from, i=0;
     const tick=()=>{
@@ -562,7 +582,7 @@ export function initTaskModal(onComplete){
     // Every 5th completion, nudge them to share
     const tc = (parseInt(localStorage.getItem('nb_tc')||'0'))+1;
     localStorage.setItem('nb_tc', tc);
-    if(tc % 5 === 0) setTimeout(()=>toast('🎉 Share your progress! <a href="/share/" style="color:#fff;font-weight:700;text-decoration:underline">Make a card →</a>','info',8000),1500);
+    if(tc % 5 === 0) setTimeout(()=>toast('🎉 Share your progress! <a href="/share/" style="color:#fff;font-weight:700;text-decoration:underline">Make a card →</a>','info',8000,true),1500);
     if(onComplete)onComplete(data.points_earned);
   };
 
