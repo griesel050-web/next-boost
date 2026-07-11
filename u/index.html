@@ -91,6 +91,18 @@
       display: flex; gap: 10px;
     }
 
+    /* ── Social links ── */
+    .pub-socials {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      padding: 0 24px 20px;
+    }
+    .pub-social-link {
+      width: 34px; height: 34px; border-radius: 9px;
+      background-size: 55% 55%; background-repeat: no-repeat; background-position: center;
+      transition: transform .15s, opacity .15s; opacity: 0.9;
+    }
+    .pub-social-link:hover { transform: translateY(-2px); opacity: 1; }
+
     /* ── Section titles ── */
     .pub-section {
       margin-bottom: 16px;
@@ -164,7 +176,7 @@
 <nav class="mobile-nav-bar" id="mobile-nav"></nav>
 
 <script type="module">
-import { supabase, esc } from '/assets/js/shared.js';
+import { supabase, esc, PLAT_CLASS, SOCIAL_PLATFORMS } from '/assets/js/shared.js';
 import { initApp } from '/assets/js/app.js';
 
 const PC   = { tiktok:'plat-tiktok', instagram:'plat-instagram', youtube:'plat-youtube', discord:'plat-discord', twitch:'plat-twitch', twitter:'plat-twitter', website:'plat-website' };
@@ -292,6 +304,12 @@ async function main() {
 
   const joined = p.created_at ? new Date(p.created_at).toLocaleDateString('en-US',{month:'long',year:'numeric'}) : '';
 
+  // Social links
+  const social = p.social_links || {};
+  const socialsHtml = SOCIAL_PLATFORMS.filter(sp => social[sp.key]).map(sp =>
+    `<a class="pub-social-link ${PLAT_CLASS[sp.key]}" href="${esc(social[sp.key])}" target="_blank" rel="noopener noreferrer nofollow" title="${esc(sp.label)}"></a>`
+  ).join('');
+
   document.getElementById('pub-root').innerHTML = `
     <!-- Hero card -->
     <div class="pub-hero">
@@ -310,6 +328,7 @@ async function main() {
         <div class="pub-stat"><div class="pub-stat-val">${p.followers_count||0}</div><div class="pub-stat-lbl">Followers</div></div>
         <div class="pub-stat"><div class="pub-stat-val">${p.streak||0}🔥</div><div class="pub-stat-lbl">Streak</div></div>
       </div>
+      ${socialsHtml ? `<div class="pub-socials">${socialsHtml}</div>` : ''}
       <div class="pub-follow-wrap">${followWrap}</div>
     </div>
 
