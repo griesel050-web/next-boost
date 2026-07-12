@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Task Bundle — Next Boost</title>
+  <meta name="description" content="Complete a bundle of tasks on Next Boost and earn points for each one."/>
+  <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png"/>
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png"/>
+  <link rel="stylesheet" href="/assets/css/main.css"/>
+  <link rel="stylesheet" href="/assets/css/app.css"/>
+  <style>
+    .bd-wrap { max-width: 640px; margin: 0 auto; padding: 24px 16px 100px; }
+    .bd-hero {
+      background: linear-gradient(135deg, #E8621A 0%, #C4430A 100%);
+      border-radius: 16px; padding: 22px 22px 18px; margin-bottom: 18px; color: #fff;
+    }
+    .bd-owner { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 0.85rem; }
+    .bd-owner img, .bd-owner-fallback {
+      width: 32px; height: 32px; border-radius: 50%; object-fit: cover;
+      display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff;
+      font-family: 'Space Grotesk', sans-serif; border: 2px solid rgba(255,255,255,0.5);
+    }
+    .bd-title { font-size: 1.4rem; font-weight: 800; font-family: 'Space Grotesk', sans-serif; margin-bottom: 6px; }
+    .bd-desc { font-size: 0.88rem; opacity: 0.92; line-height: 1.5; }
+    .bd-pts-pill {
+      display: inline-flex; align-items: center; gap: 6px; margin-top: 12px;
+      background: rgba(255,255,255,0.18); border-radius: 999px; padding: 6px 14px;
+      font-size: 0.82rem; font-weight: 700;
+    }
+    .bd-task {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 14px 16px; margin-bottom: 10px;
+    }
+    .bd-task-info { flex: 1; min-width: 0; }
+    .bd-task-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 2px; }
+    .bd-task-sub { font-size: 0.78rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+<nav class="nav" id="main-nav"></nav>
+<div class="bd-wrap" id="bd-root">
+  <div class="spinner" style="margin:60px auto"></div>
+</div>
+<script type="module">
+import { supabase, esc, PLAT_CLASS } from '/assets/js/shared.js';
+import { initApp } from '/assets/js/app.js';
+
+const PE   = { tiktok:'🎵', instagram:'📸', youtube:'▶️', discord:'💬', website:'🌐', twitch:'🟣', twitter:'🐦' };
+const TL   = { follow:'Follow', like:'Like', view:'View', join:'Join', website:'Visit', retweet:'Retweet' };
+const PLAT = { tiktok:'TikTok', instagram:'Instagram', youtube:'YouTube', discord:'Discord', twitch:'Twitch', twitter:'Twitter/X', website:'Website' };
+
+function getBundleIdFromUrl() {
+  const qs = new URLSearchParams(location.search).get('id');
+  if (qs) return qs;
+  const parts = location.pathname.split('/').filter(Boolean);
+  if (parts[0] === 'b' && parts[1]) return decodeURIComponent(parts[1]);
+  return null;
+}
+
+async function main() {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      await initApp('b');
+    } else {
+      const nav = document.getElementById('main-nav');
+      if (nav) nav.innerHTML = `
+        <a class="nav-logo" href="/"><img loading="eager" decoding="async" src="/assets/img/logo.png" alt="Next Boost" style="height:36px;width:auto"/></a>
+        <div class="nav-links">
+          <a href="/login/"  class="btn btn-ghost btn-sm">Log in</a>
+          <a href="/signup/" class="btn btn-primary btn-sm">Sign up</a>
+        </div>`;
+    }
+  } catch(e) { /* guest */ }
+
+  const root = document.getElementById('bd-root');
+  const bundleId = getBundleIdFromUrl();
+  if (!bundleId) {
+    root.innerHTML = `<div class="empty-state"><div class="empty-icon">📦</div><p>No bundle specified.</p></div>`;
+    return;
+  }
+
+  const { data: b, error } = await supabase.rpc('get_bundle_detail', { p_bundle_id: bundleId });
+  if (error || !b || b.error) {
+    root.innerHTML = `<div class="empty-state"><div class="empty-icon">📦</div><p>${esc(b?.error || 'Bundle not found.')}</p><div class="empty-cta"><a href="/earn/" class="btn btn-primary btn-sm">Browse tasks</a></div></div>`;
+    return;
+  }
+
+  document.title = `${b.name} — Task Bundle — Next Boost`;
+
+  const ini = (b.owner_display_name || b.owner_username || '?')[0].toUpperCase();
+  const ownerAvatar = b.owner_avatar_url
+    ? `<img src="${b.owner_avatar_url}" alt=""/>`
+    : `<div class="bd-owner-fallback" style="background:${b.owner_avatar_color||'var(--orange)'}">${ini}</div>`;
+
+  const tasksHtml = (b.tasks || []).map(t => {
+    const slotsLeft = t.is_infinite ? '∞' : Math.max(0, t.max_completions - t.completions_count);
+    const full = !t.is_infinite && slotsLeft === 0;
+    return `
+    <div class="bd-task">
+      <div class="task-plat-icon ${PLAT_CLASS[t.platform]||'plat-website'}" style="flex-shrink:0"></div>
+      <div class="bd-task-info">
+        <div class="bd-task-name">${PE[t.platform]||''} ${esc(PLAT[t.platform]||t.platform)} — ${esc(TL[t.type]||t.type)}</div>
+        <div class="bd-task-sub">${full ? 'All slots filled' : slotsLeft + ' slots left'} · +${t.points_reward} pts${t.is_boosted?' · ⚡ Boosted':''}</div>
+      </div>
+      ${full
+        ? `<span class="status-chip chip-closed">Full</span>`
+        : `<a class="btn btn-primary btn-sm" href="/earn/?task=${t.id}">Do it →</a>`}
+    </div>`;
+  }).join('');
+
+  root.innerHTML = `
+    <div class="bd-hero">
+      <div class="bd-owner">${ownerAvatar}<span>by <a href="/u/${encodeURIComponent(b.owner_username)}" style="color:#fff;font-weight:700;text-decoration:underline">@${esc(b.owner_username)}</a></span></div>
+      <div class="bd-title">${esc(b.name)}</div>
+      ${b.description ? `<div class="bd-desc">${esc(b.description)}</div>` : ''}
+      <div class="bd-pts-pill">⚡ ${b.tasks.length} tasks · up to ${b.total_points.toLocaleString()} pts total</div>
+    </div>
+    <div id="bd-tasks">${tasksHtml || '<p style="color:var(--muted)">No tasks in this bundle.</p>'}</div>
+  `;
+}
+
+main();
+</script>
+<nav class="mobile-nav-bar" id="mobile-nav"></nav>
+</body>
+</html>

@@ -23,6 +23,12 @@
   <div><h1 class="page-title">Earn Points</h1><p class="page-sub">Complete tasks to earn points after the 30s timer.</p></div>
 </div>
 
+<!-- Live activity ticker -->
+<div class="activity-ticker" id="activity-ticker">
+  <div class="activity-ticker-label"><span class="dot"></span>Live</div>
+  <div class="activity-ticker-track" id="activity-ticker-track"><div class="spinner" style="width:16px;height:16px"></div></div>
+</div>
+
 <!-- Feed tabs -->
 <div style="display:flex;gap:4px;margin-bottom:16px;background:var(--surface2);border-radius:var(--radius);padding:4px;width:fit-content">
   <button id="tab-all" onclick="switchFeedTab('all')" class="btn btn-primary btn-sm" style="border-radius:calc(var(--radius) - 4px)">🌐 All tasks</button>
@@ -68,7 +74,7 @@
 </div>
 <nav class="mobile-nav-bar" id="mobile-nav"></nav>
 <script type="module">
-import { supabase, esc } from '/assets/js/shared.js';
+import { supabase, esc, RANKS } from '/assets/js/shared.js';
 import { initApp, updateNavPoints, checkOnboarding, initTaskModal } from '/assets/js/app.js';
 const PE={tiktok:'🎵',instagram:'📸',youtube:'▶️',discord:'💬',website:'🌐',twitch:'🟣',twitter:'🐦'};
 const PC={tiktok:'plat-tiktok',instagram:'plat-instagram',youtube:'plat-youtube',discord:'plat-discord',website:'plat-website',twitch:'plat-twitch',twitter:'plat-twitter'};
@@ -83,6 +89,8 @@ async function main(){
   checkOnboarding(profile);
   initTaskModal(onComplete);
   checkBonusEvent();
+  loadActivityTicker();
+  setInterval(loadActivityTicker, 45000);
   await load(true);
 
   // Deep link: /earn/?task=TASK_ID — open a specific task directly (from public profiles)
@@ -95,6 +103,59 @@ async function main(){
     // Clean URL without reloading
     history.replaceState(null, '', '/earn/');
   }
+}
+
+function timeAgo(iso) {
+  const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s/60) + 'm ago';
+  if (s < 86400) return Math.floor(s/3600) + 'h ago';
+  return Math.floor(s/86400) + 'd ago';
+}
+
+async function loadActivityTicker(){
+  const track = document.getElementById('activity-ticker-track');
+  if (!track) return;
+  const { data, error } = await supabase.rpc('get_recent_activity', { p_limit: 20 });
+  if (error || !data || !data.length) {
+    document.getElementById('activity-ticker')?.style.setProperty('display', 'none');
+    return;
+  }
+  track.innerHTML = data.map(ev => {
+    const who = esc(ev.display_name || ev.username);
+    const href = `/u/${encodeURIComponent(ev.username)}`;
+    const time = `<span class="ap-time">· ${timeAgo(ev.happened_at)}</span>`;
+    let icon = '📌', text = '';
+    switch (ev.type) {
+      case 'earned': {
+        const platLabel = ev.platform ? ev.platform.charAt(0).toUpperCase() + ev.platform.slice(1) : '';
+        icon = PE[ev.platform] || '⚡';
+        text = `<strong>${who}</strong> earned +${ev.pts} pts${platLabel ? ' on '+esc(platLabel) : ''}`;
+        break;
+      }
+      case 'posted': {
+        const platLabel = ev.platform ? ev.platform.charAt(0).toUpperCase() + ev.platform.slice(1) : '';
+        icon = '📤';
+        text = `<strong>${who}</strong> posted a ${esc(platLabel)} task`;
+        break;
+      }
+      case 'joined':
+        icon = '🎉';
+        text = `<strong>${who}</strong> joined Next Boost`;
+        break;
+      case 'achievement':
+        icon = ev.meta?.icon || '🎖';
+        text = `<strong>${who}</strong> unlocked "${esc(ev.meta?.title||'an achievement')}"`;
+        break;
+      case 'rank_up': {
+        const tier = RANKS.find(r => r.key === ev.meta?.tier);
+        icon = tier?.icon || '🏆';
+        text = `<strong>${who}</strong> reached ${esc(tier?.name||ev.meta?.tier)} rank`;
+        break;
+      }
+    }
+    return `<a class="activity-pill" href="${href}"><span class="ap-icon">${icon}</span><span>${text}</span>${time}</a>`;
+  }).join('');
 }
 
 async function checkBonusEvent(){

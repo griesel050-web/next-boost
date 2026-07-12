@@ -36,7 +36,7 @@
           <button class="sidebar-btn" onclick="adminTab('users')">👥 Users</button>
           <button class="sidebar-btn" onclick="adminTab('tasks')">📋 Tasks</button>
           <button class="sidebar-btn" onclick="adminTab('reports')">🚩 Reports <span class="reports-count" id="reports-count" style="display:none">0</span></button>
-          <button class="sidebar-btn" onclick="adminTab('suspicious')">🤖 Suspicious</button>
+          <button class="sidebar-btn" onclick="adminTab('suspicious')">🕵️ Fraud & Anti-Cheat</button>
           <button class="sidebar-btn" onclick="adminTab('purchases')">💳 Purchases <span class="reports-count" id="purchase-count" style="display:none">0</span></button>
           <button class="sidebar-btn" onclick="adminTab('broadcast')">📢 Broadcast</button>
           <button class="sidebar-btn" onclick="adminTab('bonus')">🎉 Bonus Events</button>
@@ -102,11 +102,22 @@
           </div>
         </div>
 
-        <!-- SUSPICIOUS -->
+        <!-- SUSPICIOUS / FRAUD -->
         <div id="panel-suspicious" class="admin-panel">
-          <h1 class="admin-title">Suspicious Activity</h1>
-          <p style="color:var(--muted);font-size:0.85rem;margin-bottom:20px">Completions with high cheat scores. Score 60+ = rejected automatically.</p>
-          <div id="suspicious-wrap"><div class="spinner"></div></div>
+          <h1 class="admin-title">Fraud & Anti-Cheat</h1>
+          <p style="color:var(--muted);font-size:0.85rem;margin-bottom:16px">Cheat-score completions, shared-device account clusters, and rate-limit hotspots.</p>
+
+          <div class="stats-grid" id="fraud-summary" style="margin-bottom:24px"><div class="spinner"></div></div>
+
+          <div style="display:flex;gap:4px;margin-bottom:16px;background:var(--surface2);border-radius:var(--radius);padding:4px;width:fit-content">
+            <button class="btn btn-primary btn-sm fraud-subtab" onclick="switchFraudTab('cheat',this)" style="border-radius:calc(var(--radius) - 4px)">🎯 Cheat scores</button>
+            <button class="btn btn-ghost btn-sm fraud-subtab" onclick="switchFraudTab('fingerprints',this)" style="border-radius:calc(var(--radius) - 4px)">🖥️ Shared devices</button>
+            <button class="btn btn-ghost btn-sm fraud-subtab" onclick="switchFraudTab('ratelimit',this)" style="border-radius:calc(var(--radius) - 4px)">⏱️ Rate limits</button>
+          </div>
+
+          <div id="fraud-cheat-wrap"><div id="suspicious-wrap"><div class="spinner"></div></div></div>
+          <div id="fraud-fingerprints-wrap" style="display:none"><div class="spinner"></div></div>
+          <div id="fraud-ratelimit-wrap" style="display:none"><div class="spinner"></div></div>
         </div>
 
         <!-- REPORTS -->
@@ -122,9 +133,16 @@
 
         <!-- PURCHASES -->
         <div id="panel-purchases" class="admin-panel">
-          <h1 class="admin-title">Point Purchases</h1>
-          <p style="color:var(--muted);font-size:0.85rem;margin-bottom:20px">Review PayPal purchase requests. Verify payment in your PayPal account before approving.</p>
+          <h1 class="admin-title">Purchases</h1>
+          <p style="color:var(--muted);font-size:0.85rem;margin-bottom:16px">Review PayPal purchase requests. Verify payment in your PayPal account before approving.</p>
+
+          <div style="display:flex;gap:4px;margin-bottom:16px;background:var(--surface2);border-radius:var(--radius);padding:4px;width:fit-content">
+            <button class="btn btn-primary btn-sm purch-subtab" onclick="switchPurchTab('points',this)" style="border-radius:calc(var(--radius) - 4px)">💳 Points & slots</button>
+            <button class="btn btn-ghost btn-sm purch-subtab" onclick="switchPurchTab('subs',this)" style="border-radius:calc(var(--radius) - 4px)">🌟 Subscriptions <span class="reports-count" id="sub-purchase-count" style="display:none">0</span></button>
+          </div>
+
           <div id="purchases-wrap"><div class="spinner"></div></div>
+          <div id="sub-purchases-wrap" style="display:none"><div class="spinner"></div></div>
         </div>
 
         <!-- BROADCAST -->
@@ -294,7 +312,7 @@
       if (tab === 'users') { usersOffset = 0; loadUsers(true); }
       if (tab === 'tasks') { tasksOffset = 0; loadTasks(true); }
       if (tab === 'reports') { reportsOffset = 0; loadReports(true); }
-      if (tab === 'suspicious') loadSuspicious();
+      if (tab === 'suspicious') { loadSuspicious(); loadFraudSummary(); }
       if (tab === 'purchases') loadPurchases();
       if (tab === 'broadcast') { /* ready */ }
       if (tab === 'bonus') loadBonusEvents();
@@ -728,13 +746,157 @@
       });
     }
 
+    // ---- FRAUD DASHBOARD: sub-tabs, summary, fingerprints, rate limits ----
+    window.switchFraudTab = (which, btn) => {
+      document.querySelectorAll('.fraud-subtab').forEach(b => { b.classList.remove('btn-primary'); b.classList.add('btn-ghost'); });
+      btn.classList.remove('btn-ghost'); btn.classList.add('btn-primary');
+      document.getElementById('fraud-cheat-wrap').style.display = which === 'cheat' ? 'block' : 'none';
+      document.getElementById('fraud-fingerprints-wrap').style.display = which === 'fingerprints' ? 'block' : 'none';
+      document.getElementById('fraud-ratelimit-wrap').style.display = which === 'ratelimit' ? 'block' : 'none';
+      if (which === 'fingerprints') loadFingerprintClusters();
+      if (which === 'ratelimit') loadRateLimitStats();
+    };
+
+    async function loadFraudSummary() {
+      const el = document.getElementById('fraud-summary');
+      const { data, error } = await supabase.rpc('admin_get_fraud_summary');
+      if (error || !data) { el.innerHTML = ''; return; }
+      el.innerHTML = `
+        <div class="stat-card"><div class="stat-card-val">${data.suspicious_completions_24h}</div><div class="stat-card-lbl">Suspicious completions (24h)</div></div>
+        <div class="stat-card"><div class="stat-card-val">${data.shared_fingerprints}</div><div class="stat-card-lbl">Shared-device clusters</div></div>
+        <div class="stat-card"><div class="stat-card-val">${data.rate_limit_events_24h}</div><div class="stat-card-lbl">Rate-limit events (24h)</div></div>
+        <div class="stat-card"><div class="stat-card-val">${data.flagged_users}</div><div class="stat-card-lbl">Flagged users</div></div>
+        <div class="stat-card"><div class="stat-card-val">${data.banned_users}</div><div class="stat-card-lbl">Banned users</div></div>`;
+    }
+
+    async function loadFingerprintClusters() {
+      const wrap = document.getElementById('fraud-fingerprints-wrap');
+      wrap.innerHTML = '<div class="spinner"></div>';
+      const { data, error } = await supabase.rpc('admin_get_fingerprint_clusters', { p_limit: 30 });
+      if (error || !data || !data.length) {
+        wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><p>No devices shared across multiple accounts.</p></div>';
+        return;
+      }
+      wrap.innerHTML = data.map(c => `
+        <div class="card card-pad" style="margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+            <div style="font-size:0.82rem;color:var(--muted)">Device fingerprint <code style="color:var(--text)">${esc((c.fingerprint||'').slice(0,16))}…</code> — used by <strong style="color:var(--text)">${c.account_count} accounts</strong></div>
+            ${c.any_flagged ? '<span class="badge-banned">⚑ Contains flagged account</span>' : ''}
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            ${c.accounts.map(a => `
+              <div style="display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:6px 10px;font-size:0.78rem">
+                <span>${esc(a.username)}${a.is_banned?' 🚫':''}${a.is_flagged?' ⚑':''}</span>
+                <span style="color:var(--muted)">${a.points} pts · ${a.task_completions} completions</span>
+                <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:0.72rem" onclick="window.toggleFlagUser('${a.user_id}',${!a.is_flagged})">${a.is_flagged?'Unflag':'Flag'}</button>
+              </div>`).join('')}
+          </div>
+        </div>`).join('');
+    }
+
+    async function loadRateLimitStats() {
+      const wrap = document.getElementById('fraud-ratelimit-wrap');
+      wrap.innerHTML = '<div class="spinner"></div>';
+      const { data, error } = await supabase.rpc('admin_get_rate_limit_stats', { p_hours: 24, p_limit: 30 });
+      if (error || !data || !data.length) {
+        wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><p>No rate-limit activity in the last 24 hours.</p></div>';
+        return;
+      }
+      wrap.innerHTML = `
+        <div class="admin-table">
+          <div class="admin-table-head" style="grid-template-columns:1.3fr 1fr 0.8fr 0.8fr 0.8fr 1fr">
+            <span>User</span><span>Action</span><span>Events</span><span>Fingerprints</span><span>IPs</span><span>Last event</span>
+          </div>
+          <div>${data.map(r => `
+            <div class="admin-table-row" style="grid-template-columns:1.3fr 1fr 0.8fr 0.8fr 0.8fr 1fr">
+              <span>${esc(r.username || 'Unknown')}${r.is_flagged?' ⚑':''}${r.is_banned?' 🚫':''}</span>
+              <span>${esc(r.action)}</span>
+              <span style="font-weight:700;color:${r.event_count > 50 ? 'var(--red)' : 'var(--text)'}">${r.event_count}</span>
+              <span>${r.distinct_fingerprints}</span>
+              <span>${r.distinct_ips}</span>
+              <span style="color:var(--muted);font-size:0.8rem">${new Date(r.last_event).toLocaleString()}</span>
+            </div>`).join('')}</div>
+        </div>`;
+    }
+
+    window.toggleFlagUser = async (userId, flagged) => {
+      const reason = flagged ? (prompt('Reason for flagging (optional):') || 'Flagged from fraud dashboard') : null;
+      const { data, error } = await supabase.rpc('admin_set_flag', { p_user_id: userId, p_flagged: flagged, p_reason: reason });
+      if (error || data?.error) { alert(data?.error || error.message); return; }
+      loadFingerprintClusters();
+    };
+
     // ---- PURCHASES ----
     async function loadPurchaseCount() {
       const { data } = await supabase.rpc('admin_get_purchases', { p_limit: 100, p_offset: 0 });
       const pending = (data || []).filter(p => p.status === 'pending').length;
+      const { data: subData } = await supabase.rpc('admin_get_subscription_purchases', { p_status: 'pending' });
+      const subPending = (subData || []).length;
       const badge = document.getElementById('purchase-count');
-      if (badge) { badge.textContent = pending; badge.style.display = pending > 0 ? 'inline-flex' : 'none'; }
+      if (badge) { badge.textContent = pending + subPending; badge.style.display = (pending+subPending) > 0 ? 'inline-flex' : 'none'; }
+      const subBadge = document.getElementById('sub-purchase-count');
+      if (subBadge) { subBadge.textContent = subPending; subBadge.style.display = subPending > 0 ? 'inline-flex' : 'none'; }
     }
+
+    window.switchPurchTab = (which, btn) => {
+      document.querySelectorAll('.purch-subtab').forEach(b => { b.classList.remove('btn-primary'); b.classList.add('btn-ghost'); });
+      btn.classList.remove('btn-ghost'); btn.classList.add('btn-primary');
+      document.getElementById('purchases-wrap').style.display = which === 'points' ? 'block' : 'none';
+      document.getElementById('sub-purchases-wrap').style.display = which === 'subs' ? 'block' : 'none';
+      if (which === 'subs') loadSubPurchases();
+    };
+
+    async function loadSubPurchases() {
+      const wrap = document.getElementById('sub-purchases-wrap');
+      wrap.innerHTML = '<div class="spinner"></div>';
+      const { data, error } = await supabase.rpc('admin_get_subscription_purchases', { p_status: null });
+      if (error || !data || !data.length) {
+        wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🌟</div><p>No subscription requests yet.</p></div>';
+        return;
+      }
+      const statusColors = { pending: 'var(--amber)', approved: 'var(--green)', rejected: 'var(--red)' };
+      wrap.innerHTML = `
+        <div class="admin-table">
+          <div class="admin-table-head" style="grid-template-columns:1.5fr 1fr 0.8fr 1fr 1fr 1.5fr">
+            <span>User</span><span>Tier</span><span>Amount</span><span>PayPal Ref</span><span>Status</span><span>Actions</span>
+          </div>
+          <div>${data.map(p => `
+            <div class="admin-table-row" id="sub-purchase-row-${p.id}" style="grid-template-columns:1.5fr 1fr 0.8fr 1fr 1fr 1.5fr">
+              <span><div class="user-name">${esc(p.username)}</div></span>
+              <span style="text-transform:capitalize">${esc(p.tier)}</span>
+              <span style="font-weight:700;color:var(--green)">$${parseFloat(p.usd_amount).toFixed(2)}</span>
+              <span style="font-size:0.8rem;word-break:break-all">${esc(p.paypal_ref||'')}</span>
+              <span style="color:${statusColors[p.status]};font-weight:700;text-transform:capitalize">${p.status}</span>
+              <span class="action-btns">
+                ${p.status === 'pending' ? `
+                  <button class="btn btn-sm" style="background:rgba(61,186,111,0.15);color:var(--green)" onclick="window.approveSubPurchase('${p.id}')">✓ Approve</button>
+                  <button class="btn btn-danger btn-sm" onclick="window.rejectSubPurchase('${p.id}')">✗ Reject</button>
+                ` : '—'}
+              </span>
+            </div>`).join('')}</div>
+        </div>`;
+    }
+
+    window.approveSubPurchase = async (id) => {
+      if (!confirm('Approve this subscription? Make sure you have verified the PayPal payment first!')) return;
+      const { data, error } = await supabase.rpc('admin_review_subscription_purchase', { p_id: id, p_approve: true });
+      if (error || data?.error) { toast(data?.error || error.message, 'error'); return; }
+      toast('Subscription approved!', 'success');
+      document.getElementById('sub-purchase-row-' + id)?.remove();
+      loadPurchaseCount();
+    };
+
+    window.rejectSubPurchase = async (id) => {
+      const reason = prompt('Rejection reason (shown to user):');
+      if (reason === null) return;
+      const { data, error } = await supabase.rpc('admin_review_subscription_purchase', {
+        p_id: id, p_approve: false, p_reason: reason || 'Could not verify payment'
+      });
+      if (error || data?.error) { toast(data?.error || error.message, 'error'); return; }
+      toast('Subscription request rejected.', '');
+      document.getElementById('sub-purchase-row-' + id)?.remove();
+      loadPurchaseCount();
+    };
 
     async function loadPurchases() {
       const wrap = document.getElementById('purchases-wrap');

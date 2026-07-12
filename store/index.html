@@ -167,7 +167,16 @@
       <div class="error-msg" id="slot-err" style="margin-top:8px"></div>
     </div>
 
-        <!-- PURCHASE HISTORY -->
+        <!-- SUBSCRIPTIONS -->
+    <div style="margin-top:48px">
+      <h2 style="font-size:1.1rem;margin-bottom:6px">🌟 Subscriptions</h2>
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:6px">Monthly plans — extra task slots plus a discount on the platform fee every time you post.</p>
+      <p id="current-sub-status" style="font-size:0.82rem;color:var(--orange);margin-bottom:20px"></p>
+      <div class="packages-grid" style="max-width:900px" id="sub-grid"></div>
+      <p style="font-size:0.78rem;color:var(--muted);margin-top:12px">⚠️ Subscriptions use the same PayPal review process. Renews are manual — submit again each month to keep your slots and discount active.</p>
+    </div>
+
+    <!-- PURCHASE HISTORY -->
     <div style="margin-top:40px">
       <h2 style="font-size:1rem;margin-bottom:16px">Purchase history</h2>
       <div id="history-feed"></div>
@@ -176,14 +185,16 @@
 </div>
 <nav class="mobile-nav-bar" id="mobile-nav"></nav>
 <script type="module">
-import { supabase, esc } from '/assets/js/shared.js';
+import { supabase, esc, SUB_TIERS } from '/assets/js/shared.js';
 import { initApp, updateNavPoints } from '/assets/js/app.js';
 
 // ── CONFIG: Your PayPal Me link ──────────────────────────────
 const PAYPAL_ME = 'https://paypal.me/YourPayPalUsername';
 // ────────────────────────────────────────────────────────────
 
-let profile, selectedPkg = null;
+let profile;
+let purchaseMode = null; // 'points' | 'slots' | 'subscription'
+let selectedPkg = null, selectedSlotPack = null, selectedSubTier = null;
 
 async function main() {
   const ctx = await initApp('store');
@@ -192,9 +203,12 @@ async function main() {
   document.getElementById('co-username').textContent = '@' + profile.username;
   loadHistory();
   initSlotPacks();
+  initSubTiers();
 }
 
 window.selectPackage = (card) => {
+  purchaseMode = 'points';
+  selectedSlotPack = null; selectedSubTier = null;
   document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
   card.classList.add('selected');
   selectedPkg = {
@@ -219,10 +233,8 @@ window.selectPackage = (card) => {
 
 window.cancelCheckout = () => {
   document.getElementById('checkout-panel').style.display = 'none';
-  const co = document.getElementById('checkout-card');
-  if (co) { co.dataset.isSlotPurchase = ''; co.dataset.slotPack = ''; }
   document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
-  selectedPkg = null; selectedSlotPack = null;
+  selectedPkg = null; selectedSlotPack = null; selectedSubTier = null; purchaseMode = null;
 };
 
 window.submitPurchase = async () => {
@@ -231,11 +243,10 @@ window.submitPurchase = async () => {
   const btn = document.getElementById('submit-btn');
   errEl.textContent = '';
 
-  const co = document.getElementById('checkout-card');
-  const isSlotPurchase = co?.dataset?.isSlotPurchase === '1';
-  const slotPack = parseInt(co?.dataset?.slotPack || '0');
-
-  if (!isSlotPurchase && !selectedPkg) { errEl.textContent = 'Please select a package.'; return; }
+  if (purchaseMode === 'points' && !selectedPkg) { errEl.textContent = 'Please select a package.'; return; }
+  if (purchaseMode === 'slots' && !selectedSlotPack) { errEl.textContent = 'Please select a slot pack.'; return; }
+  if (purchaseMode === 'subscription' && !selectedSubTier) { errEl.textContent = 'Please select a plan.'; return; }
+  if (!purchaseMode) { errEl.textContent = 'Please select a package.'; return; }
   if (!ref || ref.length < 6) { errEl.textContent = 'Please enter a valid transaction reference.'; return; }
 
   let fp = null;
@@ -248,15 +259,22 @@ window.submitPurchase = async () => {
 
   btn.disabled = true; btn.textContent = 'Submitting…';
 
-  let data, error;
-  if (isSlotPurchase && slotPack) {
+  let data, error, successMsg;
+  if (purchaseMode === 'slots') {
     ({ data, error } = await supabase.rpc('submit_slot_purchase', {
-      p_slot_pack: slotPack, p_paypal_ref: ref, p_fingerprint: fp,
+      p_slot_pack: selectedSlotPack, p_paypal_ref: ref, p_fingerprint: fp,
     }));
+    successMsg = `<strong>Purchase submitted!</strong> Your extra task slots will be added within 24 hours after we verify your payment.`;
+  } else if (purchaseMode === 'subscription') {
+    ({ data, error } = await supabase.rpc('submit_subscription_purchase', {
+      p_tier: selectedSubTier, p_paypal_ref: ref, p_fingerprint: fp,
+    }));
+    successMsg = `<strong>Subscription request submitted!</strong> Your ${SUB_TIERS[selectedSubTier].name} plan will activate within 24 hours after we verify your payment.`;
   } else {
     ({ data, error } = await supabase.rpc('submit_purchase', {
       p_package_id: selectedPkg.id, p_paypal_ref: ref, p_fingerprint: fp,
     }));
+    successMsg = `<strong>Purchase submitted!</strong> Your ${data?.points||''} points will be added within 24 hours after we verify your payment. You'll get a notification.`;
   }
 
   btn.disabled = false; btn.textContent = 'Submit for review';
@@ -265,13 +283,13 @@ window.submitPurchase = async () => {
 
   document.getElementById('checkout-panel').style.display = 'none';
   document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
-  selectedPkg = null;
+  selectedPkg = null; selectedSlotPack = null; selectedSubTier = null; purchaseMode = null;
 
   // Show success
   const success = document.createElement('div');
   success.className = 'alert alert-success';
   success.style.maxWidth = '540px';
-  success.innerHTML = `<strong>Purchase submitted!</strong> Your ${data.points} points will be added within 24 hours after we verify your payment. You'll get a notification.`;
+  success.innerHTML = successMsg;
   document.querySelector('.page-content').insertBefore(success, document.getElementById('history-feed').parentElement);
   setTimeout(() => success.remove(), 8000);
 
@@ -280,13 +298,17 @@ window.submitPurchase = async () => {
 
 async function loadHistory() {
   const feed = document.getElementById('history-feed');
-  const { data, error } = await supabase
-    .from('point_purchases')
-    .select('*')
-    .eq('user_id', profile.id)
-    .order('submitted_at', { ascending: false });
+  const [{ data: pts }, { data: subs }] = await Promise.all([
+    supabase.from('point_purchases').select('*').eq('user_id', profile.id).order('submitted_at', { ascending: false }),
+    supabase.from('subscription_purchases').select('*').eq('user_id', profile.id).order('submitted_at', { ascending: false }),
+  ]);
 
-  if (!data || !data.length) {
+  const combined = [
+    ...(pts||[]).map(p => ({ ...p, _kind: 'points' })),
+    ...(subs||[]).map(s => ({ ...s, _kind: 'subscription' })),
+  ].sort((a,b) => new Date(b.submitted_at) - new Date(a.submitted_at));
+
+  if (!combined.length) {
     feed.innerHTML = '<p style="color:var(--muted);font-size:0.85rem">No purchases yet.</p>';
     return;
   }
@@ -294,15 +316,20 @@ async function loadHistory() {
   const statusIcon = { pending: '⏳', approved: '✅', rejected: '❌' };
   const statusClass = { pending: 'chip-pending', approved: 'chip-approved', rejected: 'chip-rejected' };
 
-  feed.innerHTML = data.map(p => `
+  feed.innerHTML = combined.map(p => {
+    const label = p._kind === 'subscription'
+      ? `${SUB_TIERS[p.tier]?.icon||''} ${SUB_TIERS[p.tier]?.name||p.tier} subscription`
+      : p.purchase_type === 'slots' ? `+${p.slot_pack ? SLOT_PACKS[p.slot_pack]?.slots : ''} task slots` : `${p.points.toLocaleString()} pts`;
+    return `
     <div class="purchase-row">
       <div class="purchase-info">
-        <strong>${p.points.toLocaleString()} pts</strong>
+        <strong>${label}</strong>
         <span style="color:var(--muted);font-size:0.82rem">$${parseFloat(p.usd_amount).toFixed(2)} · Ref: ${esc(p.paypal_ref)} · ${new Date(p.submitted_at).toLocaleDateString()}</span>
         ${p.rejection_reason ? `<span style="color:var(--red);font-size:0.8rem">Rejected: ${esc(p.rejection_reason)}</span>` : ''}
       </div>
       <span class="status-chip ${statusClass[p.status]}">${statusIcon[p.status]} ${p.status}</span>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 // ---- TASK SLOT PACKS ----
@@ -320,28 +347,77 @@ const SLOT_PACKS = {
 };
 
 window.selectSlotPack = (card, pack, label, price) => {
+  purchaseMode = 'slots';
+  selectedPkg = null; selectedSubTier = null;
   document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
   card.classList.add('selected');
   selectedSlotPack = pack;
   showSlotCheckout(pack);
 };
 
-let selectedSlotPack = null;
-
 function showSlotCheckout(pack) {
   const p = SLOT_PACKS[pack];
-  const PAYPAL_ME = document.getElementById('paypal-btn')?.href?.split('?')[0] || 'https://paypal.me/YourPayPalUsername';
-  // Reuse the existing checkout card
-  const co = document.getElementById('checkout-card');
+  const co = document.getElementById('checkout-panel');
   if (!co) return;
   co.style.display = 'block';
-  document.getElementById('co-pkg').textContent = p.label;
-  document.getElementById('co-price').textContent = p.price;
+  co.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  document.getElementById('co-summary').textContent = `${p.label} for ${p.price}`;
+  document.getElementById('co-amount').textContent = p.price;
   const pb = document.getElementById('paypal-btn');
-  if (pb) pb.href = `${PAYPAL_ME}/${p.amount_usd}USD`;
-  // Store slot pack info for submission
-  co.dataset.slotPack = pack;
-  co.dataset.isSlotPurchase = '1';
+  if (pb) pb.href = `${PAYPAL_ME}/${p.amount_usd.toFixed(2)}?currencyCode=USD`;
+};
+
+// ---- SUBSCRIPTIONS ----
+function initSubTiers() {
+  const grid = document.getElementById('sub-grid');
+  if (!grid) return;
+
+  const active = profile.subscription_tier && profile.subscription_expires_at && new Date(profile.subscription_expires_at) > new Date()
+    ? profile.subscription_tier : null;
+  const statusEl = document.getElementById('current-sub-status');
+  if (statusEl) {
+    statusEl.textContent = active
+      ? `You're on the ${SUB_TIERS[active].name} plan until ${new Date(profile.subscription_expires_at).toLocaleDateString()}.`
+      : `You're not subscribed yet — pick a plan below.`;
+  }
+
+  const perks = {
+    pro:   ['+10 task slots', '50% off platform fee', '⚡ Pro badge on your profile'],
+    vip:   ['+25 task slots', '75% off platform fee', '💠 VIP badge on your profile'],
+    elite: ['+60 task slots', '0% platform fee — free posting', '👑 Elite badge on your profile'],
+  };
+
+  grid.innerHTML = Object.values(SUB_TIERS).map(t => `
+    <div class="package-card ${t.key==='vip'?'popular':''} ${active===t.key?'selected':''}" onclick="window.selectSubTier(this,'${t.key}')">
+      ${t.key==='vip' ? '<div class="pkg-popular-badge">Most Popular</div>' : ''}
+      <div class="pkg-badge" style="color:${t.color}">${t.icon} ${t.name}</div>
+      <div class="pkg-price">$${t.usd.toFixed(2)}<span style="font-size:0.7rem;color:var(--muted)">/mo</span></div>
+      <ul class="pkg-features">
+        ${perks[t.key].map(p => `<li>✓ ${p}</li>`).join('')}
+      </ul>
+      <button class="btn ${t.key==='vip'?'btn-primary':'btn-ghost'} btn-full pkg-btn">${active===t.key ? 'Renew' : 'Select'}</button>
+    </div>`).join('');
+}
+
+window.selectSubTier = (card, tier) => {
+  purchaseMode = 'subscription';
+  selectedPkg = null; selectedSlotPack = null;
+  document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedSubTier = tier;
+  showSubCheckout(tier);
+};
+
+function showSubCheckout(tier) {
+  const t = SUB_TIERS[tier];
+  const co = document.getElementById('checkout-panel');
+  if (!co) return;
+  co.style.display = 'block';
+  co.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  document.getElementById('co-summary').textContent = `${t.name} subscription — $${t.usd.toFixed(2)}/mo`;
+  document.getElementById('co-amount').textContent = `$${t.usd.toFixed(2)}`;
+  const pb = document.getElementById('paypal-btn');
+  if (pb) pb.href = `${PAYPAL_ME}/${t.usd.toFixed(2)}?currencyCode=USD`;
 };
 
 main();

@@ -242,7 +242,7 @@ async function loadBoard(board) {
 function buildRow(u, ptField) {
   const isMe = u.id === profile.id;
   const ini = (u.display_name || u.username || '?')[0].toUpperCase();
-  const rank = getRank(u[ptField] || 0);
+  const rank = getRank({ points: u[ptField] || 0, tasks_completed: u.tasks_completed || 0, trust_score: u.trust_score || 0 });
   const rankIcon = `<span title="${esc(rank.name)} rank" style="font-size:0.9rem;line-height:1">${rank.icon}</span>`;
   const badge = u.top_badge ? `<span title="${esc(u.top_badge_title||u.top_badge)}" style="font-size:1rem;line-height:1">${u.top_badge}</span>` : '';
   const streakBadge = (u.current_streak||0)>=7 ? `<span title="${u.current_streak}-day streak" style="font-size:0.72rem;background:rgba(255,100,0,0.15);color:#ff6400;padding:1px 6px;border-radius:999px;font-weight:700">🔥${u.current_streak}</span>` : '';
@@ -307,15 +307,14 @@ window.showUser = (id, name, color, points, done, username, topBadge, topBadgeTi
     ? `<img src="${avatarUrl}" style="width:68px;height:68px;border-radius:50%;object-fit:cover;border:3px solid var(--surface);display:block" loading="lazy" alt=""/>`
     : `<div style="width:68px;height:68px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:1.75rem;font-weight:700;color:#fff;font-family:Space Grotesk,sans-serif;border:3px solid var(--surface)">${ini}</div>`;
 
-  // ── Rank tier (based on points shown for the currently selected board)
-  const rank = getRank(points);
+  // ── Rank tier (composite: points + tasks done + trust, for the currently selected board)
+  const rank = getRank({ points, tasks_completed: done, trust_score: ts });
 
   // ── Badges (rank + achievement badge + streak + verified + trust, all as pills — wraps freely, never breaks layout)
   const badgeParts = [];
-  badgeParts.push(`<span title="${esc(rank.name)} rank — ${rank.min.toLocaleString()}+ pts" style="font-size:0.68rem;background:${rank.color}18;color:${rank.color};border:1px solid ${rank.color}55;border-radius:999px;padding:2px 8px;font-weight:700">${rank.icon} ${esc(rank.name)}</span>`);
+  badgeParts.push(`<span title="${esc(rank.name)} rank — based on points, tasks done, and trust" style="font-size:0.68rem;background:${rank.color}18;color:${rank.color};border:1px solid ${rank.color}55;border-radius:999px;padding:2px 8px;font-weight:700">${rank.icon} ${esc(rank.name)}</span>`);
   if (topBadge) badgeParts.push(`<span title="${esc(topBadgeTitle||'Badge')}" style="font-size:1.2rem;line-height:1">${topBadge}</span>`);
   if (streak >= 3) badgeParts.push(`<span title="${streak}-day streak" style="font-size:0.68rem;background:rgba(255,100,0,0.15);color:#ff6400;border-radius:999px;padding:2px 8px;font-weight:700">🔥 ${streak}</span>`);
-  if (achCount > 0) badgeParts.push(`<span title="${achCount} achievements earned" style="font-size:0.68rem;background:rgba(148,163,184,0.12);color:#94a3b8;border:1px solid rgba(148,163,184,0.3);border-radius:999px;padding:2px 8px;font-weight:700">🎖 ${achCount}</span>`);
   if (isVerified) badgeParts.push(`<span style="font-size:0.68rem;background:rgba(96,165,250,0.12);color:#60a5fa;border:1px solid rgba(96,165,250,0.25);border-radius:999px;padding:2px 8px;font-weight:700">✓ Verified</span>`);
   if (ts > 0) badgeParts.push(`<span style="font-size:0.68rem;background:${tsColor}18;color:${tsColor};border:1px solid ${tsColor}38;border-radius:999px;padding:2px 8px;font-weight:600">🛡 ${ts}/100</span>`);
   document.getElementById('um-badges').innerHTML = badgeParts.join('');
@@ -339,13 +338,6 @@ window.showUser = (id, name, color, points, done, username, topBadge, topBadgeTi
   if (!isMe) {
     actionsEl.innerHTML = `
       <button class="btn btn-primary btn-full" id="follow-btn-modal" onclick="toggleFollow('${id}',this)">+ Follow</button>
-      <div id="mutual-promise-wrap" style="display:none">
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:0.82rem;color:var(--muted);background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:11px 14px">
-          <input type="checkbox" id="mutual-promise-check" onchange="toggleMutualPromise('${id}',this)" style="accent-color:var(--orange);width:15px;height:15px;flex-shrink:0"/>
-          <span>🤝 <strong style="color:var(--text)">Promise mutual follow-back</strong> — I'll follow them back if they follow me</span>
-        </label>
-      </div>
-      <div id="mutual-status" style="font-size:0.78rem;color:var(--muted);min-height:16px;text-align:center"></div>
       <a href="/u/${encodeURIComponent(username)}" class="btn btn-ghost btn-full" style="text-align:center">View full profile →</a>
       <button class="btn btn-ghost btn-full" onclick="closeUserModal()">Close</button>`;
   } else {
@@ -367,27 +359,6 @@ async function loadFollowState(userId) {
   const isFollowing = data.is_following;
   btn.textContent = isFollowing ? '✓ Following' : '+ Follow';
   btn.style.background = isFollowing ? 'var(--surface2)' : '';
-  // Show mutual promise wrap
-  const promiseWrap = document.getElementById('mutual-promise-wrap');
-  const mutualStatus = document.getElementById('mutual-status');
-  if (promiseWrap) {
-    promiseWrap.style.display = 'block';
-    // Check if there's an existing mutual promise
-    const { data: mp } = await supabase.from('mutual_promises')
-      .select('*').eq('from_user', profile.id).eq('to_user', userId).maybeSingle();
-    if (mp) {
-      document.getElementById('mutual-promise-check').checked = true;
-      if (mutualStatus) mutualStatus.textContent = '✅ Mutual promise active — both will follow back';
-    } else {
-      // Check if they promised to follow us
-      const { data: theirPromise } = await supabase.from('mutual_promises')
-        .select('*').eq('from_user', userId).eq('to_user', profile.id).maybeSingle();
-      if (theirPromise && mutualStatus) {
-        mutualStatus.textContent = '🤝 This user has a mutual promise waiting for you!';
-        mutualStatus.style.color = 'var(--orange)';
-      }
-    }
-  }
 }
 
 window.toggleFollow = async (userId, btn) => {
@@ -399,34 +370,8 @@ window.toggleFollow = async (userId, btn) => {
   } else {
     await supabase.rpc('follow_user', { p_target_id: userId });
     btn.textContent = '✓ Following'; btn.style.background = 'var(--surface2)';
-    // Check if they have a mutual promise on us
-    const { data: theirPromise } = await supabase.from('mutual_promises')
-      .select('*').eq('from_user', userId).eq('to_user', profile.id).maybeSingle();
-    const mutualStatus = document.getElementById('mutual-status');
-    if (theirPromise && mutualStatus) {
-      mutualStatus.textContent = '✅ They promised to follow back — check their profile!';
-      mutualStatus.style.color = 'var(--green)';
-    }
   }
   btn.disabled = false;
-};
-
-window.toggleMutualPromise = async (userId, checkbox) => {
-  const mutualStatus = document.getElementById('mutual-status');
-  if (checkbox.checked) {
-    const { error } = await supabase.from('mutual_promises').upsert(
-      { from_user: profile.id, to_user: userId }, { onConflict: 'from_user,to_user' }
-    );
-    if (error) {
-      checkbox.checked = false;
-      if (mutualStatus) mutualStatus.textContent = 'Could not save promise: ' + error.message;
-      return;
-    }
-    if (mutualStatus) { mutualStatus.textContent = '✅ Mutual promise set — you\'ll follow them back!'; mutualStatus.style.color = 'var(--green)'; }
-  } else {
-    await supabase.from('mutual_promises').delete().eq('from_user', profile.id).eq('to_user', userId);
-    if (mutualStatus) { mutualStatus.textContent = ''; }
-  }
 };
 
 window.closeUserModal = () => {

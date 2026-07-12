@@ -465,3 +465,39 @@ body.has-custom-bg { background-attachment: fixed; background-size: cover; backg
   box-shadow: 0 4px 20px rgba(232,98,26,0.45);
   opacity: 0.92;
 }
+
+/* ---- LIVE ACTIVITY TICKER (earn page, etc) ---- */
+.activity-ticker {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 9px 14px; margin-bottom: 18px;
+  overflow: hidden;
+}
+.activity-ticker-label {
+  flex-shrink: 0; font-size: 0.7rem; font-weight: 700; color: #4ade80;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  display: flex; align-items: center; gap: 6px;
+}
+.activity-ticker-label .dot {
+  width: 6px; height: 6px; border-radius: 50%; background: #4ade80;
+  animation: activity-pulse-dot 1.6s infinite;
+}
+@keyframes activity-pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+.activity-ticker-track {
+  display: flex; gap: 8px; overflow-x: auto; flex: 1;
+  scrollbar-width: none; -ms-overflow-style: none;
+}
+.activity-ticker-track::-webkit-scrollbar { display: none; }
+.activity-pill {
+  flex-shrink: 0; display: flex; align-items: center; gap: 6px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 999px; padding: 6px 12px; font-size: 0.78rem; color: var(--muted);
+  white-space: nowrap; cursor: pointer; transition: border-color 0.15s;
+  text-decoration: none;
+}
+.activity-pill:hover { border-color: var(--orange); }
+.activity-pill strong { color: var(--text); font-weight: 600; }
+.activity-pill .ap-time { color: var(--muted2); font-size: 0.72rem; }
+@media (max-width: 640px) {
+  .activity-ticker { flex-direction: column; align-items: flex-start; gap: 8px; }
+}

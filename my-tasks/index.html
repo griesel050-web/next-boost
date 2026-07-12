@@ -21,7 +21,37 @@
   <div class="page-content">
 <h1 class="page-title">My Tasks</h1>
 <p class="page-sub">Closing a task refunds all unused slot points instantly.</p>
+
+<!-- BUNDLES -->
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+  <h3 style="font-size:1rem;margin:0">📦 Task Bundles <span style="color:var(--muted);font-weight:400;font-size:0.82rem">— group your tasks into one shareable link</span></h3>
+  <button class="btn btn-ghost btn-sm" onclick="toggleSelectMode()" id="select-mode-btn">＋ New bundle</button>
+</div>
+<div id="bundles-list" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:22px"></div>
+
 <div id="tasks-feed" class="task-feed"><div class="spinner"></div></div></div>
+</div>
+
+<!-- Sticky bundle-selection bar -->
+<div id="bundle-select-bar" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:200;background:var(--surface);border-top:1px solid var(--border);padding:12px 20px;align-items:center;gap:14px;justify-content:center">
+  <span style="font-size:0.85rem;color:var(--muted)"><strong id="bundle-sel-count" style="color:var(--text)">0</strong> tasks selected (2–6)</span>
+  <button class="btn btn-primary btn-sm" onclick="openBundleCreateModal()" id="bundle-create-btn" disabled>Create bundle</button>
+  <button class="btn btn-ghost btn-sm" onclick="toggleSelectMode()">Cancel</button>
+</div>
+
+<!-- Create bundle modal -->
+<div class="modal-overlay" id="bundle-create-modal">
+  <div class="modal" style="max-width:440px">
+    <h2>📦 Create a bundle</h2>
+    <p class="modal-sub">Give it a name — followers see all selected tasks on one page.</p>
+    <div class="form-group"><label>Bundle name</label><input type="text" id="bundle-name" maxlength="60" placeholder="e.g. Support my socials"/></div>
+    <div class="form-group"><label>Description (optional)</label><textarea id="bundle-desc" maxlength="200" rows="2" placeholder="A quick note for people opening the link"></textarea></div>
+    <div class="error-msg" id="bundle-create-err"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="document.getElementById('bundle-create-modal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitBundleCreate()" id="bundle-submit-btn">Create</button>
+    </div>
+  </div>
 </div>
 <nav class="mobile-nav-bar" id="mobile-nav"></nav>
 <script type="module">
@@ -48,12 +78,15 @@ function prettyTarget(url, platform) {
   return (PLAT_NAMES[platform] || platform) + ' — ' + prettyHandle(url, platform);
 }
 let profile;
+let selectMode = false;
+const selectedTaskIds = new Set();
 
 async function main(){
   const ctx=await initApp('my-tasks');
   if(!ctx) return;
   profile=ctx.profile;
   await loadTasks();
+  await loadBundles();
 }
 
 async function loadTasks(){
@@ -107,6 +140,7 @@ async function loadTasks(){
       const card=document.createElement('div');
       card.className='task-card card-animate'; card.style.setProperty('--delay',`${i*0.04}s`);
       card.innerHTML=`
+        ${selectMode && t.is_active ? `<label class="bundle-check-wrap" style="display:flex;align-items:center;padding-right:4px" title="Select for bundle"><input type="checkbox" ${selectedTaskIds.has(t.id)?'checked':''} onchange="window.toggleTaskSelect('${t.id}',this.checked)" style="width:18px;height:18px;accent-color:var(--orange)"/></label>` : ''}
         <div class="task-plat-icon ${PC[t.platform]||'plat-website'}"></div>
         <div class="task-info">
           <h4>${esc(prettyTarget(t.target, t.platform))}</h4>
@@ -145,6 +179,98 @@ window.boostTask=async(id)=>{
   const {data:p}=await supabase.from('profiles').select('points').eq('id',profile.id).single();
   if(p){profile.points=p.points;updateNavPoints(p.points);}
   loadTasks();
+};
+
+window.toggleSelectMode = () => {
+  selectMode = !selectMode;
+  selectedTaskIds.clear();
+  document.getElementById('select-mode-btn').textContent = selectMode ? '✕ Cancel selection' : '＋ New bundle';
+  document.getElementById('bundle-select-bar').style.display = selectMode ? 'flex' : 'none';
+  updateBundleBar();
+  loadTasks();
+};
+
+window.toggleTaskSelect = (id, checked) => {
+  if (checked) {
+    if (selectedTaskIds.size >= 6) { alert('Max 6 tasks per bundle.'); loadTasks(); return; }
+    selectedTaskIds.add(id);
+  } else {
+    selectedTaskIds.delete(id);
+  }
+  updateBundleBar();
+};
+
+function updateBundleBar() {
+  const n = selectedTaskIds.size;
+  document.getElementById('bundle-sel-count').textContent = n;
+  document.getElementById('bundle-create-btn').disabled = n < 2 || n > 6;
+}
+
+window.openBundleCreateModal = () => {
+  if (selectedTaskIds.size < 2) return;
+  document.getElementById('bundle-name').value = '';
+  document.getElementById('bundle-desc').value = '';
+  document.getElementById('bundle-create-err').textContent = '';
+  document.getElementById('bundle-create-modal').classList.add('open');
+};
+
+window.submitBundleCreate = async () => {
+  const name = document.getElementById('bundle-name').value.trim();
+  const desc = document.getElementById('bundle-desc').value.trim();
+  const errEl = document.getElementById('bundle-create-err');
+  const btn = document.getElementById('bundle-submit-btn');
+  if (!name) { errEl.textContent = 'Please give your bundle a name.'; return; }
+  btn.disabled = true; btn.textContent = 'Creating…';
+  const { data, error } = await supabase.rpc('create_task_bundle', {
+    p_name: name, p_description: desc || null, p_task_ids: Array.from(selectedTaskIds)
+  });
+  btn.disabled = false; btn.textContent = 'Create';
+  if (error || data?.error) { errEl.textContent = data?.error || error.message; return; }
+  document.getElementById('bundle-create-modal').classList.remove('open');
+  window.toggleSelectMode();
+  await loadBundles();
+};
+
+async function loadBundles() {
+  const wrap = document.getElementById('bundles-list');
+  const { data, error } = await supabase.rpc('get_my_bundles');
+  if (error || !data || !data.length) {
+    wrap.innerHTML = `<p style="color:var(--muted);font-size:0.85rem">No bundles yet — select 2–6 active tasks above to create one.</p>`;
+    return;
+  }
+  wrap.innerHTML = data.map(b => `
+    <div class="card card-pad" style="width:260px;display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div>
+          <div style="font-weight:700;font-size:0.92rem">${esc(b.name)}</div>
+          <div style="font-size:0.76rem;color:var(--muted)">${b.task_count} tasks · ${b.total_points} pts total</div>
+        </div>
+        <span class="status-chip ${b.is_active?'chip-active':'chip-closed'}">${b.is_active?'Live':'Hidden'}</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="window.copyBundleLink('${b.id}')">🔗 Copy link</button>
+        <button class="btn btn-ghost btn-sm" onclick="window.toggleBundleActive('${b.id}',${b.is_active})">${b.is_active?'Hide':'Unhide'}</button>
+        <button class="btn btn-ghost btn-sm" onclick="window.deleteBundle('${b.id}')" style="color:#f87171">Delete</button>
+      </div>
+    </div>`).join('');
+}
+
+window.copyBundleLink = (id) => {
+  const url = `${location.origin}/b/?id=${id}`;
+  navigator.clipboard.writeText(url).then(() => alert('Link copied!\n' + url)).catch(() => prompt('Copy this link:', url));
+};
+
+window.toggleBundleActive = async (id, current) => {
+  const { error } = await supabase.from('task_bundles').update({ is_active: !current }).eq('id', id);
+  if (error) { alert(error.message); return; }
+  loadBundles();
+};
+
+window.deleteBundle = async (id) => {
+  if (!confirm('Delete this bundle? The individual tasks stay untouched.')) return;
+  const { error } = await supabase.from('task_bundles').delete().eq('id', id);
+  if (error) { alert(error.message); return; }
+  loadBundles();
 };
 
 main();

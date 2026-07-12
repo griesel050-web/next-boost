@@ -125,35 +125,53 @@ export const SOCIAL_PLATFORMS = [
   { key: 'twitch',    label: 'Twitch',      placeholder: 'https://twitch.tv/yourhandle' },
 ];
 
+// ---- SUBSCRIPTION TIERS ---- (keep in sync with subscription_tier_info SQL function)
+export const SUB_TIERS = {
+  pro:   { key: 'pro',   name: 'Pro',   icon: '⚡', color: '#60a5fa', usd: 4.99,  slots: 10, feeDiscount: 0.50 },
+  vip:   { key: 'vip',   name: 'VIP',   icon: '💠', color: '#a78bfa', usd: 9.99,  slots: 25, feeDiscount: 0.75 },
+  elite: { key: 'elite', name: 'Elite', icon: '👑', color: '#f59e0b', usd: 19.99, slots: 60, feeDiscount: 1.00 },
+};
+
 // ---- RANK SYSTEM ----
-// Tiers are based on lifetime points. Extend this array to add more tiers later.
+// Tiers are based on a composite score (points + tasks completed + trust), not raw points alone —
+// grinding out tasks and staying trustworthy both matter, not just accumulating points.
 export const RANKS = [
   { key: 'bronze',   name: 'Bronze',   icon: '🥉', min: 0,     color: '#cd7f32' },
-  { key: 'silver',   name: 'Silver',   icon: '🥈', min: 250,   color: '#c0c0c0' },
-  { key: 'gold',     name: 'Gold',     icon: '🥇', min: 750,   color: '#ffd700' },
-  { key: 'diamond',  name: 'Diamond',  icon: '💎', min: 1500,  color: '#7dd3fc' },
-  { key: 'ruby',     name: 'Ruby',     icon: '♦️', min: 3000,  color: '#e0115f' },
-  { key: 'emerald',  name: 'Emerald',  icon: '🟢', min: 6000,  color: '#50c878' },
-  { key: 'sapphire', name: 'Sapphire', icon: '🔷', min: 12000, color: '#0f52ba' },
-  { key: 'legend',   name: 'Legend',   icon: '👑', min: 25000, color: '#f59e0b' },
+  { key: 'silver',   name: 'Silver',   icon: '🥈', min: 400,   color: '#c0c0c0' },
+  { key: 'gold',     name: 'Gold',     icon: '🥇', min: 1000,  color: '#ffd700' },
+  { key: 'diamond',  name: 'Diamond',  icon: '💎', min: 2000,  color: '#7dd3fc' },
+  { key: 'ruby',     name: 'Ruby',     icon: '♦️', min: 4000,  color: '#e0115f' },
+  { key: 'emerald',  name: 'Emerald',  icon: '🟢', min: 8000,  color: '#50c878' },
+  { key: 'sapphire', name: 'Sapphire', icon: '🔷', min: 16000, color: '#0f52ba' },
+  { key: 'legend',   name: 'Legend',   icon: '👑', min: 32000, color: '#f59e0b' },
 ];
 
-// Returns the rank tier for a given points total, plus progress info toward the next tier.
-export function getRank(points) {
-  points = points || 0;
+// Composite rank score — mirrors the `compute_rank_score` SQL function, keep both in sync.
+export function computeRankScore(input) {
+  const points = input?.points || 0;
+  const tasksCompleted = input?.tasks_completed || 0;
+  const trustScore = input?.trust_score || 0;
+  return points + tasksCompleted * 15 + trustScore * 8;
+}
+
+// Returns the rank tier for a profile-like object ({points, tasks_completed, trust_score}),
+// plus progress info toward the next tier. Also accepts a raw number for convenience.
+export function getRank(input) {
+  const score = typeof input === 'number' ? input : computeRankScore(input);
   let current = RANKS[0];
   let next = null;
   for (let i = 0; i < RANKS.length; i++) {
-    if (points >= RANKS[i].min) current = RANKS[i];
+    if (score >= RANKS[i].min) current = RANKS[i];
     else { next = RANKS[i]; break; }
   }
   const progress = next
-    ? Math.max(0, Math.min(100, Math.round(((points - current.min) / (next.min - current.min)) * 100)))
+    ? Math.max(0, Math.min(100, Math.round(((score - current.min) / (next.min - current.min)) * 100)))
     : 100;
   return {
     ...current,
+    score,
     next,
-    pointsToNext: next ? next.min - points : 0,
+    pointsToNext: next ? next.min - score : 0,
     progress,
   };
 }
