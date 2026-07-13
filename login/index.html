@@ -34,17 +34,26 @@
 
       <div class="form-group">
         <label for="email">Email</label>
-        <input type="email" id="email" placeholder="you@email.com" autocomplete="email"/>
+        <div class="input-icon-wrap">
+          <i data-lucide="mail" data-size="16"></i>
+          <input type="email" id="email" placeholder="you@email.com" autocomplete="email"/>
+        </div>
       </div>
       <div class="form-group">
         <label for="password">Password</label>
-        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password"/>
+        <div class="input-icon-wrap">
+          <i data-lucide="lock" data-size="16"></i>
+          <input type="password" id="password" placeholder="••••••••" autocomplete="current-password"/>
+          <button type="button" class="pw-toggle" id="pw-toggle" aria-label="Show password" data-size="16">
+            <i data-lucide="eye" data-size="16"></i>
+          </button>
+        </div>
       </div>
       <div style="text-align:right;margin-top:-10px;margin-bottom:18px;">
         <a href="/reset-password/" style="font-size:0.83rem;color:var(--muted)">Forgot password?</a>
       </div>
-      <div class="error-msg" id="err"></div>
-      <button class="btn btn-primary btn-full" id="login-btn" onclick="doLogin()">Log in</button>
+      <div class="error-msg" id="err" role="alert" aria-live="polite"></div>
+      <button class="btn btn-primary btn-full" id="login-btn" onclick="doLogin()" data-magnetic>Log in</button>
       <div class="auth-footer">
         Don't have an account? <a href="/signup/">Sign up free</a>
       </div>
@@ -52,11 +61,24 @@
   </div>
 
   <script type="module">
+    import '/assets/js/app.js';
     import { supabase, go, toast } from '/assets/js/shared.js';
 
     // Redirect if already logged in
     const { data: { session } } = await supabase.auth.getSession();
     if (session) go('/earn/');
+
+    const pwInput = document.getElementById('password');
+    document.getElementById('pw-toggle').addEventListener('click', (e) => {
+      const btn = e.currentTarget;
+      const showing = pwInput.type === 'text';
+      pwInput.type = showing ? 'password' : 'text';
+      btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+      btn.innerHTML = '';
+      btn.appendChild(document.createElement('i')).setAttribute('data-lucide', showing ? 'eye' : 'eye-off');
+      btn.firstChild.setAttribute('data-size', '16');
+      import('/src/icons.js').then(({ renderIcons }) => renderIcons(btn));
+    });
 
     window.doLogin = async () => {
       const email = document.getElementById('email').value.trim();
@@ -68,7 +90,7 @@
       if (!email || !password) { errEl.textContent = 'Please fill in all fields.'; return; }
 
       btn.disabled = true;
-      btn.textContent = 'Logging in…';
+      btn.innerHTML = '<span class="btn-spinner"></span> Logging in…';
 
       const { error } = await supabase.auth.signInWithPassword({ email, password });
 

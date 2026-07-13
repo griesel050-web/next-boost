@@ -1,15 +1,22 @@
 <!DOCTYPE html>
 <html><head>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&display=swap"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/><meta charset="UTF-8"/>
-<meta http-equiv="refresh" content="0;url=/earn/"/>
-<title>Redirecting…</title>
+  <meta charset="UTF-8"/>
+  <meta http-equiv="refresh" content="0;url=/earn/"/>
+  <title>Redirecting…</title>
   <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico"/>
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png"/>
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png"/>
+  <style>
+    html,body{background:#0e0b09;height:100%;margin:0}
+    .spin{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+    .spin::after{content:'';width:28px;height:28px;border-radius:50%;
+      border:2.5px solid #3a2a22;border-top-color:#E8621A;
+      animation:sp .7s linear infinite}
+    @keyframes sp{to{transform:rotate(360deg)}}
+    @media (prefers-reduced-motion: reduce){.spin::after{animation:none}}
+  </style>
 </head>
 <body>
+<div class="spin"></div>
 <script>window.location.replace('/earn/');</script>
 </body></html>

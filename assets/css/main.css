@@ -439,6 +439,21 @@ h1, h2, h3, h4, h5 { font-family: 'Space Grotesk', sans-serif; line-height: 1.2;
   align-items: center;
   justify-content: center;
   padding: 32px 20px;
+  position: relative;
+  overflow: hidden;
+}
+.auth-page::before {
+  content: '';
+  position: absolute;
+  top: -180px; left: 50%;
+  transform: translateX(-50%);
+  width: 700px; height: 500px;
+  background: radial-gradient(ellipse at center, rgba(var(--orange-rgb),0.13) 0%, transparent 68%);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .auth-card { animation: authIn 0.4s var(--ease-out) both; }
+  @keyframes authIn { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: none; } }
 }
 .auth-card {
   background: var(--surface);
@@ -447,6 +462,8 @@ h1, h2, h3, h4, h5 { font-family: 'Space Grotesk', sans-serif; line-height: 1.2;
   padding: 40px 36px;
   width: 100%;
   max-width: 420px;
+  position: relative;
+  box-shadow: var(--shadow);
 }
 .auth-logo { margin-bottom: 32px; }
 .auth-logo img { height: 34px; }
@@ -454,6 +471,39 @@ h1, h2, h3, h4, h5 { font-family: 'Space Grotesk', sans-serif; line-height: 1.2;
 .auth-card .auth-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 28px; }
 .auth-footer { text-align: center; margin-top: 22px; font-size: 0.85rem; color: var(--muted); }
 .auth-footer a { color: var(--orange); font-weight: 600; }
+
+/* ---- ICON-PREFIXED INPUTS (auth forms) ---- */
+.input-icon-wrap { position: relative; }
+.input-icon-wrap .lucide-icon {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  color: var(--muted); pointer-events: none;
+}
+.input-icon-wrap input { padding-left: 42px !important; }
+.input-icon-wrap .pw-toggle {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: var(--muted); padding: 6px;
+  display: flex; border-radius: 6px; transition: color 0.15s;
+}
+.input-icon-wrap .pw-toggle:hover { color: var(--text); }
+
+/* ---- BUTTON LOADING SPINNER ---- */
+.btn .btn-spinner {
+  width: 15px; height: 15px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.35); border-top-color: #fff;
+  animation: sp 0.7s linear infinite;
+}
+@keyframes sp { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .btn .btn-spinner { animation: none; } }
+
+/* ---- PASSWORD STRENGTH METER ---- */
+.pw-bar {
+  height: 3px; flex: 1; border-radius: 2px;
+  background: var(--border2);
+  transition: background 0.2s ease;
+}
+.pw-bar.pw-bar-on:nth-child(1) { background: var(--red); }
+.pw-bar.pw-bar-on:nth-child(2) { background: var(--amber); }
+.pw-bar.pw-bar-on:nth-child(3) { background: var(--green); }
 
 /* ---- FOOTER ---- */
 .footer {
