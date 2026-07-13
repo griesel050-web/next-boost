@@ -2,7 +2,9 @@
 // NEXT BOOST — app.js  (complete rebuild)
 // ============================================================
 import { supabase, esc } from './shared.js';
-export { supabase };
+import { renderIcons } from '../../src/icons.js';
+import '../../src/motion.js';
+export { supabase, renderIcons };
 
 function toast(msg, type='', duration=3600, isHtml=false){
   let el=document.getElementById('nb-toast');

@@ -1,0 +1,27 @@
+User-agent: *
+Allow: /
+Allow: /signup/
+Allow: /leaderboard/
+Allow: /guides/
+
+# Keep app pages private from crawlers
+Disallow: /dashboard/
+Disallow: /login/
+Disallow: /reset-password/
+Disallow: /confirm-email/
+Disallow: /settings/
+Disallow: /profile/
+Disallow: /referral/
+Disallow: /achievements/
+Disallow: /my-tasks/
+Disallow: /completed/
+Disallow: /post-task/
+Disallow: /store/
+Disallow: /admin/
+Disallow: /analytics/
+Disallow: /earn/
+Disallow: /u/
+Disallow: /task/
+Disallow: /share/
+
+Sitemap: https://boost.nexosites.xyz/sitemap.xml

@@ -11,13 +11,31 @@
   top: -100px; left: 50%;
   transform: translateX(-50%);
   width: 800px; height: 500px;
-  background: radial-gradient(ellipse at center, rgba(232,98,26,0.1) 0%, transparent 68%);
+  background: radial-gradient(ellipse at center, rgba(232,98,26,0.14) 0%, transparent 68%);
+  pointer-events: none;
+  animation: heroGlowPulse 8s ease-in-out infinite;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  top: 40px; left: 50%;
+  transform: translateX(-58%);
+  width: 500px; height: 300px;
+  background: radial-gradient(ellipse at center, rgba(240,160,48,0.10) 0%, transparent 70%);
   pointer-events: none;
 }
+@keyframes heroGlowPulse {
+  0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+  50%      { opacity: 0.75; transform: translateX(-50%) scale(1.06); }
+}
+@media (prefers-reduced-motion: reduce) { .hero::before { animation: none; } }
 .hero-inner { position: relative; max-width: 700px; margin: 0 auto; }
 .hero-eyebrow {
-  display: inline-block;
-  background: var(--surface2);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(var(--surface-rgb), 0.6);
+  backdrop-filter: blur(10px);
   border: 1px solid var(--border2);
   border-radius: 20px;
   padding: 6px 18px;
@@ -26,6 +44,7 @@
   margin-bottom: 28px;
   letter-spacing: 0.04em;
 }
+.hero-eyebrow .lucide-icon { color: var(--orange-lt); }
 .hero-title {
   font-size: clamp(2.6rem, 6vw, 4.2rem);
   font-weight: 700;
@@ -84,7 +103,15 @@
   transition: opacity 0.2s;
 }
 .step-card:hover::before { opacity: 1; }
-.step-icon { font-size: 1.9rem; margin-bottom: 14px; }
+.step-icon {
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, rgba(var(--orange-rgb),0.16), rgba(var(--orange-rgb),0.04));
+  border: 1px solid rgba(var(--orange-rgb),0.18);
+  color: var(--orange-lt);
+}
 .step-card h3 { font-size: 1.02rem; margin-bottom: 9px; }
 .step-card p { font-size: 0.86rem; color: var(--muted); line-height: 1.68; }
 
