@@ -404,7 +404,9 @@ async function main() {
   document.getElementById('social-links-list').innerHTML = SOCIAL_PLATFORMS.map(p => `
     <div style="display:flex;align-items:center;gap:10px">
       <div class="task-plat-icon ${PLAT_CLASS[p.key]}" style="width:36px;height:36px;border-radius:8px;flex-shrink:0"></div>
-      <input type="url" id="social-${p.key}" placeholder="${p.placeholder}" value="${links[p.key] ? links[p.key].replace(/"/g,'&quot;') : ''}" style="flex:1;min-width:0"/>
+      <div class="form-group" style="margin-bottom:0;flex:1;min-width:0">
+        <input type="url" id="social-${p.key}" placeholder="${p.placeholder}" value="${links[p.key] ? links[p.key].replace(/"/g,'&quot;') : ''}"/>
+      </div>
     </div>`).join('');
 
   // Apply compact mode live
