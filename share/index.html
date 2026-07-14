@@ -21,8 +21,10 @@
     .share-stat-btn .ssb-lbl { font-size: 0.72rem; color: var(--muted); }
     .share-dl-row { display: flex; gap: 10px; }
   </style>
-  <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico"/>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png"/>
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/img/favicon-192.png"/>
+  <link rel="icon" type="image/png" sizes="512x512" href="/assets/img/favicon-512.png"/>
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png"/>
 </head>
 <body>
@@ -40,7 +42,7 @@
         <p style="font-size:0.8rem;color:var(--muted);margin:0">Choose what to highlight:</p>
         <div class="share-row" id="stat-btns"></div>
         <div class="share-dl-row">
-          <button class="btn btn-primary" style="flex:1" onclick="downloadCard()">⬇ Download card</button>
+          <button class="btn btn-primary" style="flex:1" onclick="downloadCard()"><i data-lucide="download" data-size="14"></i> Download card</button>
           <button class="btn btn-ghost" onclick="copyCard()"><i data-lucide="clipboard" data-size="14"></i> Copy image</button>
         </div>
         <p style="font-size:0.75rem;color:var(--muted);margin:0;text-align:center">Click the card or Download to save as PNG</p>

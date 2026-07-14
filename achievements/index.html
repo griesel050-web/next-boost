@@ -13,8 +13,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <link rel="stylesheet" href="/assets/css/main.css"/>
   <link rel="stylesheet" href="/assets/css/app.css"/>
-  <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico"/>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png"/>
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/img/favicon-192.png"/>
+  <link rel="icon" type="image/png" sizes="512x512" href="/assets/img/favicon-512.png"/>
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png"/>
 </head>
 <body>
@@ -30,6 +32,7 @@
 <script type="module">
 import { supabase, esc } from '/assets/js/shared.js';
 import { initApp } from '/assets/js/app.js';
+import { iconSVG } from '/src/icons.js';
 
 async function main(){
   const ctx=await initApp('achievements');
@@ -50,17 +53,17 @@ async function main(){
       card.className=`ach-card card-animate${done?' earned':''}`;
       card.style.setProperty('--delay',`${i*0.04}s`);
       card.innerHTML=`
-        <div class="ach-icon">${a.icon}</div>
+        <div class="ach-icon">${iconSVG(a.icon,26) || a.icon}</div>
         <div>
           <div class="ach-title">${esc(a.title)}</div>
           <div class="ach-desc">${esc(a.description)}</div>
           ${a.points_reward>0?`<div class="ach-pts">+${a.points_reward} pts reward</div>`:''}
-          ${done?'<div class="ach-earned-badge">✓ Earned</div>':''}
+          ${done?`<div class="ach-earned-badge">${iconSVG('check',12)} Earned</div>`:''}
         </div>`;
       grid.appendChild(card);
     });
   }catch(e){
-    grid.innerHTML=`<div class="empty-state"><div class="empty-icon">⚠️</div><p>${esc(e.message)}</p></div>`;
+    grid.innerHTML=`<div class="empty-state"><div class="empty-icon">${iconSVG('alert-triangle',28)}</div><p>${esc(e.message)}</p></div>`;
   }
 }
 main();

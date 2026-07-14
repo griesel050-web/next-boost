@@ -8,8 +8,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Profile — Next Boost</title>
   <meta name="description" content="View this creator's profile on Next Boost — their stats, badges, active tasks and more."/>
-  <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico"/>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png"/>
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/img/favicon-192.png"/>
+  <link rel="icon" type="image/png" sizes="512x512" href="/assets/img/favicon-512.png"/>
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png"/>
   <link rel="stylesheet" href="/assets/css/main.css"/>
   <link rel="stylesheet" href="/assets/css/app.css"/>
@@ -225,14 +227,14 @@ async function main() {
 
   const username = getUsernameFromUrl();
   if (!username) {
-    document.getElementById('pub-root').innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>No username specified.</p><div class="empty-cta"><a href="/leaderboard/" class="btn btn-primary btn-sm">Browse creators</a></div></div>`;
+    document.getElementById('pub-root').innerHTML = `<div class="empty-state"><div class="empty-icon">${iconSVG('search',28)}</div><p>No username specified.</p><div class="empty-cta"><a href="/leaderboard/" class="btn btn-primary btn-sm">Browse creators</a></div></div>`;
     return;
   }
 
   const { data: p, error } = await supabase.rpc('get_user_profile', { p_username: username });
 
   if (error || !p) {
-    document.getElementById('pub-root').innerHTML = `<div class="empty-state"><div class="empty-icon">👤</div><p>User <strong>@${esc(username)}</strong> not found.</p><div class="empty-cta"><a href="/leaderboard/" class="btn btn-primary btn-sm">Browse creators</a></div></div>`;
+    document.getElementById('pub-root').innerHTML = `<div class="empty-state"><div class="empty-icon">${iconSVG('user',28)}</div><p>User <strong>@${esc(username)}</strong> not found.</p><div class="empty-cta"><a href="/leaderboard/" class="btn btn-primary btn-sm">Browse creators</a></div></div>`;
     return;
   }
 
@@ -251,14 +253,14 @@ async function main() {
     const st = SUB_TIERS[p.subscription_tier];
     if (st) badges.push(`<span class="pub-badge" style="color:${st.color};border-color:${st.color}44;background:${st.color}18" title="${st.name} subscriber">${iconSVG(st.icon,13)} ${st.name}</span>`);
   }
-  if (p.is_verified) badges.push(`<span class="pub-badge" style="color:#60a5fa;border-color:#60a5fa44">✓ Verified</span>`);
+  if (p.is_verified) badges.push(`<span class="pub-badge" style="color:#60a5fa;border-color:#60a5fa44">${iconSVG('circle-check',12)} Verified</span>`);
   const ts = p.trust_score || 0;
   if (ts > 0) {
     const tc = ts >= 80 ? '#4ade80' : ts >= 50 ? '#f59e0b' : '#94a3b8';
-    badges.push(`<span class="pub-badge" style="color:${tc};border-color:${tc}44">🛡 Trust ${ts}/100</span>`);
+    badges.push(`<span class="pub-badge" style="color:${tc};border-color:${tc}44">${iconSVG('shield-check',12)} Trust ${ts}/100</span>`);
   }
-  if ((p.streak||0) >= 7) badges.push(`<span class="pub-badge">🔥 ${p.streak}d streak</span>`);
-  if (p.rank) badges.push(`<span class="pub-badge">📈 Leaderboard #${p.rank}</span>`);
+  if ((p.streak||0) >= 7) badges.push(`<span class="pub-badge">${iconSVG('flame',12)} ${p.streak}d streak</span>`);
+  if (p.rank) badges.push(`<span class="pub-badge">${iconSVG('trending-up',12)} Leaderboard #${p.rank}</span>`);
 
   const isOwn    = p.is_own_profile;
   const isFollow = p.viewer_is_following;
@@ -270,7 +272,7 @@ async function main() {
   } else if (ctx) {
     followWrap = `
       <button id="pub-follow-btn" class="btn ${isFollow ? 'btn-ghost' : 'btn-primary'}" style="flex:1" onclick="toggleFollow('${p.id}',this)">
-        ${isFollow ? '✓ Following' : '+ Follow'}
+        ${isFollow ? `${iconSVG('check',13)} Following` : `${iconSVG('users',13)} Follow`}
       </button>`;
   } else {
     followWrap = `<a href="/signup/" class="btn btn-primary" style="flex:1">Sign up to follow</a>`;
@@ -287,7 +289,7 @@ async function main() {
     } else if (isOwn) {
       action = `<span class="pts-badge" style="opacity:0.5">Your task</span>`;
     } else if (done) {
-      action = `<span class="pts-badge" style="background:rgba(74,222,128,0.1);color:#4ade80;border-color:#4ade8044">✓ Done</span>`;
+      action = `<span class="pts-badge" style="background:rgba(74,222,128,0.1);color:#4ade80;border-color:#4ade8044">${iconSVG('circle-check',12)} Done</span>`;
     } else if (slots <= 0) {
       action = `<span class="pts-badge" style="opacity:0.5">Full</span>`;
     } else {
@@ -297,7 +299,7 @@ async function main() {
       <div class="task-plat-icon ${PC[t.platform]||'plat-website'}"></div>
       <div class="pub-task-info">
         <div class="pub-task-name">${esc(PLAT[t.platform]||t.platform)} — ${TL[t.type]||t.type}</div>
-        <div class="pub-task-sub">${slots} slots left · +${t.points_reward} pts${t.is_boosted ? ' · ⚡ Boosted' : ''}</div>
+        <div class="pub-task-sub">${slots} slots left · +${t.points_reward} pts${t.is_boosted ? ` · ${iconSVG('zap',11)} Boosted` : ''}</div>
       </div>
       ${action}
     </div>`;
@@ -307,7 +309,7 @@ async function main() {
   const achs = p.achievements || [];
   const achsHtml = achs.length ? `
     <div class="pub-ach-grid">
-      ${achs.map(a => `<div class="pub-ach" title="${esc(a.description||a.title)}"><span style="font-size:1.3rem;line-height:1">${a.icon||'🎖'}</span><span>${esc(a.title)}</span></div>`).join('')}
+      ${achs.map(a => `<div class="pub-ach" title="${esc(a.description||a.title)}"><span style="display:inline-flex">${iconSVG(a.icon,20) || iconSVG('award',20)}</span><span>${esc(a.title)}</span></div>`).join('')}
     </div>` : '';
 
   const joined = p.created_at ? new Date(p.created_at).toLocaleDateString('en-US',{month:'long',year:'numeric'}) : '';
@@ -334,7 +336,7 @@ async function main() {
         <div class="pub-stat"><div class="pub-stat-val">${(p.points||0).toLocaleString()}</div><div class="pub-stat-lbl">Points</div></div>
         <div class="pub-stat"><div class="pub-stat-val">${p.tasks_completed||0}</div><div class="pub-stat-lbl">Done</div></div>
         <div class="pub-stat"><div class="pub-stat-val">${p.followers_count||0}</div><div class="pub-stat-lbl">Followers</div></div>
-        <div class="pub-stat"><div class="pub-stat-val">${p.streak||0}🔥</div><div class="pub-stat-lbl">Streak</div></div>
+        <div class="pub-stat"><div class="pub-stat-val" style="display:flex;align-items:center;justify-content:center;gap:4px">${p.streak||0} ${iconSVG('flame',15)}</div><div class="pub-stat-lbl">Streak</div></div>
       </div>
       ${socialsHtml ? `<div class="pub-socials">${socialsHtml}</div>` : ''}
       <div class="pub-follow-wrap">${followWrap}</div>
@@ -342,19 +344,19 @@ async function main() {
 
     ${tasksHtml ? `<div class="pub-section"><div class="pub-section-title">Active tasks (${tasks.length})</div>${tasksHtml}</div>` : ''}
     ${achsHtml  ? `<div class="pub-section"><div class="pub-section-title">Achievements (${achs.length})</div>${achsHtml}</div>` : ''}
-    ${!tasksHtml && !achsHtml ? `<div class="empty-state"><div class="empty-icon">🌱</div><p>This creator is just getting started.</p></div>` : ''}
+    ${!tasksHtml && !achsHtml ? `<div class="empty-state"><div class="empty-icon">${iconSVG('recycle',28)}</div><p>This creator is just getting started.</p></div>` : ''}
   `;
 }
 
 window.toggleFollow = async (userId, btn) => {
-  const wasFollowing = btn.textContent.trim().startsWith('✓');
+  const wasFollowing = btn.textContent.trim().includes('Following');
   btn.disabled = true; btn.textContent = '…';
   if (wasFollowing) {
     await supabase.rpc('unfollow_user', { p_target_id: userId });
     btn.textContent = '+ Follow'; btn.className = 'btn btn-primary'; btn.style.flex = '1';
   } else {
     await supabase.rpc('follow_user', { p_target_id: userId });
-    btn.textContent = '✓ Following'; btn.className = 'btn btn-ghost'; btn.style.flex = '1';
+    btn.innerHTML = `${iconSVG('check',13)} Following`; btn.className = 'btn btn-ghost'; btn.style.flex = '1';
   }
   btn.disabled = false;
 };

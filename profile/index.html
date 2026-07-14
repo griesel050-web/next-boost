@@ -106,8 +106,10 @@
       margin-top: 16px; display: inline-flex; align-items: center; gap: 6px;
     }
   </style>
-  <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico"/>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png"/>
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/img/favicon-192.png"/>
+  <link rel="icon" type="image/png" sizes="512x512" href="/assets/img/favicon-512.png"/>
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png"/>
 </head>
 <body>
@@ -125,20 +127,20 @@
   <div class="edit-modal">
     <div class="edit-modal-header">
       <h2>Edit profile</h2>
-      <button class="edit-modal-close" onclick="closeEditModal()">✕</button>
+      <button class="edit-modal-close" onclick="closeEditModal()"><i data-lucide="x" data-size="16"></i></button>
     </div>
 
     <!-- Avatar -->
     <div class="avatar-upload-area">
       <div class="avatar-upload-circle" id="modal-avatar" onclick="document.getElementById('avatar-file-input').click()">
-        <div class="avatar-overlay">📷</div>
+        <div class="avatar-overlay"><i data-lucide="image" data-size="16"></i></div>
       </div>
       <div class="avatar-upload-info">
         <label class="btn btn-ghost btn-sm" style="cursor:pointer">
-          📷 Upload photo
+          <i data-lucide="image" data-size="14"></i> Upload photo
           <input type="file" id="avatar-file-input" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" onchange="handleAvatarFile(this)"/>
         </label>
-        <button class="btn btn-ghost btn-sm" id="remove-avatar-btn" onclick="removeAvatar()" style="display:none">🗑 Remove</button>
+        <button class="btn btn-ghost btn-sm" id="remove-avatar-btn" onclick="removeAvatar()" style="display:none"><i data-lucide="trash" data-size="14"></i> Remove</button>
         <div style="font-size:0.72rem;color:var(--muted)">JPG, PNG, WebP · max 2MB</div>
         <div id="avatar-upload-progress" style="display:none;font-size:0.78rem;color:var(--orange)"></div>
       </div>
@@ -213,7 +215,7 @@ function renderProfile(email) {
       <div class="profile-header">
         <div class="profile-avatar-wrap">
           <div class="profile-avatar-xl" style="background:${avatarBg}">${avatarHtml}</div>
-          <button class="profile-edit-btn" onclick="openEditModal()" title="Edit profile">✏️</button>
+          <button class="profile-edit-btn" onclick="openEditModal()" title="Edit profile"><i data-lucide="pencil" data-size="15"></i></button>
         </div>
         <div class="profile-meta">
           <div class="profile-name">${esc(profile.display_name || profile.username)}</div>
@@ -222,13 +224,13 @@ function renderProfile(email) {
           <div class="profile-badges">
             <span class="profile-badge" style="color:${rank.color};border-color:${rank.color}" title="${rank.name} rank — based on points, tasks completed, and trust score">${iconSVG(rank.icon,13)} ${rank.name}</span>
             ${(profile.subscription_tier && profile.subscription_expires_at && new Date(profile.subscription_expires_at) > new Date()) ? (() => { const st = SUB_TIERS[profile.subscription_tier]; return `<span class="profile-badge" style="color:${st.color};border-color:${st.color};background:${st.color}18" title="${st.name} subscriber — active until ${new Date(profile.subscription_expires_at).toLocaleDateString()}">${iconSVG(st.icon,13)} ${st.name}</span>`; })() : ''}
-            ${profile.is_admin ? '<span class="profile-badge" style="color:var(--orange);border-color:var(--orange)">🛡️ Admin</span>' : ''}
-            ${profile.is_verified ? '<span class="profile-badge" style="color:#60a5fa;border-color:#60a5fa;background:rgba(96,165,250,0.1)" title="Verified Creator">✓ Verified Creator</span>' : ''}
-            ${(profile.trust_score||0) > 0 ? `<span class="profile-badge" style="color:${(profile.trust_score||0)>=80?'#4ade80':(profile.trust_score||0)>=50?'#f59e0b':'#94a3b8'};border-color:currentColor" title="Creator Trust Score — based on activity, completions & streak">🛡 Trust ${profile.trust_score}/100</span>` : ''}
-            ${(profile.reputation||0) >= 80 ? '<span class="profile-badge" style="color:var(--green);border-color:var(--green)">⭐ Trusted</span>' : ''}
-            ${(profile.streak||0) >= 7 ? `<span class="profile-badge">🔥 ${profile.streak}d streak</span>` : ''}
+            ${profile.is_admin ? `<span class="profile-badge" style="color:var(--orange);border-color:var(--orange)">${iconSVG('shield-check',12)} Admin</span>` : ''}
+            ${profile.is_verified ? `<span class="profile-badge" style="color:#60a5fa;border-color:#60a5fa;background:rgba(96,165,250,0.1)" title="Verified Creator">${iconSVG('circle-check',12)} Verified Creator</span>` : ''}
+            ${(profile.trust_score||0) > 0 ? `<span class="profile-badge" style="color:${(profile.trust_score||0)>=80?'#4ade80':(profile.trust_score||0)>=50?'#f59e0b':'#94a3b8'};border-color:currentColor" title="Creator Trust Score — based on activity, completions & streak">${iconSVG('shield-check',12)} Trust ${profile.trust_score}/100</span>` : ''}
+            ${(profile.reputation||0) >= 80 ? `<span class="profile-badge" style="color:var(--green);border-color:var(--green)">${iconSVG('star',12)} Trusted</span>` : ''}
+            ${(profile.streak||0) >= 7 ? `<span class="profile-badge">${iconSVG('flame',12)} ${profile.streak}d streak</span>` : ''}
           </div>
-          <button class="btn btn-ghost btn-sm edit-profile-full-btn" onclick="openEditModal()">✏️ Edit profile</button>
+          <button class="btn btn-ghost btn-sm edit-profile-full-btn" onclick="openEditModal()"><i data-lucide="pencil" data-size="13"></i> Edit profile</button>
         </div>
       </div>
 
@@ -236,14 +238,14 @@ function renderProfile(email) {
         <div class="stat-box"><div class="stat-val">${(profile.points||0).toLocaleString()}</div><div class="stat-lbl">Points</div></div>
         <div class="stat-box"><div class="stat-val">${profile.tasks_completed||0}</div><div class="stat-lbl">Completed</div></div>
         <div class="stat-box"><div class="stat-val">${profile.tasks_posted||0}</div><div class="stat-lbl">Posted</div></div>
-        <div class="stat-box"><div class="stat-val">${profile.streak||0}🔥</div><div class="stat-lbl">Streak</div></div>
+        <div class="stat-box"><div class="stat-val" style="display:flex;align-items:center;justify-content:center;gap:4px">${profile.streak||0} ${iconSVG('flame',15)}</div><div class="stat-lbl">Streak</div></div>
         <div class="stat-box" id="followers-box"><div class="stat-val" id="followers-count">—</div><div class="stat-lbl">Followers</div></div>
         <div class="stat-box" id="following-box"><div class="stat-val" id="following-count">—</div><div class="stat-lbl">Following</div></div>
         <div class="stat-box"><div class="stat-val" id="completion-rate-val">—</div><div class="stat-lbl">Completion rate</div></div>
         <div class="stat-box"><div class="stat-val" style="color:${repColor}">${rep}</div><div class="stat-lbl">Reputation</div></div>
       </div>
       <!-- Rank gap motivational bar -->
-      <div id="rank-gap-msg" style="font-size:0.82rem;color:var(--muted);margin-top:-12px;margin-bottom:20px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius)">📈 Loading leaderboard position…</div>
+      <div id="rank-gap-msg" style="font-size:0.82rem;color:var(--muted);margin-top:-12px;margin-bottom:20px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius)"><i data-lucide="trending-up" data-size="13" style="vertical-align:-2px"></i> Loading leaderboard position…</div>
     </div>
 
     <!-- RANK CARD -->
@@ -271,7 +273,7 @@ function renderProfile(email) {
     <div class="card card-pad" style="margin-bottom:20px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
         <div>
-          <h3 style="font-size:0.95rem;margin:0 0 4px">🧊 Streak Freeze</h3>
+          <h3 style="font-size:0.95rem;margin:0 0 4px;display:flex;align-items:center;gap:6px"><i data-lucide="gem" data-size="15"></i> Streak Freeze</h3>
           <p style="font-size:0.8rem;color:var(--muted);margin:0">Miss a day without losing your streak. Uses automatically if you forget to complete a task.</p>
         </div>
         <div style="text-align:center;flex-shrink:0;margin-left:16px">
@@ -297,7 +299,7 @@ function renderProfile(email) {
     </div>
 
     <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <a href="/share/" class="btn btn-ghost btn-sm">🎉 Share your win</a>
+      <a href="/share/" class="btn btn-ghost btn-sm"><i data-lucide="sparkles" data-size="14"></i> Share your win</a>
       <button class="btn btn-danger btn-sm" onclick="doSignOut()">Sign out</button>
     </div>`;
 
@@ -333,10 +335,10 @@ function renderProfile(email) {
     .then(({ data: next }) => {
       const rankEl = document.getElementById('rank-gap-msg');
       if (!rankEl) return;
-      if (!next) { rankEl.textContent = '🏆 You\'re #1 on the leaderboard!'; rankEl.style.color = 'var(--orange)'; return; }
+      if (!next) { rankEl.innerHTML = `${iconSVG('trophy',14)} You're #1 on the leaderboard!`; rankEl.style.color = 'var(--orange)'; return; }
       const gap = next.points - profile.points;
       const nextRank = next.rank;
-      rankEl.innerHTML = `📈 Earn <strong>${gap.toLocaleString()} more pts</strong> to reach leaderboard position <strong>#${nextRank}</strong>`;
+      rankEl.innerHTML = `${iconSVG('trending-up',13)} Earn <strong>${gap.toLocaleString()} more pts</strong> to reach leaderboard position <strong>#${nextRank}</strong>`;
     });
 }
 
@@ -345,13 +347,13 @@ async function loadLedger() {
   const { data } = await supabase.from('point_ledger').select('*')
     .eq('user_id', profile.id).order('created_at', { ascending: false }).limit(30);
   const LABELS = {
-    task_approved:'✓ Task completed', task_posted:'📤 Posted a task',
-    signup_bonus:'🎉 Signup bonus', daily_bonus:'🎁 Daily bonus',
-    task_refund:'↩ Close refund', task_expired_refund:'⏰ Expired refund',
-    achievement_reward:'🎖️ Achievement', referral_bonus:'🤝 Referral bonus',
-    referral_reward:'🤝 Referral reward', task_boost:'⚡ Task boosted',
-    admin_adjustment:'🛡️ Admin adjustment', slot_purchase:'🎰 Slot purchase',
-    boost_purchased:'⚡ Boost purchased',
+    task_approved:`${iconSVG('circle-check',12)} Task completed`, task_posted:`${iconSVG('send',12)} Posted a task`,
+    signup_bonus:`${iconSVG('sparkles',12)} Signup bonus`, daily_bonus:`${iconSVG('gift',12)} Daily bonus`,
+    task_refund:`${iconSVG('undo',12)} Close refund`, task_expired_refund:`${iconSVG('undo',12)} Expired refund`,
+    achievement_reward:`${iconSVG('award',12)} Achievement`, referral_bonus:`${iconSVG('users',12)} Referral bonus`,
+    referral_reward:`${iconSVG('users',12)} Referral reward`, task_boost:`${iconSVG('zap',12)} Task boosted`,
+    admin_adjustment:`${iconSVG('shield-check',12)} Admin adjustment`, slot_purchase:`${iconSVG('dice',12)} Slot purchase`,
+    boost_purchased:`${iconSVG('zap',12)} Boost purchased`,
   };
   if (!data || !data.length) {
     feed.innerHTML = '<p style="color:var(--muted);font-size:0.85rem">No history yet.</p>';
@@ -405,10 +407,10 @@ function updateModalAvatar() {
   const ini = (profile.display_name || profile.username || 'U')[0].toUpperCase();
   if (profile.avatar_url) {
     el.style.background = '#000';
-    el.innerHTML = `<img loading="lazy" decoding="async" src="${profile.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/><div class="avatar-overlay">📷</div>`;
+    el.innerHTML = `<img loading="lazy" decoding="async" src="${profile.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/><div class="avatar-overlay">${iconSVG('image',16)}</div>`;
   } else {
     el.style.background = pendingColor;
-    el.innerHTML = `<span style="font-size:2rem;font-weight:700;font-family:'Space Grotesk',sans-serif">${ini}</span><div class="avatar-overlay">📷</div>`;
+    el.innerHTML = `<span style="font-size:2rem;font-weight:700;font-family:'Space Grotesk',sans-serif">${ini}</span><div class="avatar-overlay">${iconSVG('image',16)}</div>`;
   }
 }
 
@@ -489,7 +491,7 @@ window.saveProfile = async () => {
   profile.avatar_color = pendingColor;
 
   errEl.style.color = 'var(--green)';
-  errEl.textContent = '✓ Saved!';
+  errEl.textContent = 'Saved!';
   if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save changes'; }
   setTimeout(() => {
     errEl.textContent = '';
@@ -521,7 +523,7 @@ window.buyFreeze = async (qty) => {
   if (countEl) countEl.textContent = data.total_freezes;
 
   msg.style.color = 'var(--green)';
-  msg.textContent = `✅ ${qty} freeze${qty>1?'s':''} added! You now have ${data.total_freezes} — ${data.new_points.toLocaleString()} pts remaining.`;
+  msg.textContent = `${qty} freeze${qty>1?'s':''} added! You now have ${data.total_freezes} — ${data.new_points.toLocaleString()} pts remaining.`;
   setTimeout(() => { msg.textContent = ''; }, 5000);
 };
 
