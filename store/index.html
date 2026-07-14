@@ -47,7 +47,7 @@
     </div>
 
     <!-- PACKAGES -->
-    <div class="packages-grid" id="packages-grid">
+    <div class="packages-grid stagger" id="packages-grid">
       <div class="package-card" data-pkg="starter" data-pts="500" data-usd="2.00" onclick="selectPackage(this)">
         <div class="pkg-badge">Starter</div>
         <div class="pkg-pts">500 <span>pts</span></div>
@@ -134,7 +134,7 @@
 
       <div class="error-msg" id="co-err"></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn btn-primary" id="submit-btn" onclick="submitPurchase()">Submit for review</button>
+        <button class="btn btn-primary" id="submit-btn" onclick="submitPurchase()" data-magnetic>Submit for review</button>
         <button class="btn btn-ghost" onclick="cancelCheckout()">Cancel</button>
       </div>
     </div>
@@ -144,7 +144,7 @@
       <h2 style="font-size:1.1rem;margin-bottom:6px">Extra task posting slots</h2>
       <p style="font-size:0.85rem;color:var(--muted);margin-bottom:6px">By default you can run <strong>5 active tasks</strong> at once. Buy extra slots via PayPal — same process as buying points.</p>
       <p id="current-slot-limit" style="font-size:0.82rem;color:var(--orange);margin-bottom:20px"></p>
-      <div class="packages-grid" style="max-width:700px">
+      <div class="packages-grid stagger" style="max-width:700px">
         <div class="package-card" onclick="selectSlotPack(this,1,'3 Task Slots','$1.00')">
           <div class="pkg-badge">Starter</div>
           <div class="pkg-pts">+3 <span>slots</span></div>

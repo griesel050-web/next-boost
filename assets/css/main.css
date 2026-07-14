@@ -385,12 +385,6 @@ h1, h2, h3, h4, h5 { font-family: 'Space Grotesk', sans-serif; line-height: 1.2;
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ---- EMPTY STATE ---- */
-.empty-state {
-  text-align: center;
-  padding: 56px 20px;
-  color: var(--muted);
-}
-.empty-state .empty-icon { font-size: 2.8rem; margin-bottom: 14px; }
 .empty-state p { font-size: 0.9rem; }
 
 /* ---- DIVIDER ---- */
@@ -569,10 +563,12 @@ h1, h2, h3, h4, h5 { font-family: 'Space Grotesk', sans-serif; line-height: 1.2;
 }
 
 /* Cards & task rows — gentle lift on hover */
-.task-card, .stat-box, .step-card, .plat-card, .testimonial-card, .guide-card, .ach-card {
+.task-card, .stat-box, .step-card, .plat-card, .testimonial-card, .guide-card, .ach-card,
+.stat-card, .package-card, .tier-card, .lb-user-card {
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
-.task-card:hover, .stat-box:hover, .step-card:hover, .plat-card:hover, .testimonial-card:hover, .guide-card:hover, .ach-card:hover {
+.task-card:hover, .stat-box:hover, .step-card:hover, .plat-card:hover, .testimonial-card:hover, .guide-card:hover, .ach-card:hover,
+.stat-card:hover, .package-card:hover, .tier-card:hover, .lb-user-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0,0,0,0.28);
 }
@@ -724,7 +720,15 @@ h1, h2, h3, h4, h5 { font-family: 'Space Grotesk', sans-serif; line-height: 1.2;
   padding: 52px 24px;
   color: var(--muted);
 }
-.empty-state .empty-icon { font-size: 2.8rem; margin-bottom: 14px; line-height: 1; }
+.empty-state .empty-icon {
+  width: 64px; height: 64px;
+  margin: 0 auto 16px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(var(--orange-rgb),0.14), rgba(var(--orange-rgb),0.03));
+  border: 1px solid rgba(var(--orange-rgb),0.16);
+  color: var(--orange-lt);
+}
 .empty-state p { font-size: 0.92rem; line-height: 1.6; margin: 0; }
 .empty-state .empty-cta { margin-top: 18px; }
 
