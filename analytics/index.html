@@ -67,6 +67,7 @@
 <script type="module">
 import { supabase, esc } from '/assets/js/shared.js';
 import { initApp } from '/assets/js/app.js';
+import { iconSVG } from '/src/icons.js';
 const PE = { tiktok:'🎵', instagram:'📸', youtube:'▶️', discord:'💬', website:'🌐', twitch:'🟣' };
 let profile, activeCommentTaskId = null;
 
@@ -88,7 +89,7 @@ async function loadAnalytics() {
 
     if (error) throw error;
     if (!tasks || !tasks.length) {
-      wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">📊</div><p>No tasks yet. <a href="/post-task/" style="color:var(--orange)">Post your first task →</a></p></div>`;
+      wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">${iconSVG('bar-chart',28)}</div><p>No tasks yet. <a href="/post-task/" style="color:var(--orange)">Post your first task →</a></p></div>`;
       return;
     }
 
@@ -113,7 +114,7 @@ async function loadAnalytics() {
       </div>`;
 
   } catch(e) {
-    wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>${esc(e.message)}</p></div>`;
+    wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">${iconSVG('alert-triangle',28)}</div><p>${esc(e.message)}</p></div>`;
   }
 }
 
@@ -138,7 +139,7 @@ function buildTaskCard(t, i) {
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;flex-wrap:wrap">
-          ${t.is_boosted ? '<span class="boost-badge">⚡ Boosted</span>' : ''}
+          ${t.is_boosted ? `<span class="boost-badge">${iconSVG('zap',12)} Boosted</span>` : ''}
           <span style="font-size:0.78rem;color:${statusColor};font-weight:700">${t.is_active ? '● Active' : '○ Closed'}</span>
           <button class="btn btn-ghost btn-sm" onclick="openComments('${t.task_id}','${esc(t.target)}')">💬 ${t.comment_count||0}</button>
         </div>
@@ -185,7 +186,7 @@ function buildTaskCard(t, i) {
 
       ${parseFloat(t.avg_cheat_score) > 30 ? `
         <div class="alert alert-error" style="font-size:0.8rem;margin-top:12px">
-          ⚠️ High average cheat score. Some completions may be low-quality or automated.
+          ${iconSVG('alert-triangle',13)} High average cheat score. Some completions may be low-quality or automated.
         </div>` : ''}
 
       <!-- AUTO-REFILL -->
@@ -195,7 +196,7 @@ function buildTaskCard(t, i) {
             ${t.auto_refill ? 'checked' : ''}
             onchange="toggleRefill('${t.task_id}', this)"
             style="accent-color:var(--orange);width:15px;height:15px"/>
-          <span style="color:var(--text);font-weight:600">♻️ Auto-refill slots when full</span>
+          <span style="color:var(--text);font-weight:600"><i data-lucide="recycle" data-size="14" style="vertical-align:-2px"></i> Auto-refill slots when full</span>
         </label>
         <div style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:var(--muted)">
           <span>Refill</span>
@@ -223,7 +224,7 @@ window.toggleRefill = async (taskId, checkbox) => {
   }
   if (statusEl) {
     statusEl.style.color = 'var(--green)';
-    statusEl.textContent = checkbox.checked ? `✅ Auto-refill on — will add ${slots} slots when full` : 'Auto-refill off';
+    statusEl.textContent = checkbox.checked ? `Auto-refill on — will add ${slots} slots when full` : 'Auto-refill off';
     setTimeout(() => { statusEl.textContent = ''; }, 4000);
   }
 };
@@ -239,7 +240,7 @@ window.updateRefillSlots = async (taskId, input) => {
   });
   if (!error && !data?.error && statusEl) {
     statusEl.style.color = 'var(--green)';
-    statusEl.textContent = `✅ Saved — ${slots} slots on refill`;
+    statusEl.textContent = `Saved — ${slots} slots on refill`;
     setTimeout(() => { statusEl.textContent = ''; }, 3000);
   }
 };
@@ -279,12 +280,12 @@ async function loadComments(taskId) {
         <div class="comment-body">
           <div class="comment-meta">
             <strong>@${esc(c.profiles?.username||'unknown')}</strong>
-            ${c.is_owner_note ? '<span class="note-badge">📌 Owner note</span>' : ''}
+            ${c.is_owner_note ? `<span class="note-badge">${iconSVG('target',11)} Owner note</span>` : ''}
             <span>${new Date(c.created_at).toLocaleDateString()}</span>
           </div>
           <div class="comment-text">${esc(c.content)}</div>
         </div>
-        ${c.user_id === profile.id ? `<button class="btn-report" onclick="deleteComment('${c.id}','${taskId}')" title="Delete">✕</button>` : ''}
+        ${c.user_id === profile.id ? `<button class="btn-report" onclick="deleteComment('${c.id}','${taskId}')" title="Delete">${iconSVG('x',12)}</button>` : ''}
       </div>`;
   }).join('');
 }

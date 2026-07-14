@@ -50,7 +50,7 @@
     <div class="breadcrumb"><a href="/">Home</a> / <a href="/guides/">Guides</a> / How to Get Free YouTube Views and Subscribers (Without View Bots)</div>
     <h1>How to Get Free YouTube Views and Subscribers (Without View Bots)</h1>
     <p class="article-sub">View-bot farms can get your channel demonetized. Here's a safer way to get real watch time from actual viewers.</p>
-    <div class="article-meta"><span>📅 Updated June 2026</span><span>·</span><span>⏱️ 7 min read</span></div>
+    <div class="article-meta"><span><i data-lucide="calendar" data-size="13" style="vertical-align:-2px"></i> Updated June 2026</span><span>·</span><span><i data-lucide="clock" data-size="13" style="vertical-align:-2px"></i> 7 min read</span></div>
 
     <h2>Why view-bot services are a bad idea for your channel</h2>
     <p>YouTube actively detects and removes views that come from bots, scripts, or view-farms — and channels caught using them risk having videos demonetized or the channel itself suspended. Even when bot views slip through detection, they don't help your channel: YouTube's recommendation algorithm cares about watch time and audience retention, not raw view count, and bot traffic has zero retention.</p>
@@ -104,17 +104,17 @@
     <h2>More growth guides</h2>
     <div class="related-guides">
       <a class="guide-card" href="/guides/tiktok-followers/">
-        <div class="guide-card-icon">🎵</div>
+        <div class="guide-card-icon"><i data-lucide="tiktok" data-size="20"></i></div>
         <h3>Free TikTok Followers</h3>
         <span class="guide-read">Read the guide →</span>
       </a>
       <a class="guide-card" href="/guides/instagram-followers/">
-        <div class="guide-card-icon">📸</div>
+        <div class="guide-card-icon"><i data-lucide="instagram" data-size="20"></i></div>
         <h3>Free Instagram Followers</h3>
         <span class="guide-read">Read the guide →</span>
       </a>
       <a class="guide-card" href="/guides/twitter-x-followers/">
-        <div class="guide-card-icon">🐦</div>
+        <div class="guide-card-icon"><i data-lucide="twitter" data-size="20"></i></div>
         <h3>Free Twitter / X Followers</h3>
         <span class="guide-read">Read the guide →</span>
       </a>
@@ -126,6 +126,7 @@
   </footer>
 
   <script type="module">
+    import { renderIcons } from '/src/icons.js';
     import { supabase, go } from '/assets/js/shared.js';
     const { data: { session } } = await supabase.auth.getSession();
     if (session) go('/earn/');

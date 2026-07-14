@@ -17,7 +17,7 @@
     .referral-tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:24px}
     .tier-card{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:16px;text-align:center;transition:.2s}
     .tier-card.active-tier{border-color:var(--orange);box-shadow:0 0 0 1px var(--orange)}
-    .tier-icon{font-size:2rem;margin-bottom:6px}
+    .tier-icon{width:40px;height:40px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);background:linear-gradient(135deg,rgba(232,98,26,0.16),rgba(232,98,26,0.04));border:1px solid rgba(232,98,26,0.18);color:var(--orange-lt)}
     .tier-name{font-weight:700;font-size:0.95rem;margin-bottom:4px}
     .tier-req{font-size:0.78rem;color:var(--muted);margin-bottom:8px}
     .tier-perks{font-size:0.82rem;color:var(--text);line-height:1.6}
@@ -51,25 +51,25 @@
     <h3 style="font-size:0.85rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:12px">Your Tier</h3>
     <div class="referral-tiers" id="tier-cards">
       <div class="tier-card" data-tier="starter">
-        <div class="tier-icon">🌱</div>
+        <div class="tier-icon"><i data-lucide="recycle" data-size="18"></i></div>
         <div class="tier-name">Starter</div>
         <div class="tier-req">0–4 referrals</div>
         <div class="tier-perks">+50 pts per L1 referral<br>No L2 earnings</div>
       </div>
       <div class="tier-card" data-tier="booster">
-        <div class="tier-icon">🚀</div>
+        <div class="tier-icon"><i data-lucide="rocket" data-size="18"></i></div>
         <div class="tier-name">Booster</div>
         <div class="tier-req">5–19 referrals</div>
         <div class="tier-perks">+60 pts per L1 referral<br>+10 pts per L2 referral</div>
       </div>
       <div class="tier-card" data-tier="grower">
-        <div class="tier-icon">📈</div>
+        <div class="tier-icon"><i data-lucide="trending-up" data-size="18"></i></div>
         <div class="tier-name">Grower</div>
         <div class="tier-req">20–49 referrals</div>
         <div class="tier-perks">+75 pts per L1 referral<br>+15 pts per L2 referral</div>
       </div>
       <div class="tier-card" data-tier="elite">
-        <div class="tier-icon">👑</div>
+        <div class="tier-icon"><i data-lucide="crown" data-size="18"></i></div>
         <div class="tier-name">Elite</div>
         <div class="tier-req">50+ referrals</div>
         <div class="tier-perks">+100 pts per L1 referral<br>+25 pts per L2 referral</div>
@@ -129,6 +129,7 @@
 <script type="module">
 import { supabase, esc } from '/assets/js/shared.js';
 import { initApp, updateNavPoints } from '/assets/js/app.js';
+import { iconSVG } from '/src/icons.js';
 
 const TIERS = [
   { id:'starter', min:0,  max:4,  l1:50,  l2:0  },
@@ -235,7 +236,7 @@ async function main(){
     if(!error&&!data?.error){
       const errEl = document.getElementById('ref-err');
       errEl.style.color='var(--green)';
-      errEl.textContent=`✓ Referral code applied! +${data.bonus} points added.`;
+      errEl.innerHTML=`${iconSVG('circle-check',13)} Referral code applied! +${data.bonus} points added.`;
       const { data:p } = await supabase.from('profiles').select('points').eq('id',profile.id).single();
       if(p){ profile.points=p.points; updateNavPoints(p.points); }
     }
@@ -258,7 +259,7 @@ window.useCode = async () => {
   const { data, error } = await supabase.rpc('use_referral_code',{p_code:code});
   if(error||data?.error){ errEl.textContent=data?.error||error.message; return; }
   errEl.style.color='var(--green)';
-  errEl.textContent=`✓ Code applied! +${data.bonus} points added.`;
+  errEl.innerHTML=`${iconSVG('circle-check',13)} Code applied! +${data.bonus} points added.`;
   document.getElementById('ref-input').value='';
   const { data:p } = await supabase.from('profiles').select('points').eq('id',profile.id).single();
   if(p){ profile.points=p.points; updateNavPoints(p.points); }

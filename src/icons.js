@@ -17,7 +17,7 @@ import {
   AlertTriangle, Info, CircleAlert, MailOpen, MailX, Ban, CircleX,
   LayoutDashboard, BarChart3, PieChart, ListChecks, Megaphone,
   Palette, Ruler, BellRing, Accessibility, Recycle, MousePointerClick,
-  Twitch, MessageCircle, Music2, Instagram, Youtube, Twitter, ThumbsUp,
+  Twitch, MessageCircle, Music2, Instagram, Youtube, Twitter, ThumbsUp, Clock,
 } from 'lucide';
 
 // Semantic name -> Lucide component. Source of truth for data-lucide="name".
@@ -41,7 +41,7 @@ export const ICON_MAP = {
   dashboard: LayoutDashboard, 'bar-chart': BarChart3, 'pie-chart': PieChart,
   'list-checks': ListChecks, megaphone: Megaphone,
   palette: Palette, ruler: Ruler, 'bell-ring': BellRing, accessibility: Accessibility,
-  recycle: Recycle, 'mouse-click': MousePointerClick, 'thumbs-up': ThumbsUp,
+  recycle: Recycle, 'mouse-click': MousePointerClick, 'thumbs-up': ThumbsUp, clock: Clock,
   twitch: Twitch, discord: MessageCircle, 'message-circle': MessageCircle, tiktok: Music2,
   instagram: Instagram, youtube: Youtube, twitter: Twitter, website: Globe,
 };

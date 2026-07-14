@@ -40,7 +40,7 @@
 <script type="module">
   import { supabase, esc } from '/assets/js/shared.js';
   import { initApp } from '/assets/js/app.js';
-  const PE={tiktok:'🎵',instagram:'📸',youtube:'▶️',discord:'💬',website:'🌐',twitch:'🟣',twitter:'🐦'};
+  import { iconSVG } from '/src/icons.js';
   const PC={tiktok:'plat-tiktok',instagram:'plat-instagram',youtube:'plat-youtube',discord:'plat-discord',twitch:'plat-twitch',twitter:'plat-twitter'};
   const TL={follow:'Follow',like:'Like',view:'View',join:'Join',website:'Visit',twitch:'Follow',retweet:'Retweet'};
   const PLAT_NAMES = { tiktok:'TikTok', instagram:'Instagram', youtube:'YouTube', twitter:'Twitter/X', twitch:'Twitch', discord:'Discord', website:'Website' };
@@ -72,7 +72,7 @@ function prettyTarget(url, platform) {
         .order('reviewed_at', { ascending: false });
       if (error) throw error;
       if (!completions || !completions.length) {
-        feed.innerHTML = '<div class="empty-state"><div class="empty-icon">🏅</div><p>No completed tasks yet. <a href="/earn/" style="color:var(--orange)">Start earning →</a></p></div>';
+        feed.innerHTML = `<div class="empty-state"><div class="empty-icon">${iconSVG('award',28)}</div><p>No completed tasks yet. <a href="/earn/" style="color:var(--orange)">Start earning →</a></p></div>`;
         return;
       }
       const taskIds = completions.map(c => c.task_id);
@@ -93,12 +93,12 @@ function prettyTarget(url, platform) {
           </div>
           <div class="task-actions">
             <span class="type-badge type-${t.type}">${TL[t.type]}</span>
-            <span class="status-chip chip-approved">✓ +${t.points_reward} pts</span>
+            <span class="status-chip chip-approved">${iconSVG('circle-check',12)} +${t.points_reward} pts</span>
           </div>`;
         feed.appendChild(card);
       });
     } catch(e) {
-      feed.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>${esc(e.message)}</p></div>`;
+      feed.innerHTML = `<div class="empty-state"><div class="empty-icon">${iconSVG('alert-triangle',28)}</div><p>${esc(e.message)}</p></div>`;
     }
   }
   main();

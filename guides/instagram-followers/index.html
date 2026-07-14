@@ -50,7 +50,7 @@
     <div class="breadcrumb"><a href="/">Home</a> / <a href="/guides/">Guides</a> / How to Get Free Instagram Followers and Likes (The Real Way)</div>
     <h1>How to Get Free Instagram Followers and Likes (The Real Way)</h1>
     <p class="article-sub">Skip the paid follower bots. Here's how to grow your Instagram with real people who actually engage back.</p>
-    <div class="article-meta"><span>📅 Updated June 2026</span><span>·</span><span>⏱️ 6 min read</span></div>
+    <div class="article-meta"><span><i data-lucide="calendar" data-size="13" style="vertical-align:-2px"></i> Updated June 2026</span><span>·</span><span><i data-lucide="clock" data-size="13" style="vertical-align:-2px"></i> 6 min read</span></div>
 
     <h2>Why bought Instagram followers hurt more than they help</h2>
     <p>It's tempting to pay for a quick follower boost, but Instagram's algorithm weighs engagement rate heavily when deciding whether to show your posts to more people. A follower count full of inactive or fake accounts drags that rate down, which means even your real followers see less of your content. Worse, mass-bought followers can get your account flagged for suspicious activity.</p>
@@ -104,17 +104,17 @@
     <h2>More growth guides</h2>
     <div class="related-guides">
       <a class="guide-card" href="/guides/tiktok-followers/">
-        <div class="guide-card-icon">🎵</div>
+        <div class="guide-card-icon"><i data-lucide="tiktok" data-size="20"></i></div>
         <h3>Free TikTok Followers</h3>
         <span class="guide-read">Read the guide →</span>
       </a>
       <a class="guide-card" href="/guides/youtube-views/">
-        <div class="guide-card-icon">▶️</div>
+        <div class="guide-card-icon"><i data-lucide="youtube" data-size="20"></i></div>
         <h3>Free YouTube Views</h3>
         <span class="guide-read">Read the guide →</span>
       </a>
       <a class="guide-card" href="/guides/discord-members/">
-        <div class="guide-card-icon">💬</div>
+        <div class="guide-card-icon"><i data-lucide="discord" data-size="20"></i></div>
         <h3>Free Discord Members</h3>
         <span class="guide-read">Read the guide →</span>
       </a>
@@ -126,6 +126,7 @@
   </footer>
 
   <script type="module">
+    import { renderIcons } from '/src/icons.js';
     import { supabase, go } from '/assets/js/shared.js';
     const { data: { session } } = await supabase.auth.getSession();
     if (session) go('/earn/');

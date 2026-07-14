@@ -32,7 +32,7 @@
       <!-- APPEARANCE -->
       <div class="settings-section">
         <div class="settings-section-header">
-          <h3>🎨 Theme</h3>
+          <h3><i data-lucide="palette" data-size="16" style="vertical-align:-3px"></i> Theme</h3>
           <p>Choose your colour scheme</p>
         </div>
         <div class="settings-section-body">
@@ -80,7 +80,7 @@
       <!-- ACCENT COLOR -->
       <div class="settings-section">
         <div class="settings-section-header">
-          <h3>🎯 Custom Accent Color</h3>
+          <h3><i data-lucide="target" data-size="16" style="vertical-align:-3px"></i> Custom Accent Color</h3>
           <p>Override the main accent with any color you want</p>
         </div>
         <div class="settings-section-body">
@@ -107,7 +107,7 @@
       <!-- FONT -->
       <div class="settings-section">
         <div class="settings-section-header">
-          <h3>✏️ Font Style</h3>
+          <h3><i data-lucide="pencil" data-size="15" style="vertical-align:-3px"></i> Font Style</h3>
           <p>Change the app's typography</p>
         </div>
         <div class="settings-section-body">
@@ -135,7 +135,7 @@
       <!-- LAYOUT -->
       <div class="settings-section">
         <div class="settings-section-header">
-          <h3>📐 Layout</h3>
+          <h3><i data-lucide="ruler" data-size="15" style="vertical-align:-3px"></i> Layout</h3>
           <p>Adjust how the interface is displayed</p>
         </div>
         <div class="settings-section-body" style="padding-top:0;padding-bottom:0">
@@ -165,7 +165,7 @@
       <!-- SOCIAL LINKS -->
       <div class="settings-section">
         <div class="settings-section-header">
-          <h3>🔗 Social Links</h3>
+          <h3><i data-lucide="link" data-size="15" style="vertical-align:-3px"></i> Social Links</h3>
           <p>Link your socials — shown on your public profile</p>
         </div>
         <div class="settings-section-body">
@@ -180,7 +180,7 @@
       <!-- PRIVACY -->
       <div class="settings-section">
         <div class="settings-section-header">
-          <h3>🔒 Privacy</h3>
+          <h3><i data-lucide="lock" data-size="16" style="vertical-align:-3px"></i> Privacy</h3>
           <p>Control who can see your information</p>
         </div>
         <div class="settings-section-body" style="padding-top:0;padding-bottom:0">
@@ -200,7 +200,7 @@
       <!-- NOTIFICATIONS -->
       <div class="settings-section">
         <div class="settings-section-header">
-          <h3>🔔 Notifications</h3>
+          <h3><i data-lucide="bell-ring" data-size="16" style="vertical-align:-3px"></i> Notifications</h3>
           <p>Choose what you get notified about</p>
         </div>
         <div class="settings-section-body" style="padding-top:0;padding-bottom:0">
@@ -240,7 +240,7 @@
       <!-- CUSTOM BACKGROUND -->
       <div class="settings-section">
         <div class="settings-section-header">
-          <h3>🖼️ Custom Background</h3>
+          <h3><i data-lucide="image" data-size="15" style="vertical-align:-3px"></i> Custom Background</h3>
           <p>Set a custom background image URL (optional)</p>
         </div>
         <div class="settings-section-body">
@@ -264,7 +264,7 @@
             <!-- ACCESSIBILITY & BEHAVIOUR -->
       <div class="settings-section">
         <div class="settings-section-header">
-          <h3>♿ Accessibility &amp; Behaviour</h3>
+          <h3><i data-lucide="accessibility" data-size="15" style="vertical-align:-3px"></i> Accessibility &amp; Behaviour</h3>
           <p>Motion, sound and interaction preferences</p>
         </div>
         <div class="settings-section-body" style="padding-top:0;padding-bottom:0">
@@ -324,13 +324,13 @@
       <!-- DATA & ACCOUNT -->
       <div class="settings-section">
         <div class="settings-section-header">
-          <h3>📦 Data &amp; Account</h3>
+          <h3><i data-lucide="package" data-size="15" style="vertical-align:-3px"></i> Data &amp; Account</h3>
           <p>Export or manage your account data</p>
         </div>
         <div class="settings-section-body">
           <div style="display:flex;flex-direction:column;gap:10px;max-width:400px">
-            <button class="btn btn-ghost" onclick="exportPointHistory()">⬇ Export point history (CSV)</button>
-            <button class="btn btn-ghost" onclick="exportAchievements()">⬇ Export achievements (CSV)</button>
+            <button class="btn btn-ghost" onclick="exportPointHistory()"><i data-lucide="download" data-size="13"></i> Export point history (CSV)</button>
+            <button class="btn btn-ghost" onclick="exportAchievements()"><i data-lucide="download" data-size="13"></i> Export achievements (CSV)</button>
           </div>
           <p style="font-size:0.78rem;color:var(--muted);margin-top:12px">Exports include all your earned points, reasons, and dates.</p>
         </div>
@@ -339,7 +339,7 @@
       <!-- DANGER ZONE -->
       <div class="settings-section" style="border-color:rgba(232,74,74,0.25)">
         <div class="settings-section-header">
-          <h3 style="color:var(--red)">⚠️ Danger Zone</h3>
+          <h3 style="color:var(--red)"><i data-lucide="alert-triangle" data-size="16" style="vertical-align:-3px"></i> Danger Zone</h3>
           <p>Irreversible actions</p>
         </div>
         <div class="settings-section-body">
@@ -527,7 +527,7 @@ window.saveSettings = async () => {
     document.body.classList.remove('has-custom-bg');
   }
 
-  msg.textContent = '✓ All settings saved!';
+  msg.textContent = 'All settings saved!';
   msg.style.color = 'var(--green)';
   if (btn) { btn.disabled = false; btn.textContent = 'Save all settings'; }
   setTimeout(() => msg.textContent = '', 3000);
@@ -563,7 +563,7 @@ window.saveSocialLinks = async () => {
   });
   profile.social_links = clean;
 
-  msg.textContent = '✓ Saved!';
+  msg.textContent = 'Saved!';
   msg.style.color = 'var(--green)';
   if (btn) { btn.disabled = false; btn.textContent = 'Save social links'; }
   setTimeout(() => msg.textContent = '', 3000);

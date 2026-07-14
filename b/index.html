@@ -52,8 +52,8 @@
 <script type="module">
 import { supabase, esc, PLAT_CLASS } from '/assets/js/shared.js';
 import { initApp } from '/assets/js/app.js';
+import { iconSVG } from '/src/icons.js';
 
-const PE   = { tiktok:'🎵', instagram:'📸', youtube:'▶️', discord:'💬', website:'🌐', twitch:'🟣', twitter:'🐦' };
 const TL   = { follow:'Follow', like:'Like', view:'View', join:'Join', website:'Visit', retweet:'Retweet' };
 const PLAT = { tiktok:'TikTok', instagram:'Instagram', youtube:'YouTube', discord:'Discord', twitch:'Twitch', twitter:'Twitter/X', website:'Website' };
 
@@ -84,13 +84,13 @@ async function main() {
   const root = document.getElementById('bd-root');
   const bundleId = getBundleIdFromUrl();
   if (!bundleId) {
-    root.innerHTML = `<div class="empty-state"><div class="empty-icon">📦</div><p>No bundle specified.</p></div>`;
+    root.innerHTML = `<div class="empty-state"><div class="empty-icon">${iconSVG('package',28)}</div><p>No bundle specified.</p></div>`;
     return;
   }
 
   const { data: b, error } = await supabase.rpc('get_bundle_detail', { p_bundle_id: bundleId });
   if (error || !b || b.error) {
-    root.innerHTML = `<div class="empty-state"><div class="empty-icon">📦</div><p>${esc(b?.error || 'Bundle not found.')}</p><div class="empty-cta"><a href="/earn/" class="btn btn-primary btn-sm">Browse tasks</a></div></div>`;
+    root.innerHTML = `<div class="empty-state"><div class="empty-icon">${iconSVG('package',28)}</div><p>${esc(b?.error || 'Bundle not found.')}</p><div class="empty-cta"><a href="/earn/" class="btn btn-primary btn-sm">Browse tasks</a></div></div>`;
     return;
   }
 
@@ -108,8 +108,8 @@ async function main() {
     <div class="bd-task">
       <div class="task-plat-icon ${PLAT_CLASS[t.platform]||'plat-website'}" style="flex-shrink:0"></div>
       <div class="bd-task-info">
-        <div class="bd-task-name">${PE[t.platform]||''} ${esc(PLAT[t.platform]||t.platform)} — ${esc(TL[t.type]||t.type)}</div>
-        <div class="bd-task-sub">${full ? 'All slots filled' : slotsLeft + ' slots left'} · +${t.points_reward} pts${t.is_boosted?' · ⚡ Boosted':''}</div>
+        <div class="bd-task-name">${esc(PLAT[t.platform]||t.platform)} — ${esc(TL[t.type]||t.type)}</div>
+        <div class="bd-task-sub">${full ? 'All slots filled' : slotsLeft + ' slots left'} · +${t.points_reward} pts${t.is_boosted?` · ${iconSVG('zap',11)} Boosted`:''}</div>
       </div>
       ${full
         ? `<span class="status-chip chip-closed">Full</span>`
@@ -122,7 +122,7 @@ async function main() {
       <div class="bd-owner">${ownerAvatar}<span>by <a href="/u/${encodeURIComponent(b.owner_username)}" style="color:#fff;font-weight:700;text-decoration:underline">@${esc(b.owner_username)}</a></span></div>
       <div class="bd-title">${esc(b.name)}</div>
       ${b.description ? `<div class="bd-desc">${esc(b.description)}</div>` : ''}
-      <div class="bd-pts-pill">⚡ ${b.tasks.length} tasks · up to ${b.total_points.toLocaleString()} pts total</div>
+      <div class="bd-pts-pill">${iconSVG('zap',13)} ${b.tasks.length} tasks · up to ${b.total_points.toLocaleString()} pts total</div>
     </div>
     <div id="bd-tasks">${tasksHtml || '<p style="color:var(--muted)">No tasks in this bundle.</p>'}</div>
   `;

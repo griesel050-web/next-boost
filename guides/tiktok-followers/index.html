@@ -50,7 +50,7 @@
     <div class="breadcrumb"><a href="/">Home</a> / <a href="/guides/">Guides</a> / How to Get Free TikTok Followers (Without Bots or Fake Accounts)</div>
     <h1>How to Get Free TikTok Followers (Without Bots or Fake Accounts)</h1>
     <p class="article-sub">A practical, no-nonsense guide to growing your TikTok following through real engagement exchange — no payment, no bots, no risk to your account.</p>
-    <div class="article-meta"><span>📅 Updated June 2026</span><span>·</span><span>⏱️ 6 min read</span></div>
+    <div class="article-meta"><span><i data-lucide="calendar" data-size="13" style="vertical-align:-2px"></i> Updated June 2026</span><span>·</span><span><i data-lucide="clock" data-size="13" style="vertical-align:-2px"></i> 6 min read</span></div>
 
     <h2>Why most "free TikTok followers" methods don't work</h2>
     <p>If you've searched for free TikTok followers before, you've probably run into two kinds of sites: ones that ask for your password (don't — these are usually scams or hijack attempts), and ones that send you thousands of bot followers overnight. Bot followers might look good on the surface, but TikTok's algorithm is good at spotting them, and a follower count padded with inactive accounts can actually hurt your reach because your engagement rate tanks.</p>
@@ -105,17 +105,17 @@
     <h2>More growth guides</h2>
     <div class="related-guides">
       <a class="guide-card" href="/guides/instagram-followers/">
-        <div class="guide-card-icon">📸</div>
+        <div class="guide-card-icon"><i data-lucide="instagram" data-size="20"></i></div>
         <h3>Free Instagram Followers</h3>
         <span class="guide-read">Read the guide →</span>
       </a>
       <a class="guide-card" href="/guides/youtube-views/">
-        <div class="guide-card-icon">▶️</div>
+        <div class="guide-card-icon"><i data-lucide="youtube" data-size="20"></i></div>
         <h3>Free YouTube Views</h3>
         <span class="guide-read">Read the guide →</span>
       </a>
       <a class="guide-card" href="/guides/twitter-x-followers/">
-        <div class="guide-card-icon">🐦</div>
+        <div class="guide-card-icon"><i data-lucide="twitter" data-size="20"></i></div>
         <h3>Free Twitter / X Followers</h3>
         <span class="guide-read">Read the guide →</span>
       </a>
@@ -127,6 +127,7 @@
   </footer>
 
   <script type="module">
+    import { renderIcons } from '/src/icons.js';
     import { supabase, go } from '/assets/js/shared.js';
     const { data: { session } } = await supabase.auth.getSession();
     if (session) go('/earn/');

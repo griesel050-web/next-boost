@@ -50,7 +50,7 @@
     <div class="breadcrumb"><a href="/">Home</a> / <a href="/guides/">Guides</a> / How to Get Free Discord Members for Your Server</div>
     <h1>How to Get Free Discord Members for Your Server</h1>
     <p class="article-sub">Fake member counts don't build a community. Here's how to fill your Discord with real people who actually joined on purpose.</p>
-    <div class="article-meta"><span>📅 Updated June 2026</span><span>·</span><span>⏱️ 6 min read</span></div>
+    <div class="article-meta"><span><i data-lucide="calendar" data-size="13" style="vertical-align:-2px"></i> Updated June 2026</span><span>·</span><span><i data-lucide="clock" data-size="13" style="vertical-align:-2px"></i> 6 min read</span></div>
 
     <h2>Why a fake member count doesn't help your Discord server</h2>
     <p>It's possible to buy a server full of bot accounts to inflate your member count, but it does nothing for the thing that actually matters: an active, engaged community. A high member count with zero activity in chat is an obvious red flag to anyone who joins and looks around — it can actually make a server look dead rather than thriving.</p>
@@ -104,17 +104,17 @@
     <h2>More growth guides</h2>
     <div class="related-guides">
       <a class="guide-card" href="/guides/youtube-views/">
-        <div class="guide-card-icon">▶️</div>
+        <div class="guide-card-icon"><i data-lucide="youtube" data-size="20"></i></div>
         <h3>Free YouTube Views</h3>
         <span class="guide-read">Read the guide →</span>
       </a>
       <a class="guide-card" href="/guides/twitter-x-followers/">
-        <div class="guide-card-icon">🐦</div>
+        <div class="guide-card-icon"><i data-lucide="twitter" data-size="20"></i></div>
         <h3>Free Twitter / X Followers</h3>
         <span class="guide-read">Read the guide →</span>
       </a>
       <a class="guide-card" href="/guides/tiktok-followers/">
-        <div class="guide-card-icon">🎵</div>
+        <div class="guide-card-icon"><i data-lucide="tiktok" data-size="20"></i></div>
         <h3>Free TikTok Followers</h3>
         <span class="guide-read">Read the guide →</span>
       </a>
@@ -126,6 +126,7 @@
   </footer>
 
   <script type="module">
+    import { renderIcons } from '/src/icons.js';
     import { supabase, go } from '/assets/js/shared.js';
     const { data: { session } } = await supabase.auth.getSession();
     if (session) go('/earn/');

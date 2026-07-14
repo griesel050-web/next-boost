@@ -204,9 +204,9 @@ const RULES = {
     hint:'Must be a TikTok profile (tiktok.com/@username) or video URL',
     types:['follow','like','view'],
     patterns:[
-      { re: /tiktok\.com\/@[\w.]+$/i,           label: 'Profile ✓' },
-      { re: /tiktok\.com\/@[\w.]+\/video\/\d+/i, label: 'Video ✓' },
-      { re: /vm\.tiktok\.com\/\w+/i,             label: 'Short link ✓' },
+      { re: /tiktok\.com\/@[\w.]+$/i,           label: 'Profile' },
+      { re: /tiktok\.com\/@[\w.]+\/video\/\d+/i, label: 'Video' },
+      { re: /vm\.tiktok\.com\/\w+/i,             label: 'Short link' },
     ]
   },
   instagram: {
@@ -215,10 +215,10 @@ const RULES = {
     hint:'Must be an Instagram profile or post URL',
     types:['follow','like','view'],
     patterns:[
-      { re: /instagram\.com\/[\w.]+\/?$/i,     label: 'Profile ✓' },
-      { re: /instagram\.com\/p\/[\w-]+/i,      label: 'Post ✓' },
-      { re: /instagram\.com\/reel\/[\w-]+/i,   label: 'Reel ✓' },
-      { re: /instagr\.am\//i,                  label: 'Short link ✓' },
+      { re: /instagram\.com\/[\w.]+\/?$/i,     label: 'Profile' },
+      { re: /instagram\.com\/p\/[\w-]+/i,      label: 'Post' },
+      { re: /instagram\.com\/reel\/[\w-]+/i,   label: 'Reel' },
+      { re: /instagr\.am\//i,                  label: 'Short link' },
     ]
   },
   youtube: {
@@ -227,11 +227,11 @@ const RULES = {
     hint:'Must be a YouTube channel or video URL',
     types:['follow','like','view'],
     patterns:[
-      { re: /youtube\.com\/@[\w-]+/i,                label: 'Channel ✓' },
-      { re: /youtube\.com\/channel\/[\w-]+/i,        label: 'Channel ✓' },
-      { re: /youtube\.com\/watch\?v=[\w-]+/i,        label: 'Video ✓' },
-      { re: /youtube\.com\/shorts\/[\w-]+/i,         label: 'Short ✓' },
-      { re: /youtu\.be\/[\w-]+/i,                    label: 'Short link ✓' },
+      { re: /youtube\.com\/@[\w-]+/i,                label: 'Channel' },
+      { re: /youtube\.com\/channel\/[\w-]+/i,        label: 'Channel' },
+      { re: /youtube\.com\/watch\?v=[\w-]+/i,        label: 'Video' },
+      { re: /youtube\.com\/shorts\/[\w-]+/i,         label: 'Short' },
+      { re: /youtu\.be\/[\w-]+/i,                    label: 'Short link' },
     ]
   },
   discord: {
@@ -240,8 +240,8 @@ const RULES = {
     hint:'Must be a discord.gg invite link (e.g. discord.gg/abc123)',
     types:['join'],
     patterns:[
-      { re: /discord\.gg\/[\w-]+/i,                        label: 'Invite ✓' },
-      { re: /discord\.com\/invite\/[\w-]+/i,               label: 'Invite ✓' },
+      { re: /discord\.gg\/[\w-]+/i,                        label: 'Invite' },
+      { re: /discord\.com\/invite\/[\w-]+/i,               label: 'Invite' },
     ]
   },
   twitch: {
@@ -250,8 +250,8 @@ const RULES = {
     hint:'Must be a twitch.tv channel URL',
     types:['follow','view'],
     patterns:[
-      { re: /twitch\.tv\/[\w]+\/?$/i,            label: 'Channel ✓' },
-      { re: /twitch\.tv\/videos\/\d+/i,          label: 'Video ✓' },
+      { re: /twitch\.tv\/[\w]+\/?$/i,            label: 'Channel' },
+      { re: /twitch\.tv\/videos\/\d+/i,          label: 'Video' },
     ]
   },
   twitter: {
@@ -260,8 +260,8 @@ const RULES = {
     hint:'Must be a Twitter/X profile or post URL',
     types:['follow','like','retweet'],
     patterns:[
-      { re: /(?:twitter|x)\.com\/[\w]+\/?$/i,              label: 'Profile ✓' },
-      { re: /(?:twitter|x)\.com\/[\w]+\/status\/\d+/i,     label: 'Post ✓' },
+      { re: /(?:twitter|x)\.com\/[\w]+\/?$/i,              label: 'Profile' },
+      { re: /(?:twitter|x)\.com\/[\w]+\/status\/\d+/i,     label: 'Post' },
     ]
   },
   website: {
@@ -290,7 +290,7 @@ function validateUrl(url, plat) {
 }
 
 function getUrlLabel(url, plat) {
-  if (plat === 'website') return 'URL ✓';
+  if (plat === 'website') return 'Valid URL';
   const patterns = RULES[plat]?.patterns || [];
   const match = patterns.find(p => p.re.test(url));
   return match ? match.label : null;
@@ -319,7 +319,7 @@ window.onUrlInput = () => {
   const hint = document.getElementById('url-hint');
   if (!url) { hint.textContent = ''; hint.className = 'url-hint'; return; }
   if (!validateUrl(url, plat)) {
-    hint.textContent = '✗ ' + RULES[plat].hint;
+    hint.textContent = RULES[plat].hint;
     hint.className = 'url-hint url-invalid';
     return;
   }
@@ -329,7 +329,7 @@ window.onUrlInput = () => {
     hint.className = 'url-hint url-valid';
   } else {
     // Host matches but pattern doesn't — warn not block
-    hint.textContent = '⚠ URL looks valid but may not match expected format';
+    hint.textContent = 'URL looks valid but may not match expected format';
     hint.className = 'url-hint';
     hint.style.color = '#f59e0b';
   }

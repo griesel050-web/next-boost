@@ -56,31 +56,31 @@
   <section class="container">
     <div class="guide-grid">
       <a class="guide-card" href="/guides/tiktok-followers/">
-        <div class="guide-card-icon">🎵</div>
+        <div class="guide-card-icon"><i data-lucide="tiktok" data-size="20"></i></div>
         <h3>How to Get Free TikTok Followers</h3>
         <p>The real, no-bot way to grow your TikTok following by trading follows with other creators.</p>
         <span class="guide-read">Read the guide →</span>
       </a>
       <a class="guide-card" href="/guides/instagram-followers/">
-        <div class="guide-card-icon">📸</div>
+        <div class="guide-card-icon"><i data-lucide="instagram" data-size="20"></i></div>
         <h3>How to Get Free Instagram Followers</h3>
         <p>Build real Instagram followers and likes without paying for fake engagement.</p>
         <span class="guide-read">Read the guide →</span>
       </a>
       <a class="guide-card" href="/guides/youtube-views/">
-        <div class="guide-card-icon">▶️</div>
+        <div class="guide-card-icon"><i data-lucide="youtube" data-size="20"></i></div>
         <h3>How to Get Free YouTube Views</h3>
         <p>Get real watch time and subscribers from active creators, not view-bot farms.</p>
         <span class="guide-read">Read the guide →</span>
       </a>
       <a class="guide-card" href="/guides/twitter-x-followers/">
-        <div class="guide-card-icon">🐦</div>
+        <div class="guide-card-icon"><i data-lucide="twitter" data-size="20"></i></div>
         <h3>How to Get Free Twitter / X Followers</h3>
         <p>Grow your X following and retweets the organic way, follower for follower.</p>
         <span class="guide-read">Read the guide →</span>
       </a>
       <a class="guide-card" href="/guides/discord-members/">
-        <div class="guide-card-icon">💬</div>
+        <div class="guide-card-icon"><i data-lucide="discord" data-size="20"></i></div>
         <h3>How to Get Free Discord Members</h3>
         <p>Fill your Discord server with real, active members instead of bot accounts.</p>
         <span class="guide-read">Read the guide →</span>
@@ -101,6 +101,7 @@
   </footer>
 
   <script type="module">
+    import { renderIcons } from '/src/icons.js';
     import { supabase, go } from '/assets/js/shared.js';
     const { data: { session } } = await supabase.auth.getSession();
     if (session) go('/earn/');

@@ -20,7 +20,7 @@
   <nav class="nav">
     <a class="nav-logo" href="/"><img loading="eager" decoding="async" src="/assets/img/logo.png" alt="Next Boost" style="height:36px;width:auto;object-fit:contain"/></a>
     <div class="nav-links">
-      <span class="admin-badge">⚡ Admin Panel</span>
+      <span class="admin-badge"><i data-lucide="zap" data-size="12"></i> Admin Panel</span>
       <a href="/earn/" class="btn btn-ghost btn-sm">Dashboard</a>
     </div>
   </nav>
@@ -35,14 +35,14 @@
       <!-- SIDEBAR -->
       <aside class="admin-sidebar">
         <nav class="sidebar-nav">
-          <button class="sidebar-btn active" onclick="adminTab('overview')">📊 Overview</button>
-          <button class="sidebar-btn" onclick="adminTab('users')">👥 Users</button>
-          <button class="sidebar-btn" onclick="adminTab('tasks')">📋 Tasks</button>
-          <button class="sidebar-btn" onclick="adminTab('reports')">🚩 Reports <span class="reports-count" id="reports-count" style="display:none">0</span></button>
-          <button class="sidebar-btn" onclick="adminTab('suspicious')">🕵️ Fraud & Anti-Cheat</button>
-          <button class="sidebar-btn" onclick="adminTab('purchases')">💳 Purchases <span class="reports-count" id="purchase-count" style="display:none">0</span></button>
-          <button class="sidebar-btn" onclick="adminTab('broadcast')">📢 Broadcast</button>
-          <button class="sidebar-btn" onclick="adminTab('bonus')">🎉 Bonus Events</button>
+          <button class="sidebar-btn active" onclick="adminTab('overview')"><i data-lucide="bar-chart" data-size="15"></i> Overview</button>
+          <button class="sidebar-btn" onclick="adminTab('users')"><i data-lucide="users" data-size="15"></i> Users</button>
+          <button class="sidebar-btn" onclick="adminTab('tasks')"><i data-lucide="clipboard" data-size="15"></i> Tasks</button>
+          <button class="sidebar-btn" onclick="adminTab('reports')"><i data-lucide="flag" data-size="15"></i> Reports <span class="reports-count" id="reports-count" style="display:none">0</span></button>
+          <button class="sidebar-btn" onclick="adminTab('suspicious')"><i data-lucide="shield-check" data-size="15"></i> Fraud & Anti-Cheat</button>
+          <button class="sidebar-btn" onclick="adminTab('purchases')"><i data-lucide="credit-card" data-size="15"></i> Purchases <span class="reports-count" id="purchase-count" style="display:none">0</span></button>
+          <button class="sidebar-btn" onclick="adminTab('broadcast')"><i data-lucide="megaphone" data-size="15"></i> Broadcast</button>
+          <button class="sidebar-btn" onclick="adminTab('bonus')"><i data-lucide="sparkles" data-size="15"></i> Bonus Events</button>
         </nav>
       </aside>
 
@@ -113,9 +113,9 @@
           <div class="stats-grid" id="fraud-summary" style="margin-bottom:24px"><div class="spinner"></div></div>
 
           <div style="display:flex;gap:4px;margin-bottom:16px;background:var(--surface2);border-radius:var(--radius);padding:4px;width:fit-content">
-            <button class="btn btn-primary btn-sm fraud-subtab" onclick="switchFraudTab('cheat',this)" style="border-radius:calc(var(--radius) - 4px)">🎯 Cheat scores</button>
-            <button class="btn btn-ghost btn-sm fraud-subtab" onclick="switchFraudTab('fingerprints',this)" style="border-radius:calc(var(--radius) - 4px)">🖥️ Shared devices</button>
-            <button class="btn btn-ghost btn-sm fraud-subtab" onclick="switchFraudTab('ratelimit',this)" style="border-radius:calc(var(--radius) - 4px)">⏱️ Rate limits</button>
+            <button class="btn btn-primary btn-sm fraud-subtab" onclick="switchFraudTab('cheat',this)" style="border-radius:calc(var(--radius) - 4px)"><i data-lucide="target" data-size="13"></i> Cheat scores</button>
+            <button class="btn btn-ghost btn-sm fraud-subtab" onclick="switchFraudTab('fingerprints',this)" style="border-radius:calc(var(--radius) - 4px)"><i data-lucide="dashboard" data-size="13"></i> Shared devices</button>
+            <button class="btn btn-ghost btn-sm fraud-subtab" onclick="switchFraudTab('ratelimit',this)" style="border-radius:calc(var(--radius) - 4px)"><i data-lucide="clock" data-size="13"></i> Rate limits</button>
           </div>
 
           <div id="fraud-cheat-wrap"><div id="suspicious-wrap"><div class="spinner"></div></div></div>
@@ -140,8 +140,8 @@
           <p style="color:var(--muted);font-size:0.85rem;margin-bottom:16px">Review PayPal purchase requests. Verify payment in your PayPal account before approving.</p>
 
           <div style="display:flex;gap:4px;margin-bottom:16px;background:var(--surface2);border-radius:var(--radius);padding:4px;width:fit-content">
-            <button class="btn btn-primary btn-sm purch-subtab" onclick="switchPurchTab('points',this)" style="border-radius:calc(var(--radius) - 4px)">💳 Points & slots</button>
-            <button class="btn btn-ghost btn-sm purch-subtab" onclick="switchPurchTab('subs',this)" style="border-radius:calc(var(--radius) - 4px)">🌟 Subscriptions <span class="reports-count" id="sub-purchase-count" style="display:none">0</span></button>
+            <button class="btn btn-primary btn-sm purch-subtab" onclick="switchPurchTab('points',this)" style="border-radius:calc(var(--radius) - 4px)"><i data-lucide="credit-card" data-size="13"></i> Points & slots</button>
+            <button class="btn btn-ghost btn-sm purch-subtab" onclick="switchPurchTab('subs',this)" style="border-radius:calc(var(--radius) - 4px)"><i data-lucide="sparkles" data-size="13"></i> Subscriptions <span class="reports-count" id="sub-purchase-count" style="display:none">0</span></button>
           </div>
 
           <div id="purchases-wrap"><div class="spinner"></div></div>
@@ -150,12 +150,12 @@
 
         <!-- BROADCAST -->
         <div id="panel-broadcast" class="admin-panel">
-          <h1 class="admin-title">📢 Broadcast Message</h1>
+          <h1 class="admin-title"><i data-lucide="megaphone" data-size="20" style="vertical-align:-4px"></i> Broadcast Message</h1>
           <p style="color:var(--muted);font-size:0.88rem;margin-bottom:24px">Send a notification to every user on the platform.</p>
           <div class="card card-pad" style="max-width:560px">
             <div class="form-group">
               <label class="form-label">Title</label>
-              <input type="text" id="bc-title" placeholder="e.g. 🎉 Weekend bonus is live!" style="width:100%"/>
+              <input type="text" id="bc-title" placeholder="e.g. Weekend bonus is live!" style="width:100%"/>
             </div>
             <div class="form-group">
               <label class="form-label">Message</label>
@@ -163,16 +163,16 @@
             </div>
             <div class="error-msg" id="bc-err" style="margin-bottom:12px"></div>
             <div style="display:flex;gap:10px;align-items:center">
-              <button class="btn btn-primary" onclick="sendBroadcast()">📢 Send to all users</button>
+              <button class="btn btn-primary" onclick="sendBroadcast()"><i data-lucide="megaphone" data-size="14"></i> Send to all users</button>
               <span id="bc-result" style="font-size:0.85rem"></span>
             </div>
-            <p style="font-size:0.75rem;color:var(--muted);margin-top:12px">⚠️ This sends an in-app notification to every non-banned user immediately.</p>
+            <p style="font-size:0.75rem;color:var(--muted);margin-top:12px"><i data-lucide="alert-triangle" data-size="12" style="vertical-align:-2px"></i> This sends an in-app notification to every non-banned user immediately.</p>
           </div>
         </div>
 
         <!-- BONUS EVENTS -->
         <div id="panel-bonus" class="admin-panel">
-          <h1 class="admin-title">🎉 Bonus Events</h1>
+          <h1 class="admin-title"><i data-lucide="sparkles" data-size="20" style="vertical-align:-4px"></i> Bonus Events</h1>
           <p style="color:var(--muted);font-size:0.88rem;margin-bottom:24px">Create weekend bonus events that multiply points for all completions.</p>
 
           <div class="card card-pad" style="max-width:560px;margin-bottom:24px">
@@ -226,7 +226,7 @@
               <button class="btn btn-ghost btn-sm" onclick="setNext48h()">Next 48 hours</button>
             </div>
             <div class="error-msg" id="bn-err" style="margin-bottom:12px"></div>
-            <button class="btn btn-primary" onclick="createBonus()">🎉 Launch bonus event</button>
+            <button class="btn btn-primary" onclick="createBonus()"><i data-lucide="sparkles" data-size="14"></i> Launch bonus event</button>
           </div>
 
           <div class="card card-pad" style="max-width:560px">
@@ -278,6 +278,7 @@
 
   <script type="module">
     import { supabase, go, toast, esc } from '/assets/js/shared.js';
+    import { iconSVG } from '/src/icons.js';
 
     const PAGE = 20;
     let usersOffset = 0, tasksOffset = 0, reportsOffset = 0;
@@ -333,7 +334,7 @@
       const { data, error } = await supabase.rpc('admin_broadcast', { p_title: title, p_body: body });
       if (error || data?.error) { errEl.textContent = data?.error || error.message; return; }
       result.style.color = 'var(--green)';
-      result.textContent = `✓ Sent to ${data.sent_to} users`;
+      result.textContent = `Sent to ${data.sent_to} users`;
       document.getElementById('bc-title').value = '';
       document.getElementById('bc-body').value = '';
     };
@@ -378,7 +379,7 @@
       });
       if (error || data?.error) { errEl.textContent = data?.error || error.message; return; }
       errEl.style.color = 'var(--green)';
-      errEl.textContent = '✓ Bonus event launched! Users notified.';
+      errEl.textContent = 'Bonus event launched! Users notified.';
       setTimeout(() => { errEl.textContent = ''; errEl.style.color = ''; }, 3000);
       loadBonusEvents();
     };
@@ -430,20 +431,20 @@
       if (liveEl) liveEl.textContent = (s.live_users || 0).toLocaleString();
 
       const cards = [
-        { icon:'👥', label:'Total users',       val: s.total_users,       color:'var(--orange)' },
+        { icon:'users', label:'Total users',       val: s.total_users,       color:'var(--orange)' },
         { icon:'🆕', label:'New today',          val: s.users_today,       color:'var(--orange-lt)' },
-        { icon:'🚫', label:'Banned users',       val: s.banned_users,      color:'var(--red)' },
-        { icon:'📋', label:'Active tasks',       val: s.active_tasks,      color:'var(--green)' },
-        { icon:'✅', label:'Total completions',  val: s.total_completions, color:'var(--amber)' },
-        { icon:'🎯', label:'Completions today',  val: s.tasks_today,       color:'var(--amber)' },
-        { icon:'🚩', label:'Open reports',       val: s.open_reports,      color: s.open_reports > 0 ? 'var(--red)' : 'var(--muted)' },
-        { icon:'💳', label:'Pending purchases',  val: s.pending_purchases, color: s.pending_purchases > 0 ? 'var(--amber)' : 'var(--muted)' },
-        { icon:'💵', label:'Total revenue',      val: '$'+parseFloat(s.total_revenue_usd||0).toFixed(2), color:'var(--green)' },
-        { icon:'⚡', label:'Points in system',   val: s.points_in_system,  color:'var(--orange)' },
+        { icon:'ban', label:'Banned users',       val: s.banned_users,      color:'var(--red)' },
+        { icon:'clipboard', label:'Active tasks',       val: s.active_tasks,      color:'var(--green)' },
+        { icon:'circle-check', label:'Total completions',  val: s.total_completions, color:'var(--amber)' },
+        { icon:'target', label:'Completions today',  val: s.tasks_today,       color:'var(--amber)' },
+        { icon:'flag', label:'Open reports',       val: s.open_reports,      color: s.open_reports > 0 ? 'var(--red)' : 'var(--muted)' },
+        { icon:'credit-card', label:'Pending purchases',  val: s.pending_purchases, color: s.pending_purchases > 0 ? 'var(--amber)' : 'var(--muted)' },
+        { icon:'credit-card', label:'Total revenue',      val: '$'+parseFloat(s.total_revenue_usd||0).toFixed(2), color:'var(--green)' },
+        { icon:'zap', label:'Points in system',   val: s.points_in_system,  color:'var(--orange)' },
       ];
       grid.innerHTML = cards.map(c => `
         <div class="stat-card">
-          <div class="stat-card-icon">${c.icon}</div>
+          <div class="stat-card-icon">${iconSVG(c.icon,20)}</div>
           <div class="stat-card-val" style="color:${c.color}">${isNaN(Number(c.val)) ? c.val : Number(c.val).toLocaleString()}</div>
           <div class="stat-card-lbl">${c.label}</div>
         </div>`).join('');
@@ -465,7 +466,7 @@
       const wrap = document.getElementById('users-table-wrap');
 
       if (reset) {
-        if (!users.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">👤</div><p>No users found.</p></div>'; return; }
+        if (!users.length) { wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">${iconSVG('user',28)}</div><p>No users found.</p></div>`; return; }
         wrap.innerHTML = `
           <div class="admin-table">
             <div class="admin-table-head">
@@ -524,7 +525,7 @@
       const wrap = document.getElementById('tasks-table-wrap');
 
       if (reset) {
-        if (!tasks.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>No tasks found.</p></div>'; return; }
+        if (!tasks.length) { wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">${iconSVG('clipboard',28)}</div><p>No tasks found.</p></div>`; return; }
         wrap.innerHTML = `
           <div class="admin-table">
             <div class="admin-table-head">
@@ -534,7 +535,7 @@
           </div>`;
       }
 
-      const PLAT = { tiktok:'🎵', instagram:'📸', youtube:'▶️', discord:'💬', twitch:'🟣', twitter:'🐦', website:'🌐' };
+      const PLAT = { tiktok:'tiktok', instagram:'instagram', youtube:'youtube', discord:'discord', twitch:'twitch', twitter:'twitter', website:'website' };
       const PLAT_NAMES = { tiktok:'TikTok', instagram:'Instagram', youtube:'YouTube', twitter:'Twitter/X', twitch:'Twitch', discord:'Discord', website:'Website' };
       function prettyHandle(url, platform) {
         try {
@@ -564,7 +565,7 @@
             <div class="user-meta"><a href="${esc(t.target)}" target="_blank" rel="noopener" style="color:var(--muted);font-size:0.72rem;word-break:break-all">${esc(t.target)}</a></div>
             <div class="user-meta">by @${esc(t.owner_username)}</div>
           </span>
-          <span>${PLAT[t.platform]||'🌐'} ${t.platform} · ${t.type}</span>
+          <span>${iconSVG(PLAT[t.platform]||'website',13)} ${t.platform} · ${t.type}</span>
           <span>
             <div class="mini-progress"><div class="mini-progress-bar" style="width:${pct}%"></div></div>
             <div class="user-meta">${t.completions_count}/${t.max_completions}</div>
@@ -600,7 +601,7 @@
       const wrap = document.getElementById('reports-table-wrap');
 
       if (reset) {
-        if (!reports.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🚩</div><p>No reports. All clear!</p></div>'; return; }
+        if (!reports.length) { wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">${iconSVG('flag',28)}</div><p>No reports. All clear!</p></div>`; return; }
         wrap.innerHTML = `
           <div class="admin-table">
             <div class="admin-table-head">
@@ -716,7 +717,7 @@
       wrap.innerHTML = '<div class="spinner"></div>';
       const { data, error } = await supabase.rpc('admin_get_suspicious', { p_limit: 50 });
       if (error || !data || !data.length) {
-        wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><p>No suspicious activity detected.</p></div>';
+        wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">${iconSVG('circle-check',28)}</div><p>No suspicious activity detected.</p></div>`;
         return;
       }
       wrap.innerHTML = `
@@ -735,7 +736,7 @@
         row.innerHTML = `
           <span>
             <div class="user-name">${esc(s.completer)}</div>
-            <div class="user-meta">Rep: ${s.reputation} ${s.is_flagged ? '⚑ Flagged' : ''}</div>
+            <div class="user-meta">Rep: ${s.reputation} ${s.is_flagged ? `${iconSVG('flag',11)} Flagged` : ''}</div>
           </span>
           <span style="color:${scoreColor};font-weight:700">${s.cheat_score}</span>
           <span>${s.mouse_events}</span>
@@ -777,19 +778,19 @@
       wrap.innerHTML = '<div class="spinner"></div>';
       const { data, error } = await supabase.rpc('admin_get_fingerprint_clusters', { p_limit: 30 });
       if (error || !data || !data.length) {
-        wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><p>No devices shared across multiple accounts.</p></div>';
+        wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">${iconSVG('circle-check',28)}</div><p>No devices shared across multiple accounts.</p></div>`;
         return;
       }
       wrap.innerHTML = data.map(c => `
         <div class="card card-pad" style="margin-bottom:10px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
             <div style="font-size:0.82rem;color:var(--muted)">Device fingerprint <code style="color:var(--text)">${esc((c.fingerprint||'').slice(0,16))}…</code> — used by <strong style="color:var(--text)">${c.account_count} accounts</strong></div>
-            ${c.any_flagged ? '<span class="badge-banned">⚑ Contains flagged account</span>' : ''}
+            ${c.any_flagged ? `<span class="badge-banned">${iconSVG('flag',11)} Contains flagged account</span>` : ''}
           </div>
           <div style="display:flex;flex-wrap:wrap;gap:8px">
             ${c.accounts.map(a => `
               <div style="display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:6px 10px;font-size:0.78rem">
-                <span>${esc(a.username)}${a.is_banned?' 🚫':''}${a.is_flagged?' ⚑':''}</span>
+                <span>${esc(a.username)}${a.is_banned?` ${iconSVG('ban',11)}`:''}${a.is_flagged?` ${iconSVG('flag',11)}`:''}</span>
                 <span style="color:var(--muted)">${a.points} pts · ${a.task_completions} completions</span>
                 <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:0.72rem" onclick="window.toggleFlagUser('${a.user_id}',${!a.is_flagged})">${a.is_flagged?'Unflag':'Flag'}</button>
               </div>`).join('')}
@@ -802,7 +803,7 @@
       wrap.innerHTML = '<div class="spinner"></div>';
       const { data, error } = await supabase.rpc('admin_get_rate_limit_stats', { p_hours: 24, p_limit: 30 });
       if (error || !data || !data.length) {
-        wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><p>No rate-limit activity in the last 24 hours.</p></div>';
+        wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">${iconSVG('circle-check',28)}</div><p>No rate-limit activity in the last 24 hours.</p></div>`;
         return;
       }
       wrap.innerHTML = `
@@ -812,7 +813,7 @@
           </div>
           <div>${data.map(r => `
             <div class="admin-table-row" style="grid-template-columns:1.3fr 1fr 0.8fr 0.8fr 0.8fr 1fr">
-              <span>${esc(r.username || 'Unknown')}${r.is_flagged?' ⚑':''}${r.is_banned?' 🚫':''}</span>
+              <span>${esc(r.username || 'Unknown')}${r.is_flagged?` ${iconSVG('flag',11)}`:''}${r.is_banned?` ${iconSVG('ban',11)}`:''}</span>
               <span>${esc(r.action)}</span>
               <span style="font-weight:700;color:${r.event_count > 50 ? 'var(--red)' : 'var(--text)'}">${r.event_count}</span>
               <span>${r.distinct_fingerprints}</span>
@@ -854,7 +855,7 @@
       wrap.innerHTML = '<div class="spinner"></div>';
       const { data, error } = await supabase.rpc('admin_get_subscription_purchases', { p_status: null });
       if (error || !data || !data.length) {
-        wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🌟</div><p>No subscription requests yet.</p></div>';
+        wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">${iconSVG('sparkles',28)}</div><p>No subscription requests yet.</p></div>`;
         return;
       }
       const statusColors = { pending: 'var(--amber)', approved: 'var(--green)', rejected: 'var(--red)' };
@@ -872,8 +873,8 @@
               <span style="color:${statusColors[p.status]};font-weight:700;text-transform:capitalize">${p.status}</span>
               <span class="action-btns">
                 ${p.status === 'pending' ? `
-                  <button class="btn btn-sm" style="background:rgba(61,186,111,0.15);color:var(--green)" onclick="window.approveSubPurchase('${p.id}')">✓ Approve</button>
-                  <button class="btn btn-danger btn-sm" onclick="window.rejectSubPurchase('${p.id}')">✗ Reject</button>
+                  <button class="btn btn-sm" style="background:rgba(61,186,111,0.15);color:var(--green)" onclick="window.approveSubPurchase('${p.id}')">${iconSVG('check',12)} Approve</button>
+                  <button class="btn btn-danger btn-sm" onclick="window.rejectSubPurchase('${p.id}')">${iconSVG('x',12)} Reject</button>
                 ` : '—'}
               </span>
             </div>`).join('')}</div>
@@ -906,7 +907,7 @@
       wrap.innerHTML = '<div class="spinner"></div>';
       const { data, error } = await supabase.rpc('admin_get_purchases', { p_limit: 50, p_offset: 0 });
       if (error || !data || !data.length) {
-        wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">💳</div><p>No purchase requests yet.</p></div>';
+        wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">${iconSVG('credit-card',28)}</div><p>No purchase requests yet.</p></div>`;
         return;
       }
       wrap.innerHTML = `
@@ -925,7 +926,7 @@
         const statusColors = { pending: 'var(--amber)', approved: 'var(--green)', rejected: 'var(--red)' };
         row.innerHTML = `
           <span>
-            <div class="user-name">${esc(p.username)} ${p.is_flagged ? '⚑' : ''}</div>
+            <div class="user-name">${esc(p.username)} ${p.is_flagged ? iconSVG('flag',11) : ''}</div>
             <div class="user-meta">Rep: ${p.reputation}</div>
           </span>
           <span style="text-transform:capitalize">${p.package_id}</span>
@@ -935,8 +936,8 @@
           <span style="color:${statusColors[p.status]};font-weight:700;text-transform:capitalize">${p.status}</span>
           <span class="action-btns">
             ${p.status === 'pending' ? `
-              <button class="btn btn-sm" style="background:rgba(61,186,111,0.15);color:var(--green)" onclick="window.approvePurchase('${p.id}',${p.points})">✓ Approve (+${p.points}pts)</button>
-              <button class="btn btn-danger btn-sm" onclick="window.rejectPurchase('${p.id}')">✗ Reject</button>
+              <button class="btn btn-sm" style="background:rgba(61,186,111,0.15);color:var(--green)" onclick="window.approvePurchase('${p.id}',${p.points})">${iconSVG('check',12)} Approve (+${p.points}pts)</button>
+              <button class="btn btn-danger btn-sm" onclick="window.rejectPurchase('${p.id}')">${iconSVG('x',12)} Reject</button>
             ` : '—'}
           </span>`;
         rows.appendChild(row);
