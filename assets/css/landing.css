@@ -168,7 +168,7 @@
   padding: 26px; text-decoration: none; color: inherit; display: block; transition: .2s;
 }
 .guide-card:hover { border-color: var(--orange); transform: translateY(-2px); }
-.guide-card-icon { font-size: 1.8rem; margin-bottom: 12px; }
+.guide-card-icon { width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:var(--radius-sm); background:linear-gradient(135deg, rgba(232,98,26,0.16), rgba(232,98,26,0.04)); border:1px solid rgba(232,98,26,0.18); color:var(--orange-lt); margin-bottom: 12px; }
 .guide-card h3 { font-size: 1.05rem; margin-bottom: 8px; }
 .guide-card p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
 .guide-card .guide-read { color: var(--orange); font-size: 0.8rem; font-weight: 600; margin-top: 14px; display: inline-block; }

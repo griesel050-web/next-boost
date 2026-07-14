@@ -98,7 +98,7 @@ async function main() {
 
   const ini = (b.owner_display_name || b.owner_username || '?')[0].toUpperCase();
   const ownerAvatar = b.owner_avatar_url
-    ? `<img src="${b.owner_avatar_url}" alt=""/>`
+    ? `<img src="${b.owner_avatar_url}" alt="" loading="lazy" decoding="async"/>`
     : `<div class="bd-owner-fallback" style="background:${b.owner_avatar_color||'var(--orange)'}">${ini}</div>`;
 
   const tasksHtml = (b.tasks || []).map(t => {

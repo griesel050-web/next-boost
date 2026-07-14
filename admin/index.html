@@ -444,7 +444,7 @@
       ];
       grid.innerHTML = cards.map(c => `
         <div class="stat-card">
-          <div class="stat-card-icon">${iconSVG(c.icon,20)}</div>
+          <div class="stat-card-icon" style="color:${c.color}">${iconSVG(c.icon,20)}</div>
           <div class="stat-card-val" style="color:${c.color}">${isNaN(Number(c.val)) ? c.val : Number(c.val).toLocaleString()}</div>
           <div class="stat-card-lbl">${c.label}</div>
         </div>`).join('');

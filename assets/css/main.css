@@ -331,7 +331,9 @@ h1, h2, h3, h4, h5 { font-family: 'Space Grotesk', sans-serif; line-height: 1.2;
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.75);
+  background: rgba(8,6,5,0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   z-index: 300;
   align-items: center;
   justify-content: center;
@@ -345,7 +347,7 @@ h1, h2, h3, h4, h5 { font-family: 'Space Grotesk', sans-serif; line-height: 1.2;
   padding: 36px 32px;
   width: 100%;
   max-width: 440px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow), 0 0 0 1px rgba(var(--orange-rgb),0.06);
 }
 .modal h2 { font-size: 1.4rem; margin-bottom: 6px; }
 .modal .modal-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 26px; }

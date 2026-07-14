@@ -77,7 +77,14 @@
   transition: border-color 0.18s, transform 0.18s;
 }
 .stat-card:hover { border-color: var(--border2); transform: translateY(-2px); }
-.stat-card-icon { font-size: 1.8rem; margin-bottom: 10px; }
+.stat-card-icon {
+  width: 40px; height: 40px;
+  margin: 0 auto 12px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, rgba(var(--orange-rgb),0.14), rgba(var(--orange-rgb),0.03));
+  border: 1px solid rgba(var(--orange-rgb),0.16);
+}
 .stat-card-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.9rem; font-weight: 700; line-height: 1; margin-bottom: 6px; }
 .stat-card-lbl { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
 
