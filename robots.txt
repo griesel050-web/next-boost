@@ -24,4 +24,4 @@ Disallow: /u/
 Disallow: /task/
 Disallow: /share/
 
-Sitemap: https://boost.nexosites.xyz/sitemap.xml
+Sitemap: https://boost.nexorealm.org/sitemap.xml

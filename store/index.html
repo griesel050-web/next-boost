@@ -172,15 +172,6 @@
       <div class="error-msg" id="slot-err" style="margin-top:8px"></div>
     </div>
 
-        <!-- SUBSCRIPTIONS -->
-    <div style="margin-top:48px">
-      <h2 style="font-size:1.1rem;margin-bottom:6px"><i data-lucide="sparkles" data-size="16" style="vertical-align:-3px"></i> Subscriptions</h2>
-      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:6px">Monthly plans — extra task slots plus a discount on the platform fee every time you post.</p>
-      <p id="current-sub-status" style="font-size:0.82rem;color:var(--orange);margin-bottom:20px"></p>
-      <div class="packages-grid" style="max-width:900px" id="sub-grid"></div>
-      <p style="font-size:0.78rem;color:var(--muted);margin-top:12px"><i data-lucide="alert-triangle" data-size="13" style="vertical-align:-2px"></i> Subscriptions use the same PayPal review process. Renews are manual — submit again each month to keep your slots and discount active.</p>
-    </div>
-
     <!-- PURCHASE HISTORY -->
     <div style="margin-top:40px">
       <h2 style="font-size:1rem;margin-bottom:16px">Purchase history</h2>
@@ -190,17 +181,17 @@
 </div>
 <nav class="mobile-nav-bar" id="mobile-nav"></nav>
 <script type="module">
-import { supabase, esc, SUB_TIERS } from '/assets/js/shared.js';
+import { supabase, esc } from '/assets/js/shared.js';
 import { initApp, updateNavPoints } from '/assets/js/app.js';
 import { iconSVG } from '/src/icons.js';
 
 // ── CONFIG: Your PayPal Me link ──────────────────────────────
-const PAYPAL_ME = 'https://paypal.me/YourPayPalUsername';
+const PAYPAL_ME = 'https://paypal.me/nxrealm08';
 // ────────────────────────────────────────────────────────────
 
 let profile;
-let purchaseMode = null; // 'points' | 'slots' | 'subscription'
-let selectedPkg = null, selectedSlotPack = null, selectedSubTier = null;
+let purchaseMode = null; // 'points' | 'slots'
+let selectedPkg = null, selectedSlotPack = null;
 
 async function main() {
   const ctx = await initApp('store');
@@ -209,12 +200,11 @@ async function main() {
   document.getElementById('co-username').textContent = '@' + profile.username;
   loadHistory();
   initSlotPacks();
-  initSubTiers();
 }
 
 window.selectPackage = (card) => {
   purchaseMode = 'points';
-  selectedSlotPack = null; selectedSubTier = null;
+  selectedSlotPack = null;
   document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
   card.classList.add('selected');
   selectedPkg = {
@@ -240,7 +230,7 @@ window.selectPackage = (card) => {
 window.cancelCheckout = () => {
   document.getElementById('checkout-panel').style.display = 'none';
   document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
-  selectedPkg = null; selectedSlotPack = null; selectedSubTier = null; purchaseMode = null;
+  selectedPkg = null; selectedSlotPack = null; purchaseMode = null;
 };
 
 window.submitPurchase = async () => {
@@ -251,7 +241,6 @@ window.submitPurchase = async () => {
 
   if (purchaseMode === 'points' && !selectedPkg) { errEl.textContent = 'Please select a package.'; return; }
   if (purchaseMode === 'slots' && !selectedSlotPack) { errEl.textContent = 'Please select a slot pack.'; return; }
-  if (purchaseMode === 'subscription' && !selectedSubTier) { errEl.textContent = 'Please select a plan.'; return; }
   if (!purchaseMode) { errEl.textContent = 'Please select a package.'; return; }
   if (!ref || ref.length < 6) { errEl.textContent = 'Please enter a valid transaction reference.'; return; }
 
@@ -271,11 +260,6 @@ window.submitPurchase = async () => {
       p_slot_pack: selectedSlotPack, p_paypal_ref: ref, p_fingerprint: fp,
     }));
     successMsg = `<strong>Purchase submitted!</strong> Your extra task slots will be added within 24 hours after we verify your payment.`;
-  } else if (purchaseMode === 'subscription') {
-    ({ data, error } = await supabase.rpc('submit_subscription_purchase', {
-      p_tier: selectedSubTier, p_paypal_ref: ref, p_fingerprint: fp,
-    }));
-    successMsg = `<strong>Subscription request submitted!</strong> Your ${SUB_TIERS[selectedSubTier].name} plan will activate within 24 hours after we verify your payment.`;
   } else {
     ({ data, error } = await supabase.rpc('submit_purchase', {
       p_package_id: selectedPkg.id, p_paypal_ref: ref, p_fingerprint: fp,
@@ -289,7 +273,7 @@ window.submitPurchase = async () => {
 
   document.getElementById('checkout-panel').style.display = 'none';
   document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
-  selectedPkg = null; selectedSlotPack = null; selectedSubTier = null; purchaseMode = null;
+  selectedPkg = null; selectedSlotPack = null; purchaseMode = null;
 
   // Show success
   const success = document.createElement('div');
@@ -304,15 +288,10 @@ window.submitPurchase = async () => {
 
 async function loadHistory() {
   const feed = document.getElementById('history-feed');
-  const [{ data: pts }, { data: subs }] = await Promise.all([
-    supabase.from('point_purchases').select('*').eq('user_id', profile.id).order('submitted_at', { ascending: false }),
-    supabase.from('subscription_purchases').select('*').eq('user_id', profile.id).order('submitted_at', { ascending: false }),
-  ]);
+  const { data: pts } = await supabase.from('point_purchases').select('*').eq('user_id', profile.id).order('submitted_at', { ascending: false });
 
-  const combined = [
-    ...(pts||[]).map(p => ({ ...p, _kind: 'points' })),
-    ...(subs||[]).map(s => ({ ...s, _kind: 'subscription' })),
-  ].sort((a,b) => new Date(b.submitted_at) - new Date(a.submitted_at));
+  const combined = (pts||[]).map(p => ({ ...p, _kind: 'points' }))
+    .sort((a,b) => new Date(b.submitted_at) - new Date(a.submitted_at));
 
   if (!combined.length) {
     feed.innerHTML = '<p style="color:var(--muted);font-size:0.85rem">No purchases yet.</p>';
@@ -323,9 +302,7 @@ async function loadHistory() {
   const statusClass = { pending: 'chip-pending', approved: 'chip-approved', rejected: 'chip-rejected' };
 
   feed.innerHTML = combined.map(p => {
-    const label = p._kind === 'subscription'
-      ? `${SUB_TIERS[p.tier]?.icon||''} ${SUB_TIERS[p.tier]?.name||p.tier} subscription`
-      : p.purchase_type === 'slots' ? `+${p.slot_pack ? SLOT_PACKS[p.slot_pack]?.slots : ''} task slots` : `${p.points.toLocaleString()} pts`;
+    const label = p.purchase_type === 'slots' ? `+${p.slot_pack ? SLOT_PACKS[p.slot_pack]?.slots : ''} task slots` : `${p.points.toLocaleString()} pts`;
     return `
     <div class="purchase-row">
       <div class="purchase-info">
@@ -354,7 +331,7 @@ const SLOT_PACKS = {
 
 window.selectSlotPack = (card, pack, label, price) => {
   purchaseMode = 'slots';
-  selectedPkg = null; selectedSubTier = null;
+  selectedPkg = null;
   document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
   card.classList.add('selected');
   selectedSlotPack = pack;
@@ -371,59 +348,6 @@ function showSlotCheckout(pack) {
   document.getElementById('co-amount').textContent = p.price;
   const pb = document.getElementById('paypal-btn');
   if (pb) pb.href = `${PAYPAL_ME}/${p.amount_usd.toFixed(2)}?currencyCode=USD`;
-};
-
-// ---- SUBSCRIPTIONS ----
-function initSubTiers() {
-  const grid = document.getElementById('sub-grid');
-  if (!grid) return;
-
-  const active = profile.subscription_tier && profile.subscription_expires_at && new Date(profile.subscription_expires_at) > new Date()
-    ? profile.subscription_tier : null;
-  const statusEl = document.getElementById('current-sub-status');
-  if (statusEl) {
-    statusEl.textContent = active
-      ? `You're on the ${SUB_TIERS[active].name} plan until ${new Date(profile.subscription_expires_at).toLocaleDateString()}.`
-      : `You're not subscribed yet — pick a plan below.`;
-  }
-
-  const perks = {
-    pro:   ['+10 task slots', '50% off platform fee', `${iconSVG('zap',12)} Pro badge on your profile`],
-    vip:   ['+25 task slots', '75% off platform fee', `${iconSVG('gem',12)} VIP badge on your profile`],
-    elite: ['+60 task slots', '0% platform fee — free posting', `${iconSVG('crown',12)} Elite badge on your profile`],
-  };
-
-  grid.innerHTML = Object.values(SUB_TIERS).map(t => `
-    <div class="package-card ${t.key==='vip'?'popular':''} ${active===t.key?'selected':''}" onclick="window.selectSubTier(this,'${t.key}')">
-      ${t.key==='vip' ? '<div class="pkg-popular-badge">Most Popular</div>' : ''}
-      <div class="pkg-badge" style="color:${t.color};display:flex;align-items:center;gap:5px">${iconSVG(t.icon,15)} ${t.name}</div>
-      <div class="pkg-price">$${t.usd.toFixed(2)}<span style="font-size:0.7rem;color:var(--muted)">/mo</span></div>
-      <ul class="pkg-features">
-        ${perks[t.key].map(p => `<li>${iconSVG('check',12)} ${p}</li>`).join('')}
-      </ul>
-      <button class="btn ${t.key==='vip'?'btn-primary':'btn-ghost'} btn-full pkg-btn">${active===t.key ? 'Renew' : 'Select'}</button>
-    </div>`).join('');
-}
-
-window.selectSubTier = (card, tier) => {
-  purchaseMode = 'subscription';
-  selectedPkg = null; selectedSlotPack = null;
-  document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
-  card.classList.add('selected');
-  selectedSubTier = tier;
-  showSubCheckout(tier);
-};
-
-function showSubCheckout(tier) {
-  const t = SUB_TIERS[tier];
-  const co = document.getElementById('checkout-panel');
-  if (!co) return;
-  co.style.display = 'block';
-  co.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  document.getElementById('co-summary').textContent = `${t.name} subscription — $${t.usd.toFixed(2)}/mo`;
-  document.getElementById('co-amount').textContent = `$${t.usd.toFixed(2)}`;
-  const pb = document.getElementById('paypal-btn');
-  if (pb) pb.href = `${PAYPAL_ME}/${t.usd.toFixed(2)}?currencyCode=USD`;
 };
 
 main();

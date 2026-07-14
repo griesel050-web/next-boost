@@ -13,7 +13,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
-    redirectTo: 'https://boost.nexosites.xyz/confirm-email/'
+    redirectTo: 'https://boost.nexorealm.org/confirm-email/'
   }
 });
 

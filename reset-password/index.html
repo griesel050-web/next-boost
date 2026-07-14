@@ -98,7 +98,7 @@
       btn.disabled = true;
       btn.innerHTML = '<span class="btn-spinner"></span> Sending…';
       await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'https://boost.nexosites.xyz/reset-password/'
+        redirectTo: 'https://boost.nexorealm.org/reset-password/'
       });
       // Always show sent screen (security: don't reveal if email exists)
       document.getElementById('request-screen').style.display = 'none';
