@@ -29,14 +29,14 @@
     <div style="max-width:580px;margin-bottom:28px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div>
-          <h2 style="font-size:1.05rem;font-weight:700;margin:0 0 2px">🚀 Growth Packages</h2>
+          <h2 style="font-size:1.05rem;font-weight:700;margin:0 0 2px;display:flex;align-items:center;gap:6px"><i data-lucide="rocket" data-size="16"></i> Growth Packages</h2>
           <p style="font-size:0.8rem;color:var(--muted);margin:0">One click to post a full campaign across multiple task types</p>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px">
         <!-- Starter -->
         <div class="bundle-card" onclick="applyBundle('starter')" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 16px;cursor:pointer;transition:.2s;position:relative">
-          <div style="font-size:1.5rem;margin-bottom:8px">🌱</div>
+          <div style="margin-bottom:8px;color:var(--green)"><i data-lucide="recycle" data-size="22"></i></div>
           <div style="font-weight:700;font-size:0.95rem;margin-bottom:4px">Starter Pack</div>
           <div style="font-size:0.75rem;color:var(--muted);margin-bottom:10px;line-height:1.5">Follow + Like<br>10 slots each · 5 pts/task</div>
           <div style="display:flex;align-items:center;justify-content:space-between">
@@ -47,7 +47,7 @@
         <!-- Growth -->
         <div class="bundle-card" onclick="applyBundle('growth')" style="background:var(--surface);border:2px solid var(--orange);border-radius:var(--radius);padding:18px 16px;cursor:pointer;transition:.2s;position:relative">
           <div style="position:absolute;top:-1px;right:12px;background:var(--orange);color:#fff;font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:0 0 6px 6px;letter-spacing:0.05em">POPULAR</div>
-          <div style="font-size:1.5rem;margin-bottom:8px">📈</div>
+          <div style="margin-bottom:8px;color:var(--orange-lt)"><i data-lucide="trending-up" data-size="22"></i></div>
           <div style="font-weight:700;font-size:0.95rem;margin-bottom:4px">Growth Bundle</div>
           <div style="font-size:0.75rem;color:var(--muted);margin-bottom:10px;line-height:1.5">Follow + Like + View<br>25 slots each · 8 pts/task</div>
           <div style="display:flex;align-items:center;justify-content:space-between">
@@ -57,7 +57,7 @@
         </div>
         <!-- Viral -->
         <div class="bundle-card" onclick="applyBundle('viral')" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 16px;cursor:pointer;transition:.2s;position:relative">
-          <div style="font-size:1.5rem;margin-bottom:8px">🔥</div>
+          <div style="margin-bottom:8px;color:var(--red)"><i data-lucide="flame" data-size="22"></i></div>
           <div style="font-weight:700;font-size:0.95rem;margin-bottom:4px">Viral Campaign</div>
           <div style="font-size:0.75rem;color:var(--muted);margin-bottom:10px;line-height:1.5">Follow + Like + View<br>50 slots each · 10 pts/task</div>
           <div style="display:flex;align-items:center;justify-content:space-between">
@@ -76,7 +76,7 @@
     </div>
 
     <div class="alert alert-info" style="max-width:580px;margin-bottom:20px;font-size:0.85rem">
-      ⚠️ Max <strong>5 active tasks</strong> at a time. Account must be at least 24 hours old.
+      <i data-lucide="alert-triangle" data-size="15" style="vertical-align:-3px"></i> Max <strong>5 active tasks</strong> at a time. Account must be at least 24 hours old.
     </div>
     <div class="card card-pad" style="max-width:580px">
       <!-- Platform + Type -->
@@ -169,7 +169,7 @@
       <div class="form-group" style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:flex-start;gap:12px;cursor:pointer" onclick="document.getElementById('boost-check').click()">
         <input type="checkbox" id="boost-check" style="margin-top:3px;width:18px;height:18px;accent-color:var(--orange);flex-shrink:0" onclick="event.stopPropagation()" onchange="updateCost()"/>
         <div>
-          <div style="font-weight:700;font-size:0.92rem;display:flex;align-items:center;gap:6px">⚡ Boost this task <span style="font-size:0.72rem;background:rgba(232,98,26,0.15);color:var(--orange);padding:1px 8px;border-radius:999px;font-weight:600">+1,000 pts</span></div>
+          <div style="font-weight:700;font-size:0.92rem;display:flex;align-items:center;gap:6px"><i data-lucide="zap" data-size="15"></i> Boost this task <span style="font-size:0.72rem;background:rgba(232,98,26,0.15);color:var(--orange);padding:1px 8px;border-radius:999px;font-weight:600">+1,000 pts</span></div>
           <div style="font-size:0.8rem;color:var(--muted);margin-top:2px">Pin to the top of the earn feed for 12 hours — get completions much faster.</div>
         </div>
       </div>
@@ -193,6 +193,7 @@
 <script type="module">
 import { supabase, esc } from '/assets/js/shared.js';
 import { initApp, updateNavPoints } from '/assets/js/app.js';
+import { iconSVG } from '/src/icons.js';
 
 const RULES = {
   tiktok:    {
@@ -422,7 +423,7 @@ window.applyBundle = async (bundleKey) => {
   const platform = document.getElementById('p-platform').value;
   if (!url || !validateUrl(url, platform)) {
     statusEl.style.color = 'var(--red,#f87171)';
-    statusEl.textContent = '⚠️ Please fill in a valid profile/video URL first, then click the package.';
+    statusEl.innerHTML = `${iconSVG('alert-triangle',14)} Please fill in a valid profile/video URL first, then click the package.`;
     document.getElementById('p-url').focus();
     return;
   }
@@ -457,7 +458,7 @@ window.applyBundle = async (bundleKey) => {
     statusEl.textContent = `Posted ${posted} tasks. Errors: ${errors.join('; ')}`;
   } else {
     statusEl.style.color = 'var(--green)';
-    statusEl.textContent = `✅ ${bundle.label} posted! ${posted} tasks live · ${totalCost} pts spent.`;
+    statusEl.innerHTML = `${iconSVG('circle-check',14)} ${bundle.label} posted! ${posted} tasks live · ${totalCost} pts spent.`;
     setTimeout(() => { statusEl.textContent = ''; }, 6000);
   }
 };

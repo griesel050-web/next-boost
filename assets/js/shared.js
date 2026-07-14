@@ -127,23 +127,23 @@ export const SOCIAL_PLATFORMS = [
 
 // ---- SUBSCRIPTION TIERS ---- (keep in sync with subscription_tier_info SQL function)
 export const SUB_TIERS = {
-  pro:   { key: 'pro',   name: 'Pro',   icon: '⚡', color: '#60a5fa', usd: 4.99,  slots: 10, feeDiscount: 0.50 },
-  vip:   { key: 'vip',   name: 'VIP',   icon: '💠', color: '#a78bfa', usd: 9.99,  slots: 25, feeDiscount: 0.75 },
-  elite: { key: 'elite', name: 'Elite', icon: '👑', color: '#f59e0b', usd: 19.99, slots: 60, feeDiscount: 1.00 },
+  pro:   { key: 'pro',   name: 'Pro',   icon: 'zap',   color: '#60a5fa', usd: 4.99,  slots: 10, feeDiscount: 0.50 },
+  vip:   { key: 'vip',   name: 'VIP',   icon: 'gem',   color: '#a78bfa', usd: 9.99,  slots: 25, feeDiscount: 0.75 },
+  elite: { key: 'elite', name: 'Elite', icon: 'crown', color: '#f59e0b', usd: 19.99, slots: 60, feeDiscount: 1.00 },
 };
 
 // ---- RANK SYSTEM ----
 // Tiers are based on a composite score (points + tasks completed + trust), not raw points alone —
 // grinding out tasks and staying trustworthy both matter, not just accumulating points.
 export const RANKS = [
-  { key: 'bronze',   name: 'Bronze',   icon: '🥉', min: 0,     color: '#cd7f32' },
-  { key: 'silver',   name: 'Silver',   icon: '🥈', min: 400,   color: '#c0c0c0' },
-  { key: 'gold',     name: 'Gold',     icon: '🥇', min: 1000,  color: '#ffd700' },
-  { key: 'diamond',  name: 'Diamond',  icon: '💎', min: 2000,  color: '#7dd3fc' },
-  { key: 'ruby',     name: 'Ruby',     icon: '♦️', min: 4000,  color: '#e0115f' },
-  { key: 'emerald',  name: 'Emerald',  icon: '🟢', min: 8000,  color: '#50c878' },
-  { key: 'sapphire', name: 'Sapphire', icon: '🔷', min: 16000, color: '#0f52ba' },
-  { key: 'legend',   name: 'Legend',   icon: '👑', min: 32000, color: '#f59e0b' },
+  { key: 'bronze',   name: 'Bronze',   icon: 'medal', min: 0,     color: '#cd7f32' },
+  { key: 'silver',   name: 'Silver',   icon: 'medal', min: 400,   color: '#c0c0c0' },
+  { key: 'gold',     name: 'Gold',     icon: 'medal', min: 1000,  color: '#ffd700' },
+  { key: 'diamond',  name: 'Diamond',  icon: 'gem',   min: 2000,  color: '#7dd3fc' },
+  { key: 'ruby',     name: 'Ruby',     icon: 'gem',   min: 4000,  color: '#e0115f' },
+  { key: 'emerald',  name: 'Emerald',  icon: 'gem',   min: 8000,  color: '#50c878' },
+  { key: 'sapphire', name: 'Sapphire', icon: 'gem',   min: 16000, color: '#0f52ba' },
+  { key: 'legend',   name: 'Legend',   icon: 'crown', min: 32000, color: '#f59e0b' },
 ];
 
 // Composite rank score — mirrors the `compute_rank_score` SQL function, keep both in sync.

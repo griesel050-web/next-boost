@@ -27,8 +27,8 @@
 
 <!-- BUNDLES -->
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
-  <h3 style="font-size:1rem;margin:0">📦 Task Bundles <span style="color:var(--muted);font-weight:400;font-size:0.82rem">— group your tasks into one shareable link</span></h3>
-  <button class="btn btn-ghost btn-sm" onclick="toggleSelectMode()" id="select-mode-btn">＋ New bundle</button>
+  <h3 style="font-size:1rem;margin:0"><i data-lucide="package" data-size="16" style="vertical-align:-3px"></i> Task Bundles <span style="color:var(--muted);font-weight:400;font-size:0.82rem">— group your tasks into one shareable link</span></h3>
+  <button class="btn btn-ghost btn-sm" onclick="toggleSelectMode()" id="select-mode-btn"><i data-lucide="package" data-size="14"></i> New bundle</button>
 </div>
 <div id="bundles-list" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:22px"></div>
 
@@ -45,7 +45,7 @@
 <!-- Create bundle modal -->
 <div class="modal-overlay" id="bundle-create-modal">
   <div class="modal" style="max-width:440px">
-    <h2>📦 Create a bundle</h2>
+    <h2><i data-lucide="package" data-size="18" style="vertical-align:-3px"></i> Create a bundle</h2>
     <p class="modal-sub">Give it a name — followers see all selected tasks on one page.</p>
     <div class="form-group"><label>Bundle name</label><input type="text" id="bundle-name" maxlength="60" placeholder="e.g. Support my socials"/></div>
     <div class="form-group"><label>Description (optional)</label><textarea id="bundle-desc" maxlength="200" rows="2" placeholder="A quick note for people opening the link"></textarea></div>
@@ -60,6 +60,7 @@
 <script type="module">
 import { supabase, esc } from '/assets/js/shared.js';
 import { initApp, updateNavPoints } from '/assets/js/app.js';
+import { iconSVG } from '/src/icons.js';
 const PE={tiktok:'🎵',instagram:'📸',youtube:'▶️',discord:'💬',website:'🌐',twitch:'🟣',twitter:'🐦'};
 const PC={tiktok:'plat-tiktok',instagram:'plat-instagram',youtube:'plat-youtube',discord:'plat-discord',twitch:'plat-twitch',twitter:'plat-twitter'};
 const TL={follow:'Follow',like:'Like',view:'View',join:'Join',website:'Visit',twitch:'Follow',retweet:'Retweet'};
@@ -133,7 +134,7 @@ async function loadTasks(){
   try{
     const {data:tasks,error}=await supabase.from('tasks').select('*').eq('owner_id',profile.id).order('created_at',{ascending:false});
     if(error) throw error;
-    if(!tasks||!tasks.length){feed.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><p>No tasks yet. <a href="/post-task/" style="color:var(--orange)">Post your first →</a></p></div>';return;}
+    if(!tasks||!tasks.length){feed.innerHTML=`<div class="empty-state"><div class="empty-icon">${iconSVG('clipboard',28)}</div><p>No tasks yet. <a href="/post-task/" style="color:var(--orange)">Post your first →</a></p></div>`;return;}
     feed.innerHTML='';
     tasks.forEach((t,i)=>{
       const sl=t.max_completions-t.completions_count;
@@ -154,15 +155,15 @@ async function loadTasks(){
         </div>
         <div class="task-actions">
           <span class="type-badge type-${t.type}">${TL[t.type]}</span>
-          ${t.is_boosted?'<span class="boost-badge">⚡ Boosted</span>':''}
+          ${t.is_boosted?`<span class="boost-badge">${iconSVG('zap',12)} Boosted</span>`:''}
           ${t.is_active?'<span class="status-chip chip-active">Active</span>':'<span class="status-chip chip-closed">Closed</span>'}
           <span class="slots-badge">${sl} left</span>
-          ${t.is_active?`<button class="btn btn-ghost btn-sm" onclick="window.boostTask('${t.id}')" title="Pin to top for 12 hours — costs 1,000 pts">⚡ Boost (1,000 pts)</button><button class="btn btn-ghost btn-sm" onclick="window.closeTask('${t.id}',${unused})" title="10% platform fee on early close">Close (+${Math.floor(unused*0.90)} pts after 10% fee)</button>`:''}\n          ${t.is_infinite?'<span class="boost-badge" style="background:rgba(232,98,26,0.2)">∞ Infinite</span>':''}
+          ${t.is_active?`<button class="btn btn-ghost btn-sm" onclick="window.boostTask('${t.id}')" title="Pin to top for 12 hours — costs 1,000 pts">${iconSVG('zap',13)} Boost (1,000 pts)</button><button class="btn btn-ghost btn-sm" onclick="window.closeTask('${t.id}',${unused})" title="10% platform fee on early close">Close (+${Math.floor(unused*0.90)} pts after 10% fee)</button>`:''}\n          ${t.is_infinite?'<span class="boost-badge" style="background:rgba(232,98,26,0.2)">∞ Infinite</span>':''}
         </div>`;
       feed.appendChild(card);
     });
   }catch(e){
-    feed.innerHTML=`<div class="empty-state"><div class="empty-icon">⚠️</div><p>${esc(e.message)}</p></div>`;
+    feed.innerHTML=`<div class="empty-state"><div class="empty-icon">${iconSVG('alert-triangle',28)}</div><p>${esc(e.message)}</p></div>`;
   }
 }
 
@@ -187,7 +188,7 @@ window.boostTask=async(id)=>{
 window.toggleSelectMode = () => {
   selectMode = !selectMode;
   selectedTaskIds.clear();
-  document.getElementById('select-mode-btn').textContent = selectMode ? '✕ Cancel selection' : '＋ New bundle';
+  document.getElementById('select-mode-btn').innerHTML = selectMode ? `${iconSVG('x',14)} Cancel selection` : `${iconSVG('package',14)} New bundle`;
   document.getElementById('bundle-select-bar').style.display = selectMode ? 'flex' : 'none';
   updateBundleBar();
   loadTasks();
@@ -251,7 +252,7 @@ async function loadBundles() {
         <span class="status-chip ${b.is_active?'chip-active':'chip-closed'}">${b.is_active?'Live':'Hidden'}</span>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="btn btn-ghost btn-sm" onclick="window.copyBundleLink('${b.id}')">🔗 Copy link</button>
+        <button class="btn btn-ghost btn-sm" onclick="window.copyBundleLink('${b.id}')">${iconSVG('link',13)} Copy link</button>
         <button class="btn btn-ghost btn-sm" onclick="window.toggleBundleActive('${b.id}',${b.is_active})">${b.is_active?'Hide':'Unhide'}</button>
         <button class="btn btn-ghost btn-sm" onclick="window.deleteBundle('${b.id}')" style="color:#f87171">Delete</button>
       </div>

@@ -34,8 +34,8 @@
 
 <!-- Feed tabs -->
 <div style="display:flex;gap:4px;margin-bottom:16px;background:var(--surface2);border-radius:var(--radius);padding:4px;width:fit-content">
-  <button id="tab-all" onclick="switchFeedTab('all')" class="btn btn-primary btn-sm" style="border-radius:calc(var(--radius) - 4px)">🌐 All tasks</button>
-  <button id="tab-following" onclick="switchFeedTab('following')" class="btn btn-ghost btn-sm" style="border-radius:calc(var(--radius) - 4px)">👥 Following</button>
+  <button id="tab-all" onclick="switchFeedTab('all')" class="btn btn-primary btn-sm" style="border-radius:calc(var(--radius) - 4px)"><i data-lucide="globe" data-size="14"></i> All tasks</button>
+  <button id="tab-following" onclick="switchFeedTab('following')" class="btn btn-ghost btn-sm" style="border-radius:calc(var(--radius) - 4px)"><i data-lucide="users" data-size="14"></i> Following</button>
 </div>
 
 <div class="filter-dropdowns" id="filter-bar">
@@ -66,7 +66,7 @@
 </div>
 <!-- Bonus event banner -->
 <div id="bonus-banner" style="display:none;background:linear-gradient(135deg,var(--orange),var(--orange-lt));border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;align-items:center;gap:12px">
-  <div style="font-size:1.8rem">🎉</div>
+  <div style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;color:#fff"><i data-lucide="sparkles" data-size="26"></i></div>
   <div style="flex:1"><div style="font-weight:700;font-size:0.95rem;color:#fff" id="bonus-name"></div><div style="font-size:0.8rem;color:rgba(255,255,255,0.85)" id="bonus-desc"></div></div>
   <div style="text-align:right;flex-shrink:0"><div style="font-size:1.5rem;font-weight:900;color:#fff" id="bonus-mult"></div><div style="font-size:0.72rem;color:rgba(255,255,255,0.8)" id="bonus-ends"></div></div>
 </div>
@@ -79,6 +79,7 @@
 <script type="module">
 import { supabase, esc, RANKS } from '/assets/js/shared.js';
 import { initApp, updateNavPoints, checkOnboarding, initTaskModal } from '/assets/js/app.js';
+import { iconSVG, renderIcons, EMOJI_TO_NAME } from '/src/icons.js';
 const PE={tiktok:'🎵',instagram:'📸',youtube:'▶️',discord:'💬',website:'🌐',twitch:'🟣',twitter:'🐦'};
 const PC={tiktok:'plat-tiktok',instagram:'plat-instagram',youtube:'plat-youtube',discord:'plat-discord',website:'plat-website',twitch:'plat-twitch',twitter:'plat-twitter'};
 const TL={follow:'Follow',like:'Like',view:'View',join:'Join',website:'Visit',twitch:'Follow',retweet:'Retweet'};
@@ -128,36 +129,36 @@ async function loadActivityTicker(){
     const who = esc(ev.display_name || ev.username);
     const href = `/u/${encodeURIComponent(ev.username)}`;
     const time = `<span class="ap-time">· ${timeAgo(ev.happened_at)}</span>`;
-    let icon = '📌', text = '';
+    let icon = 'target', text = '';
     switch (ev.type) {
       case 'earned': {
         const platLabel = ev.platform ? ev.platform.charAt(0).toUpperCase() + ev.platform.slice(1) : '';
-        icon = PE[ev.platform] || '⚡';
+        icon = EMOJI_TO_NAME[PE[ev.platform]] || 'zap';
         text = `<strong>${who}</strong> earned +${ev.pts} pts${platLabel ? ' on '+esc(platLabel) : ''}`;
         break;
       }
       case 'posted': {
         const platLabel = ev.platform ? ev.platform.charAt(0).toUpperCase() + ev.platform.slice(1) : '';
-        icon = '📤';
+        icon = 'send';
         text = `<strong>${who}</strong> posted a ${esc(platLabel)} task`;
         break;
       }
       case 'joined':
-        icon = '🎉';
+        icon = 'sparkles';
         text = `<strong>${who}</strong> joined Next Boost`;
         break;
       case 'achievement':
-        icon = ev.meta?.icon || '🎖';
+        icon = EMOJI_TO_NAME[ev.meta?.icon] || 'award';
         text = `<strong>${who}</strong> unlocked "${esc(ev.meta?.title||'an achievement')}"`;
         break;
       case 'rank_up': {
         const tier = RANKS.find(r => r.key === ev.meta?.tier);
-        icon = tier?.icon || '🏆';
+        icon = tier?.icon || 'trophy';
         text = `<strong>${who}</strong> reached ${esc(tier?.name||ev.meta?.tier)} rank`;
         break;
       }
     }
-    return `<a class="activity-pill" href="${href}"><span class="ap-icon">${icon}</span><span>${text}</span>${time}</a>`;
+    return `<a class="activity-pill" href="${href}"><span class="ap-icon">${iconSVG(icon,14)}</span><span>${text}</span>${time}</a>`;
   }).join('');
 }
 
@@ -197,7 +198,7 @@ async function load(reset=true){
     document.getElementById('load-more').style.display=newT.length===PAGE?'flex':'none';
     render(reset);
   }catch(e){
-    document.getElementById('earn-feed').innerHTML=`<div class="empty-state"><div class="empty-icon">⚠️</div><p>${esc(e.message)}</p></div>`;
+    document.getElementById('earn-feed').innerHTML=`<div class="empty-state"><div class="empty-icon">${iconSVG("alert-triangle",28)}</div><p>${esc(e.message)}</p></div>`;
   }
 }
 
@@ -210,7 +211,7 @@ function render(reset=true){
   else if(filterSort==='points_low') filtered.sort((a,b)=>a.points_reward-b.points_reward);
   else if(filterSort==='slots') filtered.sort((a,b)=>(b.max_completions-b.completions_count)-(a.max_completions-a.completions_count));
   if(reset) feed.innerHTML='';
-  if(!filtered.length&&reset){feed.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div><p>No tasks to complete right now.<br><span style="font-size:0.82rem;color:var(--muted)">Your own tasks don\'t appear here. Invite others to see tasks!</span><br><br><a href="/post-task/" style="color:var(--orange)">Post a task →</a></p></div>';return;}
+  if(!filtered.length&&reset){feed.innerHTML=`<div class="empty-state"><div class="empty-icon">${iconSVG('mail-x',28)}</div><p>No tasks to complete right now.<br><span style="font-size:0.82rem;color:var(--muted)">Your own tasks don't appear here. Invite others to see tasks!</span><br><br><a href="/post-task/" style="color:var(--orange)">Post a task →</a></p></div>`;return;}
   const slice=reset?filtered:filtered.slice(Math.max(0,filtered.length-PAGE));
   slice.forEach((t,i)=>{
     if(reset&&feed.querySelector(`[data-id="${t.id}"]`)) return;
@@ -227,12 +228,12 @@ function render(reset=true){
     const trustScore = t.owner_trust_score || 0;
     const trustColor = trustScore >= 80 ? '#4ade80' : trustScore >= 50 ? '#f59e0b' : '#94a3b8';
     const trustLabel = trustScore >= 80 ? 'High trust' : trustScore >= 50 ? 'Good' : trustScore > 0 ? 'New' : '';
-    const trustHtml = trustScore > 0 ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.7rem;color:${trustColor};background:${trustColor}1a;border:1px solid ${trustColor}33;border-radius:999px;padding:1px 6px;font-weight:600" title="Creator Trust Score">🛡 ${trustScore} ${trustLabel}</span>` : '';
-    const verifiedHtml = t.owner_is_verified ? `<span style="font-size:0.72rem;color:#60a5fa;background:#60a5fa1a;border:1px solid #60a5fa33;border-radius:999px;padding:1px 6px;font-weight:600" title="Verified Creator">✓ Verified</span>` : '';
+    const trustHtml = trustScore > 0 ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.7rem;color:${trustColor};background:${trustColor}1a;border:1px solid ${trustColor}33;border-radius:999px;padding:1px 6px;font-weight:600" title="Creator Trust Score">${iconSVG('shield-check',12)} ${trustScore} ${trustLabel}</span>` : '';
+    const verifiedHtml = t.owner_is_verified ? `<span style="font-size:0.72rem;color:#60a5fa;background:#60a5fa1a;border:1px solid #60a5fa33;border-radius:999px;padding:1px 6px;font-weight:600" title="Verified Creator">${iconSVG('circle-check',11)} Verified</span>` : '';
     card.innerHTML=`
       <div class="task-plat-icon ${PC[t.platform]||'plat-website'}"></div>
       <div class="task-info">
-        <h4>${esc(prettyTarget(t.target, t.platform))}${t.is_boosted?' <span class="boost-badge">⚡ Boosted</span>':''}</h4>
+        <h4>${esc(prettyTarget(t.target, t.platform))}${t.is_boosted?` <span class="boost-badge">${iconSVG('zap',12)} Boosted</span>`:''}</h4>
         <p>${esc(TL[t.type]||t.type)} · by <span style="color:var(--text)">${esc(t.owner_display_name||t.owner_username||'Unknown')}</span>${verifiedHtml?` ${verifiedHtml}`:''} · <span class="expiry-label">${exp}d left</span></p>
         ${trustHtml ? `<div style="margin-top:5px">${trustHtml}</div>` : ''}
       </div>
@@ -241,8 +242,8 @@ function render(reset=true){
         <span class="pts-badge">+${t.points_reward} pts</span>
         <span class="slots-badge">${sl}/${t.max_completions}</span>
         ${action}
-        <button class="btn btn-ghost btn-sm" title="Comments" onclick="window.openEarnComments('${t.id}','${esc(prettyTarget(t.target,t.platform))}')" style="padding:4px 8px;font-size:0.75rem;min-width:0">💬 <span id="cc-${t.id}">…</span></button>
-        <button class="btn-report" title="Report" onclick="window.openReport('${t.id}')">⚑</button>
+        <button class="btn btn-ghost btn-sm" title="Comments" onclick="window.openEarnComments('${t.id}','${esc(prettyTarget(t.target,t.platform))}')" style="padding:4px 8px;font-size:0.75rem;min-width:0">${iconSVG('message-circle',14)} <span id="cc-${t.id}">…</span></button>
+        <button class="btn-report" title="Report" onclick="window.openReport('${t.id}')">${iconSVG('flag',13)}</button>
       </div>`;
     feed.appendChild(card);
   });
@@ -294,6 +295,7 @@ window.switchFeedTab = async (tab) => {
   currentFeedTab = tab;
   document.getElementById('tab-all').className = tab==='all' ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm';
   document.getElementById('tab-following').className = tab==='following' ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm';
+  // className swap only touches classes, not innerHTML, so icons persist
   document.getElementById('filter-bar').style.display = tab==='all' ? '' : 'none';
 
   if (tab === 'following') {
@@ -337,7 +339,7 @@ window.switchFeedTab = async (tab) => {
     const { data, error } = await supabase.rpc('get_following_tasks', { p_limit: 50 });
     if (error) { feed.innerHTML = `<div class="empty-state"><p>${error.message}</p></div>`; return; }
     if (!data || !data.length) {
-      feed.innerHTML = `<div class="empty-state"><div class="empty-icon">👥</div><p>No tasks from people you follow yet.<br/><span style="font-size:0.82rem;color:var(--muted)">Follow creators on the <a href="/leaderboard/" style="color:var(--orange)">leaderboard</a> to see their tasks here.</span></p></div>`;
+      feed.innerHTML = `<div class="empty-state"><div class="empty-icon">${iconSVG('users',28)}</div><p>No tasks from people you follow yet.<br/><span style="font-size:0.82rem;color:var(--muted)">Follow creators on the <a href="/leaderboard/" style="color:var(--orange)">leaderboard</a> to see their tasks here.</span></p></div>`;
       return;
     }
     feed.innerHTML = '';
@@ -355,7 +357,7 @@ window.switchFeedTab = async (tab) => {
       const exp = Math.max(0, Math.ceil((new Date(t.expires_at) - Date.now()) / 86400000));
       let action;
       if (t.already_completed) {
-        action = `<button class="btn btn-ghost btn-sm" disabled style="opacity:0.5;cursor:default">✓ Done</button>`;
+        action = `<button class="btn btn-ghost btn-sm" disabled style="opacity:0.5;cursor:default">${iconSVG('circle-check',13)} Done</button>`;
       } else if ((t.max_completions - sl) <= 0) {
         action = `<button class="btn btn-ghost btn-sm" disabled style="opacity:0.5">Full</button>`;
       } else {
@@ -365,8 +367,8 @@ window.switchFeedTab = async (tab) => {
       // Trust + verified badges
       const ts = t.owner_trust_score || 0;
       const tsColor = ts >= 80 ? '#4ade80' : ts >= 50 ? '#f59e0b' : '#94a3b8';
-      const trustHtml = ts > 0 ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.7rem;color:${tsColor};background:${tsColor}1a;border:1px solid ${tsColor}33;border-radius:999px;padding:1px 6px;font-weight:600" title="Creator Trust Score">🛡 ${ts}</span>` : '';
-      const verifiedHtml = t.owner_is_verified ? `<span style="font-size:0.72rem;color:#60a5fa;background:#60a5fa1a;border:1px solid #60a5fa33;border-radius:999px;padding:1px 6px;font-weight:600">✓ Verified</span>` : '';
+      const trustHtml = ts > 0 ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.7rem;color:${tsColor};background:${tsColor}1a;border:1px solid ${tsColor}33;border-radius:999px;padding:1px 6px;font-weight:600" title="Creator Trust Score">${iconSVG('shield-check',12)} ${ts}</span>` : '';
+      const verifiedHtml = t.owner_is_verified ? `<span style="font-size:0.72rem;color:#60a5fa;background:#60a5fa1a;border:1px solid #60a5fa33;border-radius:999px;padding:1px 6px;font-weight:600">${iconSVG('circle-check',11)} Verified</span>` : '';
 
       const card = document.createElement('div');
       card.className = 'task-card card-animate';
@@ -374,7 +376,7 @@ window.switchFeedTab = async (tab) => {
       card.innerHTML = `
         <div class="task-plat-icon ${PC[t.platform]||'plat-website'}"></div>
         <div class="task-info">
-          <h4>${esc(prettyTarget(t.target, t.platform))}${t.is_boosted ? ' <span class="boost-badge">⚡ Boosted</span>' : ''}</h4>
+          <h4>${esc(prettyTarget(t.target, t.platform))}${t.is_boosted ? ` <span class="boost-badge">${iconSVG('zap',12)} Boosted</span>` : ''}</h4>
           <p>${esc(TL[t.type]||t.type)} · by <a href="/u/${encodeURIComponent(t.owner_username||'')}" style="color:var(--text);text-decoration:none;font-weight:600" onmouseover="this.style.color='var(--orange)'" onmouseout="this.style.color='var(--text)'">${esc(t.owner_display_name||t.owner_username||'Unknown')}</a>${verifiedHtml?' '+verifiedHtml:''} · <span class="expiry-label">${exp}d left</span></p>
           ${trustHtml ? `<div style="margin-top:5px">${trustHtml}</div>` : ''}
         </div>
@@ -383,8 +385,8 @@ window.switchFeedTab = async (tab) => {
           <span class="pts-badge">+${t.points_reward} pts</span>
           <span class="slots-badge">${sl}/${t.max_completions}</span>
           ${action}
-          <button class="btn btn-ghost btn-sm" title="Comments" onclick="window.openEarnComments('${t.task_id}','${esc(prettyTarget(t.target,t.platform))}')" style="padding:4px 8px;font-size:0.75rem;min-width:0">💬 <span id="cc-${t.task_id}">…</span></button>
-          <button class="btn-report" title="Report" onclick="window.openReport('${t.task_id}')">⚑</button>
+          <button class="btn btn-ghost btn-sm" title="Comments" onclick="window.openEarnComments('${t.task_id}','${esc(prettyTarget(t.target,t.platform))}')" style="padding:4px 8px;font-size:0.75rem;min-width:0">${iconSVG('message-circle',14)} <span id="cc-${t.task_id}">…</span></button>
+          <button class="btn-report" title="Report" onclick="window.openReport('${t.task_id}')">${iconSVG('flag',13)}</button>
         </div>`;
       feed.appendChild(card);
       taskIds.push(t.task_id);
@@ -466,7 +468,7 @@ window.openEarnComments = async (taskId, target) => {
     return `<div style="display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
       <div style="width:26px;height:26px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#fff;flex-shrink:0">${ini}</div>
       <div>
-        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:2px"><strong style="color:var(--text)">@${esc(cm.profiles?.username||'?')}</strong> ${cm.is_owner_note?'<span style="color:var(--orange);font-size:0.7rem">📌 Owner note</span>':''}</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:2px"><strong style="color:var(--text)">@${esc(cm.profiles?.username||'?')}</strong> ${cm.is_owner_note?`<span style="color:var(--orange);font-size:0.7rem">${iconSVG('target',11)} Owner note</span>`:''}</div>
         <div style="font-size:0.85rem">${esc(cm.content)}</div>
       </div>
     </div>`;

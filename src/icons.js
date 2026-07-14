@@ -42,7 +42,7 @@ export const ICON_MAP = {
   'list-checks': ListChecks, megaphone: Megaphone,
   palette: Palette, ruler: Ruler, 'bell-ring': BellRing, accessibility: Accessibility,
   recycle: Recycle, 'mouse-click': MousePointerClick, 'thumbs-up': ThumbsUp,
-  twitch: Twitch, discord: MessageCircle, tiktok: Music2,
+  twitch: Twitch, discord: MessageCircle, 'message-circle': MessageCircle, tiktok: Music2,
   instagram: Instagram, youtube: Youtube, twitter: Twitter, website: Globe,
 };
 
@@ -69,12 +69,17 @@ export const EMOJI_TO_NAME = {
 };
 
 function makeSVG(Comp, size, thin) {
-  return createElement(Comp, {
-    width: size, height: size, stroke: 'currentColor',
+  // lucide's createElement expects a single [tag, attrs, children] tuple.
+  // Each icon (e.g. Rocket) IS the `children` array of path/circle/etc tuples —
+  // it is not a component you pass alongside props. Build the <svg> wrapper here.
+  return createElement(['svg', {
+    xmlns: 'http://www.w3.org/2000/svg',
+    width: size, height: size, viewBox: '0 0 24 24',
+    fill: 'none', stroke: 'currentColor',
     'stroke-width': thin ? 1.5 : 1.75,
     'stroke-linecap': 'round', 'stroke-linejoin': 'round',
     class: 'lucide-icon',
-  });
+  }, Comp]);
 }
 
 // For dynamic template-string rendering (e.g. task card innerHTML built in
