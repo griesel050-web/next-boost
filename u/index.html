@@ -179,6 +179,7 @@
 <script type="module">
 import { supabase, esc, PLAT_CLASS, SOCIAL_PLATFORMS, getRank, SUB_TIERS } from '/assets/js/shared.js';
 import { initApp } from '/assets/js/app.js';
+import { iconSVG } from '/src/icons.js';
 
 const PC   = { tiktok:'plat-tiktok', instagram:'plat-instagram', youtube:'plat-youtube', discord:'plat-discord', twitch:'plat-twitch', twitter:'plat-twitter', website:'plat-website' };
 const TL   = { follow:'Follow', like:'Like', view:'View', join:'Join', website:'Visit', retweet:'Retweet' };
@@ -245,10 +246,10 @@ async function main() {
   // Badges
   const badges = [];
   const rank = getRank(p);
-  badges.push(`<span class="pub-badge" style="color:${rank.color};border-color:${rank.color}44;background:${rank.color}18" title="${esc(rank.name)} rank — based on points, tasks completed, and trust">${rank.icon} ${esc(rank.name)}</span>`);
+  badges.push(`<span class="pub-badge" style="color:${rank.color};border-color:${rank.color}44;background:${rank.color}18" title="${esc(rank.name)} rank — based on points, tasks completed, and trust">${iconSVG(rank.icon,13)} ${esc(rank.name)}</span>`);
   if (p.subscription_tier && p.subscription_expires_at) {
     const st = SUB_TIERS[p.subscription_tier];
-    if (st) badges.push(`<span class="pub-badge" style="color:${st.color};border-color:${st.color}44;background:${st.color}18" title="${st.name} subscriber">${st.icon} ${st.name}</span>`);
+    if (st) badges.push(`<span class="pub-badge" style="color:${st.color};border-color:${st.color}44;background:${st.color}18" title="${st.name} subscriber">${iconSVG(st.icon,13)} ${st.name}</span>`);
   }
   if (p.is_verified) badges.push(`<span class="pub-badge" style="color:#60a5fa;border-color:#60a5fa44">✓ Verified</span>`);
   const ts = p.trust_score || 0;

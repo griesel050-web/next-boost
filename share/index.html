@@ -41,7 +41,7 @@
         <div class="share-row" id="stat-btns"></div>
         <div class="share-dl-row">
           <button class="btn btn-primary" style="flex:1" onclick="downloadCard()">⬇ Download card</button>
-          <button class="btn btn-ghost" onclick="copyCard()">📋 Copy image</button>
+          <button class="btn btn-ghost" onclick="copyCard()"><i data-lucide="clipboard" data-size="14"></i> Copy image</button>
         </div>
         <p style="font-size:0.75rem;color:var(--muted);margin:0;text-align:center">Click the card or Download to save as PNG</p>
       </div>
@@ -52,6 +52,7 @@
 <script type="module">
 import { supabase, esc } from '/assets/js/shared.js';
 import { initApp } from '/assets/js/app.js';
+import { iconSVG } from '/src/icons.js';
 
 const canvas = document.getElementById('share-canvas');
 const ctx = canvas.getContext('2d');
@@ -171,7 +172,7 @@ function buildStatBtns() {
   STATS.forEach(s => {
     const btn = document.createElement('button');
     btn.className = 'share-stat-btn' + (s.key === selected ? ' active' : '');
-    btn.innerHTML = `<span class="ssb-val">${s.icon} ${s.val(profile)}</span><span class="ssb-lbl">${s.label}</span>`;
+    btn.innerHTML = `<span class="ssb-val">${iconSVG(s.icon,13)} ${s.val(profile)}</span><span class="ssb-lbl">${s.label}</span>`;
     btn.onclick = () => { selected = s.key; buildStatBtns(); drawCard(); };
     wrap.appendChild(btn);
   });

@@ -158,6 +158,7 @@
 <script type="module">
 import { supabase, esc, getRank } from '/assets/js/shared.js';
 import { initApp } from '/assets/js/app.js';
+import { iconSVG } from '/src/icons.js';
 let profile;
 const medals = ['🥇','🥈','🥉'];
 
@@ -246,7 +247,7 @@ function buildRow(u, ptField) {
   const isMe = u.id === profile.id;
   const ini = (u.display_name || u.username || '?')[0].toUpperCase();
   const rank = getRank({ points: u[ptField] || 0, tasks_completed: u.tasks_completed || 0, trust_score: u.trust_score || 0 });
-  const rankIcon = `<span title="${esc(rank.name)} rank" style="font-size:0.9rem;line-height:1">${rank.icon}</span>`;
+  const rankIcon = `<span title="${esc(rank.name)} rank" style="display:inline-flex">${iconSVG(rank.icon,15)}</span>`;
   const badge = u.top_badge ? `<span title="${esc(u.top_badge_title||u.top_badge)}" style="font-size:1rem;line-height:1">${u.top_badge}</span>` : '';
   const streakBadge = (u.current_streak||0)>=7 ? `<span title="${u.current_streak}-day streak" style="font-size:0.72rem;background:rgba(255,100,0,0.15);color:#ff6400;padding:1px 6px;border-radius:999px;font-weight:700">🔥${u.current_streak}</span>` : '';
   const verifiedBadge = u.is_verified ? `<span title="Verified Creator" style="font-size:0.68rem;background:rgba(96,165,250,0.15);color:#60a5fa;padding:1px 6px;border-radius:999px;font-weight:700">✓ Verified</span>` : '';
@@ -315,7 +316,7 @@ window.showUser = (id, name, color, points, done, username, topBadge, topBadgeTi
 
   // ── Badges (rank + achievement badge + streak + verified + trust, all as pills — wraps freely, never breaks layout)
   const badgeParts = [];
-  badgeParts.push(`<span title="${esc(rank.name)} rank — based on points, tasks done, and trust" style="font-size:0.68rem;background:${rank.color}18;color:${rank.color};border:1px solid ${rank.color}55;border-radius:999px;padding:2px 8px;font-weight:700">${rank.icon} ${esc(rank.name)}</span>`);
+  badgeParts.push(`<span title="${esc(rank.name)} rank — based on points, tasks done, and trust" style="font-size:0.68rem;background:${rank.color}18;color:${rank.color};border:1px solid ${rank.color}55;border-radius:999px;padding:2px 8px;font-weight:700;display:inline-flex;align-items:center;gap:3px">${iconSVG(rank.icon,11)} ${esc(rank.name)}</span>`);
   if (topBadge) badgeParts.push(`<span title="${esc(topBadgeTitle||'Badge')}" style="font-size:1.2rem;line-height:1">${topBadge}</span>`);
   if (streak >= 3) badgeParts.push(`<span title="${streak}-day streak" style="font-size:0.68rem;background:rgba(255,100,0,0.15);color:#ff6400;border-radius:999px;padding:2px 8px;font-weight:700">🔥 ${streak}</span>`);
   if (isVerified) badgeParts.push(`<span style="font-size:0.68rem;background:rgba(96,165,250,0.12);color:#60a5fa;border:1px solid rgba(96,165,250,0.25);border-radius:999px;padding:2px 8px;font-weight:700">✓ Verified</span>`);

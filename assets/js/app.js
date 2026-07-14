@@ -2,7 +2,7 @@
 // NEXT BOOST — app.js  (complete rebuild)
 // ============================================================
 import { supabase, esc } from './shared.js';
-import { renderIcons } from '../../src/icons.js';
+import { renderIcons, iconSVG } from '../../src/icons.js';
 import '../../src/motion.js';
 export { supabase, renderIcons };
 
@@ -146,40 +146,40 @@ function renderShell(profile,currentPage){
       <a class="nav-logo" href="/"><img src="/assets/img/logo.png" alt="Next Boost" style="height:36px;width:auto;object-fit:contain"/></a>
       <div class="nav-links" style="gap:8px">
         <button class="daily-pill" id="daily-pill" onclick="claimBonus()">
-          <span class="dp-icon">🎁</span>
+          <span class="dp-icon">${iconSVG('gift',16)}</span>
           <div style="display:flex;flex-direction:column;line-height:1.2">
             <span class="dp-label" id="dp-label">Daily bonus</span>
             <span class="dp-pts" id="dp-pts">+10 pts</span>
           </div>
           <span class="dp-streak" id="dp-streak" style="display:none"></span>
         </button>
-        <a href="/store/" class="pts-pill" id="nav-pts-pill" title="Buy more points +" style="text-decoration:none;cursor:pointer">⚡ <span id="nav-pts">${profile.points}</span> pts <span style="font-size:0.7rem;opacity:0.7">+</span></a>
+        <a href="/store/" class="pts-pill" id="nav-pts-pill" title="Buy more points +" style="text-decoration:none;cursor:pointer">${iconSVG('zap',14)} <span id="nav-pts">${profile.points}</span> pts <span style="font-size:0.7rem;opacity:0.7">+</span></a>
         <button class="notif-btn" id="notif-btn" onclick="toggleNotifs()" title="Notifications">
-          🔔<span class="notif-dot" id="notif-dot" style="display:none"></span>
+          ${iconSVG('bell',17)}<span class="notif-dot" id="notif-dot" style="display:none"></span>
         </button>
       </div>`;
   }
   const sidebar=document.getElementById('app-sidebar');
   if(sidebar){
     const L1=[
-      {href:'/earn/',icon:'⚡',label:'Earn Points',page:'earn'},
-      {href:'/completed/',icon:'✅',label:'Completed',page:'completed'},
-      {href:'/post-task/',icon:'📤',label:'Post a Task',page:'post-task'},
-      {href:'/my-tasks/',icon:'📋',label:'My Tasks',page:'my-tasks'},
-      {href:'/store/',icon:'🛒',label:'Buy Points',page:'store'},
+      {href:'/earn/',icon:'zap',label:'Earn Points',page:'earn'},
+      {href:'/completed/',icon:'circle-check',label:'Completed',page:'completed'},
+      {href:'/post-task/',icon:'send',label:'Post a Task',page:'post-task'},
+      {href:'/my-tasks/',icon:'clipboard',label:'My Tasks',page:'my-tasks'},
+      {href:'/store/',icon:'credit-card',label:'Buy Points',page:'store'},
     ];
     const L2=[
-      {href:'/leaderboard/',icon:'🏆',label:'Leaderboard',page:'leaderboard'},
-      {href:'/achievements/',icon:'🎖️',label:'Achievements',page:'achievements'},
-      {href:'/referral/',icon:'🤝',label:'Referral',page:'referral'},
-      {href:'/share/',icon:'🎉',label:'Share your win',page:'share'},
+      {href:'/leaderboard/',icon:'trophy',label:'Leaderboard',page:'leaderboard'},
+      {href:'/achievements/',icon:'award',label:'Achievements',page:'achievements'},
+      {href:'/referral/',icon:'users',label:'Referral',page:'referral'},
+      {href:'/share/',icon:'sparkles',label:'Share your win',page:'share'},
     ];
     const L3=[
-      {href:'/profile/',icon:'👤',label:'Profile',page:'profile'},
-      {href:'/settings/',icon:'⚙️',label:'Settings',page:'settings'},
-      ...(profile.is_admin?[{href:'/admin/',icon:'🛡️',label:'Admin Panel',page:'admin'}]:[]),
+      {href:'/profile/',icon:'user',label:'Profile',page:'profile'},
+      {href:'/settings/',icon:'settings',label:'Settings',page:'settings'},
+      ...(profile.is_admin?[{href:'/admin/',icon:'shield-check',label:'Admin Panel',page:'admin'}]:[]),
     ];
-    const rl=arr=>arr.map(l=>`<a href="${l.href}" class="sidebar-link ${currentPage===l.page?'active':''}"><span class="sidebar-icon">${l.icon}</span>${l.label}</a>`).join('');
+    const rl=arr=>arr.map(l=>`<a href="${l.href}" class="sidebar-link ${currentPage===l.page?'active':''}"><span class="sidebar-icon">${iconSVG(l.icon,17)}</span>${l.label}</a>`).join('');
     sidebar.innerHTML=`
       <span class="sidebar-section-label">Earn</span>${rl(L1)}
       <span class="sidebar-section-label">Explore</span>${rl(L2)}
@@ -188,21 +188,21 @@ function renderShell(profile,currentPage){
         ${avatarHtml}
         <div class="sidebar-user-info">
           <div class="sidebar-user-name">${esc(profile.display_name||profile.username)}</div>
-          <div class="sidebar-user-pts">⚡ ${profile.points} pts · <span style="color:var(--orange)">Buy more →</span></div>
+          <div class="sidebar-user-pts">${iconSVG('zap',12)} ${profile.points} pts · <span style="color:var(--orange)">Buy more →</span></div>
         </div>
       </a>
       <button id="pwa-install-btn" onclick="window.promptPWAInstall()" style="display:none;align-items:center;gap:10px;background:rgba(232,98,26,0.1);border:1px solid rgba(232,98,26,0.3);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-family:inherit;font-size:0.82rem;cursor:pointer;width:100%;margin-top:8px;font-weight:600">
-        📱 Install app
+        ${iconSVG('download',15)} Install app
       </button>`;
   }
   const mn=document.getElementById('mobile-nav');
   if(mn){
     mn.innerHTML=`<div class="mobile-nav-inner">
-      <a href="/earn/"        class="mobile-nav-item ${currentPage==='earn'?'active':''}"><span class="mn-icon">⚡</span>Earn</a>
-      <a href="/post-task/"   class="mobile-nav-item ${currentPage==='post-task'?'active':''}"><span class="mn-icon">📤</span>Post</a>
-      <a href="/leaderboard/" class="mobile-nav-item ${currentPage==='leaderboard'?'active':''}"><span class="mn-icon">🏆</span>Top</a>
-      <a href="/profile/"     class="mobile-nav-item ${currentPage==='profile'?'active':''}"><span class="mn-icon">👤</span>Profile</a>
-      <a href="/settings/"    class="mobile-nav-item ${currentPage==='settings'?'active':''}"><span class="mn-icon">⚙️</span>More</a>
+      <a href="/earn/"        class="mobile-nav-item ${currentPage==='earn'?'active':''}"><span class="mn-icon">${iconSVG('zap',18)}</span>Earn</a>
+      <a href="/post-task/"   class="mobile-nav-item ${currentPage==='post-task'?'active':''}"><span class="mn-icon">${iconSVG('send',18)}</span>Post</a>
+      <a href="/leaderboard/" class="mobile-nav-item ${currentPage==='leaderboard'?'active':''}"><span class="mn-icon">${iconSVG('trophy',18)}</span>Top</a>
+      <a href="/profile/"     class="mobile-nav-item ${currentPage==='profile'?'active':''}"><span class="mn-icon">${iconSVG('user',18)}</span>Profile</a>
+      <a href="/settings/"    class="mobile-nav-item ${currentPage==='settings'?'active':''}"><span class="mn-icon">${iconSVG('settings',18)}</span>More</a>
     </div>`;
   }
 }
@@ -224,7 +224,7 @@ export function updateNavPoints(pts){
     };
     requestAnimationFrame(tick);
   }
-  const su=document.querySelector('.sidebar-user-pts');if(su)su.textContent=`⚡ ${pts.toLocaleString()} pts`;
+  const su=document.querySelector('.sidebar-user-pts');if(su)su.innerHTML=`${iconSVG('zap',12)} ${pts.toLocaleString()} pts · <span style="color:var(--orange)">Buy more →</span>`;
 }
 
 // ---- DAILY BONUS ----
@@ -343,10 +343,10 @@ export function checkOnboarding(profile){
   if(localStorage.getItem('nb_onboarded'))return;
   if(profile.tasks_completed>0||profile.tasks_posted>0){localStorage.setItem('nb_onboarded','1');return;}
   const STEPS=[
-    {icon:'🎉',title:'Welcome to Next Boost!',desc:'You got 50 free points just for joining.'},
-    {icon:'⚡',title:'Complete tasks, earn points',desc:'Browse the Earn tab and complete tasks to earn points.'},
-    {icon:'📤',title:'Post tasks to grow',desc:'Spend points to post your own task. Others complete it and you grow.'},
-    {icon:'🎁',title:'Come back daily',desc:'Claim your daily bonus for free points. Build streaks for bigger rewards!'},
+    {icon:'sparkles',title:'Welcome to Next Boost!',desc:'You got 50 free points just for joining.'},
+    {icon:'zap',title:'Complete tasks, earn points',desc:'Browse the Earn tab and complete tasks to earn points.'},
+    {icon:'send',title:'Post tasks to grow',desc:'Spend points to post your own task. Others complete it and you grow.'},
+    {icon:'gift',title:'Come back daily',desc:'Claim your daily bonus for free points. Build streaks for bigger rewards!'},
   ];
   let step=0;
   const overlay=document.createElement('div');
@@ -357,7 +357,7 @@ export function checkOnboarding(profile){
     const last=s===STEPS.length-1;
     overlay.innerHTML=`<div class="onboarding-card">
       <div class="onboarding-steps">${dots}</div>
-      <div class="onboarding-icon">${st.icon}</div>
+      <div class="onboarding-icon">${iconSVG(st.icon,32)}</div>
       <h2 class="onboarding-title">${st.title}</h2>
       <p class="onboarding-desc">${st.desc}</p>
       <div style="display:flex;gap:10px;justify-content:center">

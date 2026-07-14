@@ -52,8 +52,8 @@
         <div class="pkg-price">$2.00</div>
         <div class="pkg-rate">$0.004 per point</div>
         <ul class="pkg-features">
-          <li>✓ Post 2–3 tasks</li>
-          <li>✓ Instant after approval</li>
+          <li><i data-lucide="check" data-size="13"></i> Post 2–3 tasks</li>
+          <li><i data-lucide="check" data-size="13"></i> Instant after approval</li>
         </ul>
         <button class="btn btn-ghost btn-full pkg-btn">Select</button>
       </div>
@@ -64,9 +64,9 @@
         <div class="pkg-price">$5.00</div>
         <div class="pkg-rate">$0.0033 per point</div>
         <ul class="pkg-features">
-          <li>✓ Post 5–7 tasks</li>
-          <li>✓ Boost 1 task</li>
-          <li>✓ Best starter value</li>
+          <li><i data-lucide="check" data-size="13"></i> Post 5–7 tasks</li>
+          <li><i data-lucide="check" data-size="13"></i> Boost 1 task</li>
+          <li><i data-lucide="check" data-size="13"></i> Best starter value</li>
         </ul>
         <button class="btn btn-primary btn-full pkg-btn">Select</button>
       </div>
@@ -76,9 +76,9 @@
         <div class="pkg-price">$10.00</div>
         <div class="pkg-rate">$0.0029 per point</div>
         <ul class="pkg-features">
-          <li>✓ Post 10+ tasks</li>
-          <li>✓ Boost multiple tasks</li>
-          <li>✓ Great for creators</li>
+          <li><i data-lucide="check" data-size="13"></i> Post 10+ tasks</li>
+          <li><i data-lucide="check" data-size="13"></i> Boost multiple tasks</li>
+          <li><i data-lucide="check" data-size="13"></i> Great for creators</li>
         </ul>
         <button class="btn btn-ghost btn-full pkg-btn">Select</button>
       </div>
@@ -88,9 +88,9 @@
         <div class="pkg-price">$20.00</div>
         <div class="pkg-rate">$0.0025 per point — best value</div>
         <ul class="pkg-features">
-          <li>✓ Maximum growth</li>
-          <li>✓ Unlimited boosts</li>
-          <li>✓ Best value per point</li>
+          <li><i data-lucide="check" data-size="13"></i> Maximum growth</li>
+          <li><i data-lucide="check" data-size="13"></i> Unlimited boosts</li>
+          <li><i data-lucide="check" data-size="13"></i> Best value per point</li>
         </ul>
         <button class="btn btn-ghost btn-full pkg-btn">Select</button>
       </div>
@@ -127,7 +127,7 @@
       </div>
 
       <div class="alert alert-info" style="font-size:0.83rem;margin-bottom:16px">
-        ⏱️ Purchases are reviewed manually within 24 hours. You'll get a notification when approved. Do not submit multiple purchase requests for the same payment.
+        <i data-lucide="clock" data-size="13" style="vertical-align:-2px"></i> Purchases are reviewed manually within 24 hours. You'll get a notification when approved. Do not submit multiple purchase requests for the same payment.
       </div>
 
       <div class="error-msg" id="co-err"></div>
@@ -166,17 +166,17 @@
           <button class="btn btn-ghost btn-full pkg-btn">Select</button>
         </div>
       </div>
-      <p style="font-size:0.78rem;color:var(--muted);margin-top:12px">⚠️ Slot purchases use the same PayPal review process as point packages. Slots are added manually within 24 hours.</p>
+      <p style="font-size:0.78rem;color:var(--muted);margin-top:12px"><i data-lucide="alert-triangle" data-size="13" style="vertical-align:-2px"></i> Slot purchases use the same PayPal review process as point packages. Slots are added manually within 24 hours.</p>
       <div class="error-msg" id="slot-err" style="margin-top:8px"></div>
     </div>
 
         <!-- SUBSCRIPTIONS -->
     <div style="margin-top:48px">
-      <h2 style="font-size:1.1rem;margin-bottom:6px">🌟 Subscriptions</h2>
+      <h2 style="font-size:1.1rem;margin-bottom:6px"><i data-lucide="sparkles" data-size="16" style="vertical-align:-3px"></i> Subscriptions</h2>
       <p style="font-size:0.85rem;color:var(--muted);margin-bottom:6px">Monthly plans — extra task slots plus a discount on the platform fee every time you post.</p>
       <p id="current-sub-status" style="font-size:0.82rem;color:var(--orange);margin-bottom:20px"></p>
       <div class="packages-grid" style="max-width:900px" id="sub-grid"></div>
-      <p style="font-size:0.78rem;color:var(--muted);margin-top:12px">⚠️ Subscriptions use the same PayPal review process. Renews are manual — submit again each month to keep your slots and discount active.</p>
+      <p style="font-size:0.78rem;color:var(--muted);margin-top:12px"><i data-lucide="alert-triangle" data-size="13" style="vertical-align:-2px"></i> Subscriptions use the same PayPal review process. Renews are manual — submit again each month to keep your slots and discount active.</p>
     </div>
 
     <!-- PURCHASE HISTORY -->
@@ -190,6 +190,7 @@
 <script type="module">
 import { supabase, esc, SUB_TIERS } from '/assets/js/shared.js';
 import { initApp, updateNavPoints } from '/assets/js/app.js';
+import { iconSVG } from '/src/icons.js';
 
 // ── CONFIG: Your PayPal Me link ──────────────────────────────
 const PAYPAL_ME = 'https://paypal.me/YourPayPalUsername';
@@ -316,7 +317,7 @@ async function loadHistory() {
     return;
   }
 
-  const statusIcon = { pending: '⏳', approved: '✅', rejected: '❌' };
+  const statusIcon = { pending: iconSVG('circle-alert',12), approved: iconSVG('circle-check',12), rejected: iconSVG('circle-x',12) };
   const statusClass = { pending: 'chip-pending', approved: 'chip-approved', rejected: 'chip-rejected' };
 
   feed.innerHTML = combined.map(p => {
@@ -385,18 +386,18 @@ function initSubTiers() {
   }
 
   const perks = {
-    pro:   ['+10 task slots', '50% off platform fee', '⚡ Pro badge on your profile'],
-    vip:   ['+25 task slots', '75% off platform fee', '💠 VIP badge on your profile'],
-    elite: ['+60 task slots', '0% platform fee — free posting', '👑 Elite badge on your profile'],
+    pro:   ['+10 task slots', '50% off platform fee', `${iconSVG('zap',12)} Pro badge on your profile`],
+    vip:   ['+25 task slots', '75% off platform fee', `${iconSVG('gem',12)} VIP badge on your profile`],
+    elite: ['+60 task slots', '0% platform fee — free posting', `${iconSVG('crown',12)} Elite badge on your profile`],
   };
 
   grid.innerHTML = Object.values(SUB_TIERS).map(t => `
     <div class="package-card ${t.key==='vip'?'popular':''} ${active===t.key?'selected':''}" onclick="window.selectSubTier(this,'${t.key}')">
       ${t.key==='vip' ? '<div class="pkg-popular-badge">Most Popular</div>' : ''}
-      <div class="pkg-badge" style="color:${t.color}">${t.icon} ${t.name}</div>
+      <div class="pkg-badge" style="color:${t.color};display:flex;align-items:center;gap:5px">${iconSVG(t.icon,15)} ${t.name}</div>
       <div class="pkg-price">$${t.usd.toFixed(2)}<span style="font-size:0.7rem;color:var(--muted)">/mo</span></div>
       <ul class="pkg-features">
-        ${perks[t.key].map(p => `<li>✓ ${p}</li>`).join('')}
+        ${perks[t.key].map(p => `<li>${iconSVG('check',12)} ${p}</li>`).join('')}
       </ul>
       <button class="btn ${t.key==='vip'?'btn-primary':'btn-ghost'} btn-full pkg-btn">${active===t.key ? 'Renew' : 'Select'}</button>
     </div>`).join('');
