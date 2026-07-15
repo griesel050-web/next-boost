@@ -254,7 +254,7 @@
 
   <script type="module">
     import '/assets/js/app.js'; // powers scroll-reveal animations, PWA install prompt, etc.
-    import { supabase, go } from '/assets/js/shared.js';
+    import { supabase, go, esc } from '/assets/js/shared.js';
     import { iconSVG } from '/src/icons.js';
     // Auto-redirect logged in users to dashboard
     const { data: { session } } = await supabase.auth.getSession();
@@ -279,9 +279,9 @@
         const { data } = await supabase.rpc('get_recent_activity', { p_limit: 20 });
         if (!data || !data.length) return;
         const items = data.map(a => {
-          const user   = a.display_name || a.username || 'Someone';
+          const user   = esc(a.display_name || a.username || 'Someone');
           const icon   = iconSVG(a.type === 'joined' ? 'sparkles' : (PLAT_NAMES[a.platform] || 'sparkles'), 14);
-          const action = a.type === 'joined' ? 'joined Next Boost' : `${TYPE_VERBS[a.type]||'completed a task'} +${a.pts}pts`;
+          const action = esc(a.type === 'joined' ? 'joined Next Boost' : `${TYPE_VERBS[a.type]||'completed a task'} +${a.pts}pts`);
           const ago    = Math.max(1, Math.round((Date.now() - new Date(a.happened_at)) / 60000));
           const agoStr = ago < 60 ? `${ago}m ago` : `${Math.round(ago/60)}h ago`;
           return `<span style="display:inline-flex;align-items:center;gap:6px;font-size:0.76rem;color:var(--muted);flex-shrink:0">${icon} <strong style="color:var(--text)">${user}</strong> ${action} · ${agoStr}</span>`;

@@ -123,7 +123,10 @@ export async function initApp(currentPage=''){
     document.head.appendChild(lk);
   }
   if(profile.compact_mode) document.body.classList.add('compact-mode');
-  if(profile.custom_bg){document.body.style.backgroundImage=`url('${profile.custom_bg}')`;document.body.classList.add('has-custom-bg');}
+  if(profile.custom_bg && /^https:\/\/[^\s'")]+$/.test(profile.custom_bg)){
+    document.body.style.backgroundImage=`url("${profile.custom_bg}")`;
+    document.body.classList.add('has-custom-bg');
+  }
   renderShell(profile,currentPage);
   // Run these after shell is fully rendered, non-blocking
   setTimeout(()=>{
