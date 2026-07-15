@@ -12,7 +12,7 @@ const pages = [
   'guides/tiktok-followers/index', 'guides/twitter-x-followers/index', 'guides/youtube-views/index',
   'leaderboard/index', 'login/index', 'my-tasks/index', 'post-task/index',
   'profile/index', 'referral/index', 'reset-password/index', 'settings/index',
-  'share/index', 'signup/index', 'store/index', 'u/index',
+  'signup/index', 'store/index', 'u/index',
 ];
 
 export default defineConfig({

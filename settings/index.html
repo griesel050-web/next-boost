@@ -162,21 +162,6 @@
         </div>
       </div>
 
-      <!-- SOCIAL LINKS -->
-      <div class="settings-section">
-        <div class="settings-section-header">
-          <h3><i data-lucide="link" data-size="15" style="vertical-align:-3px"></i> Social Links</h3>
-          <p>Link your socials — shown on your public profile</p>
-        </div>
-        <div class="settings-section-body">
-          <div id="social-links-list" style="display:flex;flex-direction:column;gap:10px"></div>
-          <div style="display:flex;gap:12px;align-items:center;margin-top:16px">
-            <button class="btn btn-primary btn-sm" onclick="saveSocialLinks()">Save social links</button>
-            <span id="social-msg" style="font-size:0.85rem"></span>
-          </div>
-        </div>
-      </div>
-
       <!-- PRIVACY -->
       <div class="settings-section">
         <div class="settings-section-header">
@@ -352,7 +337,7 @@
 </div>
 <nav class="mobile-nav-bar" id="mobile-nav"></nav>
 <script type="module">
-import { supabase, SOCIAL_PLATFORMS, PLAT_CLASS } from '/assets/js/shared.js';
+import { supabase } from '/assets/js/shared.js';
 import { initApp, THEMES, applyTheme } from '/assets/js/app.js';
 let pendingTheme, pendingAccent, pendingFont, profile;
 
@@ -403,16 +388,6 @@ async function main() {
   if (profile.custom_bg) {
     document.getElementById('custom-bg-input').value = profile.custom_bg;
   }
-
-  // Social links
-  const links = profile.social_links || {};
-  document.getElementById('social-links-list').innerHTML = SOCIAL_PLATFORMS.map(p => `
-    <div style="display:flex;align-items:center;gap:10px">
-      <div class="task-plat-icon ${PLAT_CLASS[p.key]}" style="width:36px;height:36px;border-radius:8px;flex-shrink:0"></div>
-      <div class="form-group" style="margin-bottom:0;flex:1;min-width:0">
-        <input type="url" id="social-${p.key}" placeholder="${p.placeholder}" value="${links[p.key] ? links[p.key].replace(/"/g,'&quot;') : ''}"/>
-      </div>
-    </div>`).join('');
 
   // Apply compact mode live
   if (profile.compact_mode) document.body.classList.add('compact-mode');
@@ -530,42 +505,6 @@ window.saveSettings = async () => {
   msg.textContent = 'All settings saved!';
   msg.style.color = 'var(--green)';
   if (btn) { btn.disabled = false; btn.textContent = 'Save all settings'; }
-  setTimeout(() => msg.textContent = '', 3000);
-};
-
-// ---- SOCIAL LINKS ----
-window.saveSocialLinks = async () => {
-  const msg = document.getElementById('social-msg');
-  const btn = document.querySelector('[onclick="saveSocialLinks()"]');
-  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
-  msg.textContent = ''; msg.style.color = 'var(--muted)';
-
-  const payload = {};
-  SOCIAL_PLATFORMS.forEach(p => {
-    const val = document.getElementById(`social-${p.key}`).value.trim();
-    if (val) payload[p.key] = val;
-  });
-
-  const { data, error } = await supabase.rpc('update_social_links', { p_social_links: payload });
-
-  if (error || data?.error) {
-    msg.textContent = data?.error || error.message;
-    msg.style.color = 'var(--red)';
-    if (btn) { btn.disabled = false; btn.textContent = 'Save social links'; }
-    return;
-  }
-
-  // Reflect any auto-cleanup (e.g. https:// prefix added) back into the inputs
-  const clean = data.social_links || {};
-  SOCIAL_PLATFORMS.forEach(p => {
-    const input = document.getElementById(`social-${p.key}`);
-    if (input) input.value = clean[p.key] || '';
-  });
-  profile.social_links = clean;
-
-  msg.textContent = 'Saved!';
-  msg.style.color = 'var(--green)';
-  if (btn) { btn.disabled = false; btn.textContent = 'Save social links'; }
   setTimeout(() => msg.textContent = '', 3000);
 };
 

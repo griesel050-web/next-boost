@@ -166,6 +166,12 @@
       <textarea id="modal-bio" maxlength="160" rows="3" placeholder="Tell the community about yourself…" style="width:100%;resize:vertical;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-family:inherit;font-size:0.9rem"></textarea>
     </div>
 
+    <!-- Social links -->
+    <div class="form-group">
+      <label class="form-label">Social links <span style="color:var(--muted);font-size:0.75rem;font-weight:400">(shown on your public profile)</span></label>
+      <div id="modal-social-links-list" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+
     <!-- Read-only -->
     <div class="form-group">
       <label class="form-label">Username <span style="color:var(--muted);font-size:0.75rem;font-weight:400">(cannot change)</span></label>
@@ -182,7 +188,7 @@
 </div>
 
 <script type="module">
-import { supabase, esc, getRank, RANKS } from '/assets/js/shared.js';
+import { supabase, esc, getRank, RANKS, SOCIAL_PLATFORMS, PLAT_CLASS } from '/assets/js/shared.js';
 import { initApp, updateNavPoints } from '/assets/js/app.js';
 import { iconSVG } from '/src/icons.js';
 
@@ -299,7 +305,6 @@ function renderProfile(email) {
     </div>
 
     <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <a href="/share/" class="btn btn-ghost btn-sm"><i data-lucide="sparkles" data-size="14"></i> Share your win</a>
       <button class="btn btn-danger btn-sm" onclick="doSignOut()">Sign out</button>
     </div>`;
 
@@ -374,6 +379,16 @@ window.openEditModal = () => {
   document.getElementById('modal-username-display').value = profile.username || '';
   document.getElementById('bio-count').textContent = (profile.bio || '').length;
   document.getElementById('modal-err').textContent = '';
+
+  // Social links
+  const links = profile.social_links || {};
+  document.getElementById('modal-social-links-list').innerHTML = SOCIAL_PLATFORMS.map(p => `
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="task-plat-icon ${PLAT_CLASS[p.key]}" style="width:36px;height:36px;border-radius:8px;flex-shrink:0"></div>
+      <div class="form-group" style="margin-bottom:0;flex:1;min-width:0">
+        <input type="url" id="modal-social-${p.key}" placeholder="${p.placeholder}" value="${links[p.key] ? links[p.key].replace(/"/g,'&quot;') : ''}"/>
+      </div>
+    </div>`).join('');
 
   // Avatar preview
   updateModalAvatar();
@@ -489,6 +504,20 @@ window.saveProfile = async () => {
   profile.display_name = name || profile.username;
   profile.bio = bio;
   profile.avatar_color = pendingColor;
+
+  // Social links
+  const socialPayload = {};
+  SOCIAL_PLATFORMS.forEach(p => {
+    const val = document.getElementById(`modal-social-${p.key}`).value.trim();
+    if (val) socialPayload[p.key] = val;
+  });
+  const { data: socialData, error: socialError } = await supabase.rpc('update_social_links', { p_social_links: socialPayload });
+  if (socialError || socialData?.error) {
+    errEl.textContent = socialData?.error || socialError.message;
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save changes'; }
+    return;
+  }
+  profile.social_links = socialData.social_links || {};
 
   errEl.style.color = 'var(--green)';
   errEl.textContent = 'Saved!';

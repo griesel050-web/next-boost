@@ -474,9 +474,12 @@
       users.forEach(u => {
         const row = document.createElement('div');
         row.className = 'admin-table-row' + (u.is_banned ? ' row-banned' : '');
+        const avatarHtml = u.avatar_url
+          ? `<img src="${u.avatar_url}" loading="lazy" decoding="async" class="user-mini-avatar" style="object-fit:cover" alt=""/>`
+          : `<div class="user-mini-avatar" style="background:${u.is_banned?'var(--red)':(u.avatar_color||'var(--orange)')}">${(u.username||'?')[0].toUpperCase()}</div>`;
         row.innerHTML = `
           <span class="user-cell">
-            <div class="user-mini-avatar" style="background:${u.is_banned?'var(--red)':'var(--orange)'}">${(u.username||'?')[0].toUpperCase()}</div>
+            ${avatarHtml}
             <div>
               <div class="user-name">${esc(u.display_name||u.username)}</div>
               <div class="user-meta">@${esc(u.username)} · joined ${new Date(u.created_at).toLocaleDateString()}</div>

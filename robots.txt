@@ -22,6 +22,5 @@ Disallow: /analytics/
 Disallow: /earn/
 Disallow: /u/
 Disallow: /task/
-Disallow: /share/
 
 Sitemap: https://boost.nexorealm.org/sitemap.xml

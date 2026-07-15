@@ -172,7 +172,6 @@ function renderShell(profile,currentPage){
       {href:'/leaderboard/',icon:'trophy',label:'Leaderboard',page:'leaderboard'},
       {href:'/achievements/',icon:'award',label:'Achievements',page:'achievements'},
       {href:'/referral/',icon:'users',label:'Referral',page:'referral'},
-      {href:'/share/',icon:'sparkles',label:'Share your win',page:'share'},
     ];
     const L3=[
       {href:'/profile/',icon:'user',label:'Profile',page:'profile'},
