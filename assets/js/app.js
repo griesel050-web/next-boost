@@ -234,6 +234,20 @@ function renderShell(profile,currentPage){
       <a href="/settings/"    class="mobile-nav-item ${currentPage==='settings'?'active':''}"><span class="mn-icon">${iconSVG('settings',18)}</span>More</a>
     </div>`;
   }
+
+  // Promo FAB — links to nexorealm.org, can be disabled in Settings
+  let fab=document.getElementById('promo-fab');
+  if(!fab){
+    fab=document.createElement('a');
+    fab.id='promo-fab';
+    fab.href='https://nexorealm.org';
+    fab.target='_blank';
+    fab.rel='noopener';
+    fab.title='Visit Nexorealm';
+    fab.innerHTML=iconSVG('arrow-up-right',20);
+    document.body.appendChild(fab);
+  }
+  fab.style.display = profile.show_promo_fab === false ? 'none' : 'flex';
 }
 
 export function updateNavPoints(pts){

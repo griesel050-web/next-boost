@@ -159,6 +159,16 @@
               <span class="toggle-slider"></span>
             </label>
           </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Show Nexorealm button</div>
+              <div class="toggle-desc">Floating button in the bottom-right corner linking to nexorealm.org</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-promo-fab" checked/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
         </div>
       </div>
 
@@ -382,6 +392,7 @@ async function main() {
   // Set toggles from profile
   document.getElementById('toggle-compact').checked = profile.compact_mode || false;
   document.getElementById('toggle-hints').checked = profile.show_earn_hints !== false;
+  document.getElementById('toggle-promo-fab').checked = profile.show_promo_fab !== false;
   document.getElementById('toggle-public').checked = profile.profile_public !== false;
 
   // Custom BG
@@ -395,6 +406,12 @@ async function main() {
   // Toggle compact live preview
   document.getElementById('toggle-compact').addEventListener('change', e => {
     document.body.classList.toggle('compact-mode', e.target.checked);
+  });
+
+  // Toggle promo FAB live preview
+  document.getElementById('toggle-promo-fab').addEventListener('change', e => {
+    const fab = document.getElementById('promo-fab');
+    if (fab) fab.style.display = e.target.checked ? 'flex' : 'none';
   });
 
   // Accessibility toggles
@@ -481,6 +498,7 @@ window.saveSettings = async () => {
     p_accent_color:    pendingAccent || null,
     p_compact_mode:    document.getElementById('toggle-compact').checked,
     p_show_earn_hints: document.getElementById('toggle-hints').checked,
+    p_show_promo_fab:  document.getElementById('toggle-promo-fab').checked,
     p_profile_public:  document.getElementById('toggle-public').checked,
     p_font_choice:     pendingFont || 'inter',
     p_custom_bg:       customBg,

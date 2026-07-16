@@ -100,6 +100,23 @@
 .sidebar-user-name { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
 .sidebar-user-pts { font-size: 0.75rem; color: var(--orange); font-weight: 600; }
 
+/* ---- PROMO FAB ---- */
+#promo-fab {
+  position: fixed;
+  right: 24px; bottom: 24px;
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: var(--orange, #E8621A);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(232,98,26,0.4);
+  z-index: 150;
+  transition: transform 0.15s, box-shadow 0.15s;
+  text-decoration: none;
+}
+#promo-fab:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 6px 20px rgba(232,98,26,0.5); }
+@media(max-width:768px) { #promo-fab { right: 16px; bottom: 88px; width: 46px; height: 46px; } }
+
 /* ---- MOBILE BOTTOM NAV ---- */
 .mobile-nav-bar {
   display: none;
