@@ -244,7 +244,7 @@ function renderShell(profile,currentPage){
     fab.target='_blank';
     fab.rel='noopener';
     fab.title='Visit Nexorealm';
-    fab.innerHTML=iconSVG('arrow-up-right',20);
+    fab.innerHTML=iconSVG('globe',20);
     document.body.appendChild(fab);
   }
   fab.style.display = profile.show_promo_fab === false ? 'none' : 'flex';
