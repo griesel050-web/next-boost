@@ -78,7 +78,7 @@
           <div class="panel-header">
             <h1 class="admin-title">Users</h1>
             <div class="search-box">
-              <input type="text" id="user-search" placeholder="Search username…" oninput="debounceUserSearch()"/>
+              <input type="text" id="user-search" maxlength="30" placeholder="Search username…" oninput="debounceUserSearch()"/>
             </div>
           </div>
           <div id="users-table-wrap">
@@ -94,7 +94,7 @@
           <div class="panel-header">
             <h1 class="admin-title">All Tasks</h1>
             <div class="search-box">
-              <input type="text" id="task-search" placeholder="Search target or username…" oninput="debounceTaskSearch()"/>
+              <input type="text" id="task-search" maxlength="300" placeholder="Search target or username…" oninput="debounceTaskSearch()"/>
             </div>
           </div>
           <div id="tasks-table-wrap">
@@ -149,11 +149,11 @@
           <div class="card card-pad" style="max-width:560px">
             <div class="form-group">
               <label class="form-label">Title</label>
-              <input type="text" id="bc-title" placeholder="e.g. Weekend bonus is live!" style="width:100%"/>
+              <input type="text" id="bc-title" maxlength="100" placeholder="e.g. Weekend bonus is live!" style="width:100%"/>
             </div>
             <div class="form-group">
               <label class="form-label">Message</label>
-              <textarea id="bc-body" rows="4" placeholder="Write your message here..." style="width:100%;resize:vertical;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-family:inherit;font-size:0.9rem"></textarea>
+              <textarea id="bc-body" rows="4" maxlength="500" placeholder="Write your message here..." style="width:100%;resize:vertical;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-family:inherit;font-size:0.9rem"></textarea>
             </div>
             <div class="error-msg" id="bc-err" style="margin-bottom:12px"></div>
             <div style="display:flex;gap:10px;align-items:center">
@@ -173,11 +173,11 @@
             <h3 style="font-size:0.95rem;margin-bottom:16px">Create new bonus event</h3>
             <div class="form-group">
               <label class="form-label">Event name</label>
-              <input type="text" id="bn-name" placeholder="e.g. Weekend Warrior" style="width:100%"/>
+              <input type="text" id="bn-name" maxlength="60" placeholder="e.g. Weekend Warrior" style="width:100%"/>
             </div>
             <div class="form-group">
               <label class="form-label">Description</label>
-              <input type="text" id="bn-desc" placeholder="e.g. 2x points on all tasks this weekend!" style="width:100%"/>
+              <input type="text" id="bn-desc" maxlength="200" placeholder="e.g. 2x points on all tasks this weekend!" style="width:100%"/>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
               <div class="form-group">
@@ -243,7 +243,7 @@
       </div>
       <div class="form-group">
         <label for="points-reason">Reason (shown in ledger)</label>
-        <input type="text" id="points-reason" value="admin_adjustment" placeholder="admin_adjustment"/>
+        <input type="text" id="points-reason" maxlength="60" value="admin_adjustment" placeholder="admin_adjustment"/>
       </div>
       <div class="error-msg" id="points-err"></div>
       <div class="modal-footer">
@@ -260,7 +260,7 @@
       <p class="modal-sub" id="ban-modal-sub">This will deactivate all their tasks.</p>
       <div class="form-group">
         <label for="ban-reason">Reason</label>
-        <input type="text" id="ban-reason" placeholder="e.g. Spam, fake tasks, abuse…"/>
+        <input type="text" id="ban-reason" maxlength="300" placeholder="e.g. Spam, fake tasks, abuse…"/>
       </div>
       <div class="error-msg" id="ban-err"></div>
       <div class="modal-footer">

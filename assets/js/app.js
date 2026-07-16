@@ -110,6 +110,12 @@ export async function initApp(currentPage=''){
   if(pRes.error){window.location.replace('/login/');return null;}
   const profile=pRes.data;
   const email=uRes.data?.user?.email||'';
+
+  if(profile.is_banned){
+    renderBannedScreen(profile);
+    return null;
+  }
+
   // Update last_seen for live user count (fire and forget)
   supabase.from('profiles').update({ last_seen: new Date().toISOString() }).eq('id', profile.id).then(() => {});
 
@@ -135,6 +141,27 @@ export async function initApp(currentPage=''){
     try{ subscribeNotifs(profile.id); }catch(e){ console.warn('subscribeNotifs',e); }
   }, 0);
   return{profile,email,session};
+}
+
+// ---- BANNED SCREEN ----
+function renderBannedScreen(profile){
+  applyTheme(profile.theme||'dark-orange',profile.accent_color||null);
+  const reason = esc(profile.ban_reason || 'No reason was provided.');
+  document.body.innerHTML = `
+    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px">
+      <div class="empty-state" style="max-width:440px;text-align:center;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg,16px);padding:40px 32px">
+        <div class="empty-icon" style="color:var(--danger,#e5484d);margin-bottom:8px">${iconSVG('ban',32)}</div>
+        <h2 style="margin:12px 0 6px;font-size:1.25rem">Account suspended</h2>
+        <p style="color:var(--muted)">Your Next Boost account has been suspended.</p>
+        <p style="color:var(--muted);background:var(--surface2);border-radius:var(--radius-sm);padding:10px 14px;margin-top:14px;font-size:0.88rem">${reason}</p>
+        <p style="color:var(--muted);margin-top:18px;font-size:0.9rem">Think this is a mistake? Reach out and we'll take a look.</p>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px">
+          <a href="mailto:support@nexorealm.org?subject=Ban%20appeal" class="btn btn-primary btn-sm">${iconSVG('mail',14)} Email support</a>
+          <a href="https://discord.gg/JFz3mVpCUm" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">${iconSVG('message-circle',14)} Join our Discord</a>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:20px" onclick="window.doSignOut()">${iconSVG('log-out',14)} Log out</button>
+      </div>
+    </div>`;
 }
 
 // ---- RENDER SHELL ----

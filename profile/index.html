@@ -138,7 +138,7 @@
       <div class="avatar-upload-info">
         <label class="btn btn-ghost btn-sm" style="cursor:pointer">
           <i data-lucide="image" data-size="14"></i> Upload photo
-          <input type="file" id="avatar-file-input" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" onchange="handleAvatarFile(this)"/>
+          <input type="file" id="avatar-file-input" accept="image/jpeg,image/png" style="display:none" onchange="handleAvatarFile(this)"/>
         </label>
         <button class="btn btn-ghost btn-sm" id="remove-avatar-btn" onclick="removeAvatar()" style="display:none"><i data-lucide="trash" data-size="14"></i> Remove</button>
         <div style="font-size:0.72rem;color:var(--muted)">JPG, PNG, WebP · max 2MB</div>
@@ -386,7 +386,7 @@ window.openEditModal = () => {
     <div style="display:flex;align-items:center;gap:10px">
       <div class="task-plat-icon ${PLAT_CLASS[p.key]}" style="width:36px;height:36px;border-radius:8px;flex-shrink:0"></div>
       <div class="form-group" style="margin-bottom:0;flex:1;min-width:0">
-        <input type="url" id="modal-social-${p.key}" placeholder="${p.placeholder}" value="${links[p.key] ? links[p.key].replace(/"/g,'&quot;') : ''}"/>
+        <input type="url" id="modal-social-${p.key}" maxlength="300" placeholder="${p.placeholder}" value="${links[p.key] ? links[p.key].replace(/"/g,'&quot;') : ''}"/>
       </div>
     </div>`).join('');
 
@@ -443,7 +443,23 @@ window.handleAvatarFile = async (input) => {
   if (!file) return;
   const prog = document.getElementById('avatar-upload-progress');
   const errEl = document.getElementById('modal-err');
-  if (file.size > 2 * 1024 * 1024) { errEl.textContent = 'File too large — max 2MB.'; return; }
+  errEl.textContent = '';
+
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png'];
+  const ALLOWED_EXTS  = ['jpg', 'jpeg', 'png'];
+  const MAX_BYTES = 1 * 1024 * 1024; // 1MB
+
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  if (!ALLOWED_TYPES.includes(file.type) || !ALLOWED_EXTS.includes(ext)) {
+    errEl.textContent = 'Only PNG or JPG images are allowed.';
+    input.value = '';
+    return;
+  }
+  if (file.size > MAX_BYTES) {
+    errEl.textContent = 'File too large — max 1MB.';
+    input.value = '';
+    return;
+  }
 
   prog.style.display = 'block'; prog.textContent = 'Uploading…';
 
@@ -452,8 +468,8 @@ window.handleAvatarFile = async (input) => {
   profile.avatar_url = localUrl;
   updateModalAvatar();
 
-  const ext = file.name.split('.').pop().toLowerCase() || 'jpg';
-  const filePath = `${profile.id}/avatar.${ext}`;
+  const safeExt = ext === 'jpeg' ? 'jpg' : ext;
+  const filePath = `${profile.id}/avatar.${safeExt}`;
 
   const { error: upErr } = await supabase.storage.from('avatars').upload(filePath, file, { upsert: true, contentType: file.type });
   if (upErr) { prog.textContent = 'Upload failed: ' + upErr.message; profile.avatar_url = null; updateModalAvatar(); return; }

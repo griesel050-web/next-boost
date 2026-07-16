@@ -3,6 +3,7 @@ Allow: /
 Allow: /signup/
 Allow: /leaderboard/
 Allow: /guides/
+Allow: /u/
 
 # Keep app pages private from crawlers
 Disallow: /dashboard/
@@ -20,7 +21,6 @@ Disallow: /store/
 Disallow: /admin/
 Disallow: /analytics/
 Disallow: /earn/
-Disallow: /u/
 Disallow: /task/
 
 Sitemap: https://boost.nexorealm.org/sitemap.xml

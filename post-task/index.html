@@ -107,13 +107,13 @@
       <!-- URL -->
       <div class="form-group">
         <label for="p-url" id="url-label">Profile / video URL</label>
-        <input type="url" id="p-url" placeholder="https://www.tiktok.com/@username" oninput="onUrlInput()"/>
+        <input type="url" id="p-url" placeholder="https://www.tiktok.com/@username" maxlength="300" oninput="onUrlInput()"/>
         <div class="url-hint" id="url-hint"></div>
       </div>
       <!-- Instructions -->
       <div class="form-group">
         <label for="p-desc">Instructions <span style="font-weight:400;text-transform:none;font-size:0.8rem;color:var(--muted2)">(optional)</span></label>
-        <textarea id="p-desc" placeholder="e.g. Visit our website and browse around for a bit"></textarea>
+        <textarea id="p-desc" placeholder="e.g. Visit our website and browse around for a bit" maxlength="300"></textarea>
       </div>
       <!-- Points + Slots (presets) -->
       <div class="form-row">
