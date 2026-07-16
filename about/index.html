@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&display=swap"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About — Next Boost</title>
+  <meta name="description" content="Next Boost is a free engagement exchange platform where creators trade real follows, likes, views and members — no bots, no purchased engagement."/>
+  <link rel="canonical" href="https://boost.nexorealm.org/about/"/>
+  <meta property="og:title" content="About Next Boost"/>
+  <meta property="og:description" content="Next Boost is a free engagement exchange platform where creators trade real follows, likes, views and members — no bots, no purchased engagement."/>
+  <meta property="og:url" content="https://boost.nexorealm.org/about/"/>
+  <meta property="og:type" content="website"/>
+  <meta name="robots" content="index, follow"/>
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Next Boost"/>
+  <meta name="theme-color" content="#E8621A"/>
+  <link rel="stylesheet" href="/assets/css/main.css"/>
+  <link rel="stylesheet" href="/assets/css/landing.css"/>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://boost.nexorealm.org/"},{"@type":"ListItem","position":2,"name":"About","item":"https://boost.nexorealm.org/about/"}]}</script>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png"/>
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/img/favicon-192.png"/>
+  <link rel="icon" type="image/png" sizes="512x512" href="/assets/img/favicon-512.png"/>
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png"/>
+  <meta property="og:image" content="https://boost.nexorealm.org/assets/img/og-image.png"/>
+  <meta name="twitter:image" content="https://boost.nexorealm.org/assets/img/og-image.png"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+</head>
+<body>
+  <nav class="nav" id="main-nav">
+    <a class="nav-logo" href="/"><img loading="eager" decoding="async" src="/assets/img/logo.png" alt="Next Boost" style="height:36px;width:auto;object-fit:contain"/></a>
+    <div class="nav-links" id="nav-links">
+      <a href="/login/" class="btn btn-ghost btn-sm">Log in</a>
+      <a href="/signup/" class="btn btn-primary btn-sm">Sign up free</a>
+    </div>
+  </nav>
+
+  <article class="article">
+    <div class="breadcrumb"><a href="/">Home</a> / About</div>
+    <h1>About Next Boost</h1>
+    <p class="article-sub">A free engagement exchange built for creators who are tired of choosing between paying for fake followers or growing alone.</p>
+
+    <h2>What we're building</h2>
+    <p>Next Boost is a platform where creators trade real engagement with each other. Instead of buying followers, views, or members from bot farms, you complete small tasks for other creators — following, liking, watching, joining — and earn points you spend to get the same kind of support back on your own content and channels.</p>
+    <p>Every action on Next Boost comes from a real person using their own account. No bots, no fake engagement, no purchased follower counts that disappear a month later.</p>
+
+    <h2>Why we started this</h2>
+    <p>Growing an audience from zero is genuinely hard, and the fastest "solutions" — buying followers, views, or members — actively hurt creators in the long run. Platforms detect and purge fake engagement, algorithms deprioritize accounts with suspicious activity, and an inflated follower count with no real interaction is easy for anyone to spot. We built Next Boost as a straightforward alternative: real engagement, earned by giving real engagement first.</p>
+
+    <h2>How it works, briefly</h2>
+    <ol>
+      <li>Sign up and get points to start.</li>
+      <li>Complete tasks — follow, like, watch, or join — for other creators to earn points.</li>
+      <li>Spend those points posting your own tasks to grow your following, your channel, or your server.</li>
+    </ol>
+    <p>We also run anti-cheat checks on every task completion, so points are only awarded for genuine engagement, and we take reports of fake or spammy tasks seriously.</p>
+
+    <div class="article-cta">
+      <h3>Questions about how it works?</h3>
+      <p>Check out our support page, or reach out directly — we're happy to help.</p>
+      <a href="/support/" class="btn btn-primary btn-lg">Visit support</a>
+    </div>
+  </article>
+
+  <footer class="footer">
+    <p>© 2026 Next Boost &nbsp;·&nbsp; <a href="/login/">Log in</a> &nbsp;·&nbsp; <a href="/signup/">Sign up</a> &nbsp;·&nbsp; <a href="/guides/">Guides</a> &nbsp;·&nbsp; <a href="/about/">About</a> &nbsp;·&nbsp; <a href="/support/">Support</a> &nbsp;·&nbsp; <a href="https://discord.gg/3dknk9P5Nb" target="_blank" rel="noopener">Discord</a></p>
+  </footer>
+
+  <script type="module">
+    import { supabase, go } from '/assets/js/shared.js';
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) go('/earn/');
+  </script>
+</body>
+</html>
