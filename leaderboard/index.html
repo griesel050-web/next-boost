@@ -348,7 +348,7 @@ window.showUser = (id, name, color, points, done, username, topBadge, topBadgeTi
   if (!isMe) {
     actionsEl.innerHTML = `
       <button class="btn btn-primary btn-full" id="follow-btn-modal" onclick="toggleFollow('${id}',this)">+ Follow</button>
-      <a href="/u/${encodeURIComponent(username)}" class="btn btn-ghost btn-full" style="text-align:center">View full profile →</a>
+      <a href="/u/${encodeURIComponent(username||'')}" class="btn btn-ghost btn-full" style="text-align:center${username?'':';display:none'}">View full profile →</a>
       <button class="btn btn-ghost btn-full" onclick="closeUserModal()">Close</button>`;
   } else {
     actionsEl.innerHTML = `
