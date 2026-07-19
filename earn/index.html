@@ -128,8 +128,8 @@ async function loadActivityTicker(){
     return;
   }
   track.innerHTML = data.map(ev => {
-    const who = esc(ev.display_name || ev.username);
-    const href = `/u/${encodeURIComponent(ev.username)}`;
+    const who = esc(ev.display_name || ev.username || 'Someone');
+    const href = ev.username ? `/u/${encodeURIComponent(ev.username)}` : null;
     const time = `<span class="ap-time">· ${timeAgo(ev.happened_at)}</span>`;
     let icon = 'target', text = '';
     switch (ev.type) {
@@ -160,7 +160,9 @@ async function loadActivityTicker(){
         break;
       }
     }
-    return `<a class="activity-pill" href="${href}"><span class="ap-icon">${iconSVG(icon,14)}</span><span>${text}</span>${time}</a>`;
+    const tag = href ? 'a' : 'span';
+    const hrefAttr = href ? ` href="${href}"` : '';
+    return `<${tag} class="activity-pill"${hrefAttr}><span class="ap-icon">${iconSVG(icon,14)}</span><span>${text}</span>${time}</${tag}>`;
   }).join('');
 }
 
@@ -379,7 +381,7 @@ window.switchFeedTab = async (tab) => {
         <div class="task-plat-icon ${PC[t.platform]||'plat-website'}"></div>
         <div class="task-info">
           <h4>${esc(prettyTarget(t.target, t.platform))}${t.is_boosted ? ` <span class="boost-badge">${iconSVG('zap',12)} Boosted</span>` : ''}</h4>
-          <p>${esc(TL[t.type]||t.type)} · by <a href="/u/${encodeURIComponent(t.owner_username||'')}" style="color:var(--text);text-decoration:none;font-weight:600" onmouseover="this.style.color='var(--orange)'" onmouseout="this.style.color='var(--text)'">${esc(t.owner_display_name||t.owner_username||'Unknown')}</a>${verifiedHtml?' '+verifiedHtml:''} · <span class="expiry-label">${exp}d left</span></p>
+          <p>${esc(TL[t.type]||t.type)} · by ${t.owner_username ? `<a href="/u/${encodeURIComponent(t.owner_username)}" style="color:var(--text);text-decoration:none;font-weight:600" onmouseover="this.style.color='var(--orange)'" onmouseout="this.style.color='var(--text)'">${esc(t.owner_display_name||t.owner_username)}</a>` : `<span style="font-weight:600">Unknown</span>`}${verifiedHtml?' '+verifiedHtml:''} · <span class="expiry-label">${exp}d left</span></p>
           ${trustHtml ? `<div style="margin-top:5px">${trustHtml}</div>` : ''}
         </div>
         <div class="task-actions">

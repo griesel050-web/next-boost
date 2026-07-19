@@ -119,7 +119,7 @@ async function main() {
 
   root.innerHTML = `
     <div class="bd-hero">
-      <div class="bd-owner">${ownerAvatar}<span>by <a href="/u/${encodeURIComponent(b.owner_username)}" style="color:#fff;font-weight:700;text-decoration:underline">@${esc(b.owner_username)}</a></span></div>
+      <div class="bd-owner">${ownerAvatar}<span>by ${b.owner_username ? `<a href="/u/${encodeURIComponent(b.owner_username)}" style="color:#fff;font-weight:700;text-decoration:underline">@${esc(b.owner_username)}</a>` : `<strong>Unknown creator</strong>`}</span></div>
       <div class="bd-title">${esc(b.name)}</div>
       ${b.description ? `<div class="bd-desc">${esc(b.description)}</div>` : ''}
       <div class="bd-pts-pill">${iconSVG('zap',13)} ${b.tasks.length} tasks · up to ${b.total_points.toLocaleString()} pts total</div>
