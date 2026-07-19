@@ -169,7 +169,7 @@
 
       <!-- Boost upsell -->
       <div class="form-group" style="background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:flex-start;gap:12px;cursor:pointer" onclick="document.getElementById('boost-check').click()">
-        <input type="checkbox" id="boost-check" style="margin-top:3px;width:18px;height:18px;accent-color:var(--orange);flex-shrink:0" onclick="event.stopPropagation()" onchange="updateCost()"/>
+        <input type="checkbox" id="boost-check" class="nb-checkbox" onclick="event.stopPropagation()" onchange="updateCost()"/>
         <div>
           <div style="font-weight:700;font-size:0.92rem;display:flex;align-items:center;gap:6px"><i data-lucide="zap" data-size="15"></i> Boost this task <span style="font-size:0.72rem;background:rgba(232,98,26,0.15);color:var(--orange);padding:1px 8px;border-radius:999px;font-weight:600">+1,000 pts</span></div>
           <div style="font-size:0.8rem;color:var(--muted);margin-top:2px">Pin to the top of the earn feed for 12 hours — get completions much faster.</div>
@@ -179,7 +179,7 @@
       <!-- Admin only: infinite task — JS reveals this only for admins -->
       <div id="infinite-wrap" class="admin-only-field" style="background:rgba(232,98,26,0.08);border:1px solid var(--orange);border-radius:var(--radius);padding:14px 16px;cursor:pointer;margin-bottom:8px" onclick="document.getElementById('infinite-check').click()">
         <div style="display:flex;align-items:flex-start;gap:12px">
-          <input type="checkbox" id="infinite-check" style="margin-top:3px;width:18px;height:18px;accent-color:var(--orange);flex-shrink:0" onclick="event.stopPropagation()"/>
+          <input type="checkbox" id="infinite-check" class="nb-checkbox" onclick="event.stopPropagation()"/>
           <div>
             <div style="font-weight:700;font-size:0.92rem;display:flex;align-items:center;gap:6px">∞ Infinite task <span style="font-size:0.72rem;background:rgba(232,98,26,0.15);color:var(--orange);padding:1px 8px;border-radius:999px;font-weight:600">Admin only</span></div>
             <div style="font-size:0.8rem;color:var(--muted);margin-top:2px">Task never closes — unlimited completions. No point cost charged.</div>

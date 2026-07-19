@@ -53,7 +53,7 @@
       <textarea id="cm-input" placeholder="Ask a question or leave feedback…" maxlength="500" rows="3"></textarea>
     </div>
     <label style="display:flex;align-items:center;gap:8px;font-size:0.83rem;color:var(--muted);margin-bottom:14px;cursor:pointer">
-      <input type="checkbox" id="cm-owner-note" style="accent-color:var(--orange)"/>
+      <input type="checkbox" id="cm-owner-note" class="nb-checkbox" style="margin-top:0"/>
       Private owner note (only visible after task is started)
     </label>
     <div class="error-msg" id="cm-err"></div>
@@ -192,10 +192,10 @@ function buildTaskCard(t, i) {
       <!-- AUTO-REFILL -->
       <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.82rem;color:var(--muted)">
-          <input type="checkbox" class="refill-toggle" data-task="${t.task_id}"
+          <input type="checkbox" class="refill-toggle nb-checkbox" data-task="${t.task_id}"
             ${t.auto_refill ? 'checked' : ''}
             onchange="toggleRefill('${t.task_id}', this)"
-            style="accent-color:var(--orange);width:15px;height:15px"/>
+            style="margin-top:0;width:16px;height:16px"/>
           <span style="color:var(--text);font-weight:600"><i data-lucide="recycle" data-size="14" style="vertical-align:-2px"></i> Auto-refill slots when full</span>
         </label>
         <div style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:var(--muted)">

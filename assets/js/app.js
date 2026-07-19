@@ -22,33 +22,6 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// PWA install prompt — store event for later use
-let _deferredInstall = null;
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  _deferredInstall = e;
-  // Show install button in sidebar if not already installed
-  const btn = document.getElementById('pwa-install-btn');
-  if (btn) btn.style.display = 'flex';
-});
-
-window.promptPWAInstall = async () => {
-  if (!_deferredInstall) return;
-  _deferredInstall.prompt();
-  const { outcome } = await _deferredInstall.userChoice;
-  if (outcome === 'accepted') {
-    const btn = document.getElementById('pwa-install-btn');
-    if (btn) btn.style.display = 'none';
-  }
-  _deferredInstall = null;
-};
-
-window.addEventListener('appinstalled', () => {
-  const btn = document.getElementById('pwa-install-btn');
-  if (btn) btn.style.display = 'none';
-  _deferredInstall = null;
-});
-
 // ---- SCROLL REVEAL ----
 // Any element with data-reveal fades/slides in once it enters the viewport.
 // Safe no-op on pages that don't use it.
@@ -219,10 +192,7 @@ function renderShell(profile,currentPage){
           <div class="sidebar-user-name">${esc(profile.display_name||profile.username)}</div>
           <div class="sidebar-user-pts">${iconSVG('zap',12)} ${profile.points} pts · <span style="color:var(--orange)">Buy more →</span></div>
         </div>
-      </a>
-      <button id="pwa-install-btn" onclick="window.promptPWAInstall()" style="display:none;align-items:center;gap:10px;background:rgba(232,98,26,0.1);border:1px solid rgba(232,98,26,0.3);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-family:inherit;font-size:0.82rem;cursor:pointer;width:100%;margin-top:8px;font-weight:600">
-        ${iconSVG('download',15)} Install app
-      </button>`;
+      </a>`;
   }
   const mn=document.getElementById('mobile-nav');
   if(mn){

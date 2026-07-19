@@ -401,6 +401,27 @@ body.has-custom-bg { background-attachment: fixed; background-size: cover; backg
 .toggle-switch input:checked + .toggle-slider { background: var(--orange); border-color: var(--orange); }
 .toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); background: #fff; }
 
+/* ---- CUSTOM CHECKBOX ---- */
+.nb-checkbox {
+  appearance: none; -webkit-appearance: none;
+  width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px;
+  border: 2px solid var(--border2);
+  border-radius: 6px;
+  background: var(--surface3);
+  cursor: pointer;
+  position: relative;
+  transition: background 0.15s, border-color 0.15s;
+}
+.nb-checkbox:hover { border-color: var(--orange); }
+.nb-checkbox:checked { background: var(--orange); border-color: var(--orange); }
+.nb-checkbox:checked::after {
+  content: '';
+  position: absolute; left: 6px; top: 2px;
+  width: 5px; height: 10px;
+  border: solid #fff; border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
 /* ---- FONT SELECTOR ---- */
 .font-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
 .font-btn { background: var(--surface2); border: 2px solid var(--border2); border-radius: var(--radius-sm); padding: 12px 10px; cursor: pointer; transition: all 0.15s; text-align: center; }
