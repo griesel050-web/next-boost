@@ -3,4 +3,4 @@
 # matches literal files/folders, so a request for /u/SomeUsername would
 # 404 by default. This rewrite (200 = proxy, keeps the URL as-is) sends
 # any /u/<username> request to the actual u/index.html page.
-/u/:username /u/index.html 200
+/u/:username /u/ 200
